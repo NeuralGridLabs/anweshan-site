@@ -6,15 +6,15 @@ import { ArrowRight } from "lucide-react";
 
 const slides = [
   {
-    image: "/images/hero-1.jpg",
+    image: "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=1600",
     label: "Community Health Surveys",
   },
   {
-    image: "/images/hero-2.jpg",
+    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=1600",
     label: "HPV Vaccination Research",
   },
   {
-    image: "/images/hero-3.jpg",
+    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=1600",
     label: "Household Data Collection",
   },
 ];
@@ -44,26 +44,20 @@ export default function Hero() {
 
       <Image
         src="/images/bg.png"
-        alt="background"
+        alt=""
         fill
         className="object-cover object-center -z-10"
         priority
       />
-      <div className="absolute inset-0 bg-white/0 -z-10" />
 
       <div className="max-w-4xl mx-auto px-6 pb-12 text-center">
-        <div className="flex items-center justify-center gap-3 mb-5">
-          <span className="h-px w-8 bg-primary inline-block" />
-          <p className="text-primary text-xs font-semibold tracking-widest uppercase">
-            Redefining Research in Nepal
-          </p>
-          <span className="h-px w-8 bg-primary inline-block" />
-        </div>
+        <p className="text-primary eyebrow mb-5">Redefining Research in Nepal</p>
         <h1 className="text-4xl md:text-5xl font-bold text-base-text leading-tight mb-6 max-w-2xl mx-auto">
           Field Research That Drives Real Health Impact
         </h1>
-        <p className="text-base-text/60 text-base leading-relaxed max-w-lg mx-auto mb-10">
-          Clinical research, policy dialogue, and data-driven survey work across Nepal - from HPV vaccination studies to nationwide household health data.
+        <p className="text-base-text/60 body mb-10 max-w-lg mx-auto">
+          Clinical research, policy dialogue, and data-driven survey work across Nepal, from HPV
+          vaccination studies to nationwide household health data.
         </p>
         <div className="flex items-center justify-center gap-4">
           <button
@@ -74,7 +68,7 @@ export default function Hero() {
             <ArrowRight size={14} />
           </button>
           <button
-            onClick={() => scrollTo("clients")}
+            onClick={() => (window.location.href = "/clients")}
             className="flex items-center gap-2 rounded-full bg-accent text-accent-dark text-sm font-semibold px-7 py-3.5 hover:brightness-95 transition"
           >
             Our clients
@@ -93,13 +87,14 @@ export default function Hero() {
             src={slides[current].image}
             alt={slides[current].label}
             fill
+            sizes="(max-width: 1024px) 100vw, 1000px"
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
           <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between">
-            <span className="text-white text-sm font-medium">
+            <span className="text-white text-sm font-semibold">
               {slides[current].label}
             </span>
             <div className="flex gap-2">
@@ -107,10 +102,9 @@ export default function Hero() {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
+                  aria-label={`Slide ${i + 1}`}
                   className={`rounded-full transition-all duration-300 ${
-                    i === current
-                      ? "bg-white w-5 h-2"
-                      : "bg-white/50 w-2 h-2"
+                    i === current ? "bg-white w-5 h-2" : "bg-white/50 w-2 h-2"
                   }`}
                 />
               ))}

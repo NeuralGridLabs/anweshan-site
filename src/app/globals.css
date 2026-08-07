@@ -1,12 +1,198 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #5A9C3E;
-  --color-primary-dark: #3B6D11;
-  --color-primary-light: #EAF3DE;
-  --color-accent: #F5B72E;
-  --color-accent-dark: #BA7517;
-  --color-accent-light: #FAEEDA;
-  --color-base: #FAFAF7;
-  --color-base-text: #1F2A1A;
+  /* ------------------------------------------------------------------
+     PALETTE  (only the twelve supplied colours, plus black and white)
+
+     The set contains exactly ONE dark: forest #132A13. So the site is
+     light-dominant: pale grounds carry the pages, forest is the single
+     dark used for type, chrome and one or two anchor bands.
+
+     Measured contrast (ink #132A13 as the type colour):
+       on snow   15.0   on ivory  14.4   on sage  13.6
+       on cream  13.3   on butter 13.5   on neon  14.3
+       on mint    9.8   on jade    9.6   on gold   9.6
+       on aqua    7.9   on teal    6.7
+       white on forest 15.4
+     Every pairing above clears AA. White text is used ONLY on forest;
+     on every other ground the type is forest.
+     ------------------------------------------------------------------ */
+
+  /* The single dark */
+  --color-forest: #132A13;
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  /* Pale grounds, lightest first */
+  --color-snow: #FEFCFB;
+  --color-ivory: #FDF8E1;
+  --color-sage: #E9F5DB;
+  --color-cream: #FCEFB4;
+
+  /* Saturated grounds and accents */
+  --color-butter: #FFF566;
+  --color-neon: #FFFF3F;
+  --color-gold: #FDC500;
+  --color-mint: #7AE582;
+  --color-jade: #7BE0AD;
+  --color-aqua: #4ECDC4;
+  --color-teal: #17BEBB;
+
+  /* Type */
+  --color-base-text: #132A13;
+
+  /* Aliases so untouched components resolve into this palette. */
+  --color-night: #132A13;
+  --color-ink: #132A13;
+  --color-petrol: #17BEBB;
+  --color-plum: #132A13;
+  --color-paper: #FEFCFB;
+  --color-mist: #E9F5DB;
+  --color-sand: #FDF8E1;
+  --color-cyan: #4ECDC4;
+  --color-sky: #4ECDC4;
+  --color-grass: #7AE582;
+  --color-lime: #7AE582;
+  --color-alert: #FDC500;
+  --color-teal-dark: #0F8F8D;
+  --color-teal-light: #E9F5DB;
+  --color-primary: #17BEBB;
+  --color-primary-dark: #0F8F8D;
+  --color-primary-light: #E9F5DB;
+  --color-accent: #FDC500;
+  --color-accent-dark: #B08A00;
+  --color-accent-light: #FCEFB4;
+  --color-brand-yellow: #FDC500;
+  --color-brand-yellow-bright: #FFF566;
+  --color-brand-green: #7AE582;
+  --color-clay: #FDC500;
+  --color-clay-light: #FCEFB4;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Word-by-word heading rise */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(0.6em); }
+  to   { opacity: 1; transform: none; }
+}
+.rise > span {
+  display: inline-block;
+  animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Slow image drift for editorial photos */
+@keyframes kenburns {
+  from { transform: scale(1.06); }
+  to   { transform: scale(1.14); }
+}
+.kenburns { animation: kenburns 18s ease-out infinite alternate; }
+
+/* ---- Type scale ----------------------------------------------------
+   h1-page   page hero headings (PageHeader, Hero)
+   h2-section  section headings
+   h3-card   card / list-item headings
+   eyebrow   small uppercase label above a heading
+   body-lg / body / body-sm  running text
+   ------------------------------------------------------------------ */
+@utility h1-page {
+  @apply text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight;
+}
+@utility h2-section {
+  @apply text-3xl md:text-5xl font-bold leading-[1.1] tracking-tight;
+}
+@utility h3-card {
+  @apply text-xl font-bold leading-[1.3] tracking-tight;
+}
+@utility eyebrow {
+  @apply text-xs font-semibold tracking-[0.2em] uppercase;
+}
+@utility body-lg {
+  @apply text-base md:text-lg leading-relaxed;
+}
+@utility body {
+  @apply text-base leading-relaxed;
+}
+@utility body-sm {
+  @apply text-sm leading-relaxed;
+}
+@utility meta-label {
+  @apply text-[11px] font-semibold tracking-[0.15em] uppercase;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ---- Animated background cutouts -------------------------------
+   Large flat geometric shapes that drift slowly behind dark sections.
+   Flat fills only, no gradients, so they read as cutouts rather than
+   glows. All motion is disabled under prefers-reduced-motion. */
+@keyframes drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%      { transform: translate3d(3vw, -2vw, 0) rotate(8deg); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%      { transform: translate3d(-2.5vw, 2vw, 0) rotate(-6deg); }
+}
+@keyframes drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(1.5vw, 1.5vw, 0) scale(1.08); }
+}
+
+@utility cutout {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+}
+.cutout-a { animation: drift-a 26s ease-in-out infinite; }
+.cutout-b { animation: drift-b 32s ease-in-out infinite; }
+.cutout-c { animation: drift-c 38s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cutout-a, .cutout-b, .cutout-c { animation: none !important; }
+}
+
+/* Client marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Animated underline for links */
+.underline-grow {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.underline-grow:hover { background-size: 100% 1px; }

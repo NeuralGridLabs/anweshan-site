@@ -70,15 +70,15 @@ export default function About() {
 
             {/* Simple, Clean Heading */}
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.2] mb-6 text-base-text">
-              Advancing Nepal's <span className="text-primary-dark">public health.</span> Through evidence.
+              Advancing Nepal&apos;s <span className="text-primary-dark">public health.</span> Through evidence.
             </h2>
 
             {/* Body Copy */}
-            <p className="text-base-text/80 text-base md:text-lg leading-relaxed mb-4 font-medium">
+            <p className="text-base-text/80 body-lg mb-4 font-medium">
               Anweshan Pvt. Ltd. is a multidisciplinary Clinical Research Organization and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives.
             </p>
-            <p className="text-base-text/80 text-base md:text-lg leading-relaxed mb-10 font-medium">
-              From clinical trials to nationwide household surveys, and from HPV vaccination research to community health toolkit deployments -- our work spans the full spectrum of health research across Nepal.
+            <p className="text-base-text/80 body-lg mb-10 font-medium">
+              From clinical trials to nationwide household surveys, and from HPV vaccination research to community health toolkit deployments, our work spans the full spectrum of health research across Nepal.
             </p>
 
             {/* Action Buttons */}
@@ -92,7 +92,7 @@ export default function About() {
               </button>
 
               <button
-                onClick={() => scrollTo("team")}
+                onClick={() => (window.location.href = "/team")}
                 className="flex items-center gap-2 rounded-full bg-primary text-white text-sm font-bold px-7 py-3.5 hover:bg-primary-dark transition-colors shadow-sm"
               >
                 Meet our team
