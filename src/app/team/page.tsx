@@ -85,10 +85,10 @@ export default function TeamPage() {
             <div className="max-w-[1400px] mx-auto px-6">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
                 <div className="md:col-span-4">
-                  <p className={`${dark ? "text-forest" : "text-forest"} eyebrow mb-4`}>
+                  <p className={`${dark ? "text-forest" : "text-forest"} text-2xl md:text-3xl font-bold mb-4`}>
                     {group.name}
                   </p>
-                  <p className={`${dark ? "text-forest/70" : "text-forest/55"} body-sm max-w-xs`}>
+                  <p className={`${dark ?"text-forest/70" : "text-forest/55"} text-base md:text-lg leading-relaxed whitespace-nowrap`}>
                     {group.blurb}
                   </p>
                 </div>

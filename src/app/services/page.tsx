@@ -179,7 +179,7 @@ export default function ServicesPage() {
                 </Reveal>
 
                 <Reveal delay={210}>
-                  <ul className="flex flex-wrap gap-2.5">
+                  <ul className="flex flex-wrap gap-2.5 text-base">
                     {service.items.map((item) => (
                       <li
                         key={item}

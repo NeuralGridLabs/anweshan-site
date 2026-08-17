@@ -46,7 +46,7 @@ export default function Navbar() {
             : "bg-forest border-b border-forest/20"
         }`}
       >
-        <nav className="max-w-[1400px] mx-auto flex items-center justify-between px-6 py-3">
+        <nav className="max-w-[1400px] mx-auto flex items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2 shrink-0">
             {/* Wordmark recoloured white; the yellow and green marks are
                 preserved from the original artwork. */}
@@ -57,7 +57,7 @@ export default function Navbar() {
               height={44}
               priority
               className={`object-contain transition-all duration-300 ${
-                scrolled ? "h-9" : "h-11"
+                scrolled ? "h-10" : "h-15"
               } w-auto`}
             />
           </Link>

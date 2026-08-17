@@ -62,7 +62,7 @@ export default function PageHeader({
       <div className="relative max-w-[1400px] mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           <div className="md:col-span-8">
-            <p className={`${t.eyebrow} eyebrow mb-8`}>{eyebrow}</p>
+            <p className={`${t.eyebrow} eyebrow text-base mb-8`}>{eyebrow}</p>
 
             <h1 className="rise h1-page">
               {words.map((word, i) => (
@@ -86,7 +86,7 @@ export default function PageHeader({
             <dl className={`grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 md:mt-24 pt-10 border-t ${t.rule}`}>
               {meta.map((item) => (
                 <div key={item.label}>
-                  <dt className={`${t.sub} eyebrow mb-3`}>
+                  <dt className={`${t.sub} eyebrow text-base mb-3`}>
                     {item.label}
                   </dt>
                   <dd className="text-3xl md:text-5xl font-bold tracking-tight tabular-nums">

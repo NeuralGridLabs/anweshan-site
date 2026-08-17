@@ -34,7 +34,7 @@ export default function ContactPage() {
 
           <div className="lg:col-span-4">
             <Reveal>
-              <p className="text-petrol eyebrow mb-8">
+              <p className="text-petrol eyebrow mb-8 text-base">
                 Reach us
               </p>
             </Reveal>
@@ -48,10 +48,10 @@ export default function ContactPage() {
                       className="text-petrol mt-1 shrink-0 group-hover:scale-110 transition-transform"
                     />
                     <div>
-                      <p className="text-base-text/45 meta-label mb-1.5">
+                      <p className="text-base-text/55 text-base font-medium mb-1">
                         {item.label}
                       </p>
-                      <p className="text-base-text text-base font-medium">{item.value}</p>
+                      <p className="text-base-text text-lg font-medium">{item.value}</p>
                     </div>
                   </li>
                 </Reveal>
@@ -83,7 +83,7 @@ export default function ContactPage() {
                 <Reveal key={field.id} delay={i * 70} className="flex flex-col">
                   <label
                     htmlFor={field.id}
-                    className="text-base-text/45 meta-label mb-3"
+                    className="text-base-text/55 text-base font-medium mb-3"
                   >
                     {field.label}
                   </label>
@@ -100,7 +100,7 @@ export default function ContactPage() {
               <Reveal delay={210} className="flex flex-col">
                 <label
                   htmlFor="subject"
-                  className="text-base-text/45 meta-label mb-3"
+                  className="text-base-text/55 text-base font-medium mb-3"
                 >
                   Enquiry about
                 </label>
@@ -123,7 +123,7 @@ export default function ContactPage() {
               <Reveal delay={280} className="flex flex-col md:col-span-2">
                 <label
                   htmlFor="message"
-                  className="text-base-text/45 meta-label mb-3"
+                  className="text-base-text/55 text-base font-medium mb-3"
                 >
                   Message
                 </label>
@@ -139,11 +139,11 @@ export default function ContactPage() {
               <Reveal delay={340} className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-5 pt-4">
                 <button
                   type="submit"
-                  className="rounded-full bg-forest text-white text-sm font-semibold px-9 py-4 hover:bg-petrol transition-colors"
+                  className="rounded-full bg-forest text-white text-md font-semibold px-9 py-4 hover:bg-petrol transition-colors"
                 >
                   Send message
                 </button>
-                <p className="text-base-text/45 text-xs leading-relaxed">
+                <p className="text-base-text/45 text-md leading-relaxed">
                   This form is not yet wired to a backend. Until then, email{" "}
                   <span className="text-base-text/70 font-medium">info@anweshan.org</span> directly.
                 </p>

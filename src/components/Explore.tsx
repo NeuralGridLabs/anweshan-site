@@ -125,7 +125,7 @@ export default function Explore() {
                     <span className="block text-forest/55 meta-label mt-2">{item.caption}</span>
                   </span>
 
-                  <span className="relative hidden md:block md:col-span-4 text-forest/65 body-sm">
+                  <span className="relative hidden md:block md:col-span-4 text-forest/75 body-sm">
                     {item.description}
                   </span>
 
