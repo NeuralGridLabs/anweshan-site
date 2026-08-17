@@ -53,7 +53,7 @@ export default function ClientsPage() {
       <section className="bg-snow py-16 md:py-24">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="max-w-2xl mb-10">
-            <p className="text-forest text-[11px] font-semibold tracking-[0.18em] uppercase mb-4">
+            <p className="text-forest text-[14px] font-semibold tracking-[0.18em] uppercase mb-4">
               Selected partners
             </p>
             <h2 className="h2-section text-forest">
@@ -67,7 +67,7 @@ export default function ClientsPage() {
               <Reveal as="li" key={client.name} delay={(i % 4) * 80}>
                 <article className="group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-forest/10 hover:border-forest/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-400">
                   <div className={`relative h-12 ${band} flex items-center px-4`}>
-                    <span className="text-forest text-[10px] font-bold tracking-[0.16em] uppercase">
+                    <span className="text-forest text-[12px] font-bold tracking-[0.16em] uppercase">
                       {client.sector}
                     </span>
                     <svg className="absolute -bottom-px left-0 w-full h-3 text-white" viewBox="0 0 400 16" preserveAspectRatio="none" aria-hidden="true">
@@ -75,19 +75,19 @@ export default function ClientsPage() {
                     </svg>
                   </div>
                   <div className="p-5 flex flex-col h-full">
-                    <h2 className="text-[15px] leading-snug font-semibold text-forest mb-3">
+                    <h2 className="text-[18px] leading-snug font-semibold text-forest mb-3">
                       {client.name}
                     </h2>
                     <ul className="space-y-2 mt-auto">
                       {client.work.slice(0, 4).map((item) => (
-                        <li key={item} className="flex gap-2 text-forest/70 text-[12px] leading-snug">
+                        <li key={item} className="flex gap-2 text-forest/70 text-[14px] leading-snug">
                           <span className="w-1.5 h-1.5 rounded-full bg-forest/40 mt-1.5 shrink-0 group-hover:bg-gold transition-colors duration-400" />
                           {item}
                         </li>
                       ))}
                     </ul>
                     {client.work.length > 4 && (
-                      <p className="mt-2 text-[11px] text-forest/50">+{client.work.length - 4} more</p>
+                      <p className="mt-2 text-[13px] text-forest/50">+{client.work.length - 4} more</p>
                     )}
                   </div>
                 </article>

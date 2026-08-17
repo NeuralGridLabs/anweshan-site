@@ -149,12 +149,12 @@ export default function Projects() {
                   <h3 className="h3-card text-base-text mb-3 group-hover:text-forest transition-colors">
                     {project.title}
                   </h3>
-                  <p className="body-sm text-base-text/65 line-clamp-3 mb-6">
+                  <p className="body-sm text-base-text/75 line-clamp-3 mb-6">
                     {project.description}
                   </p>
 
                   <div className="mt-auto flex items-center justify-between gap-4 pt-5 border-t border-forest/15">
-                    <span className="meta-label text-base-text/45 truncate">{project.partner}</span>
+                    <span className="meta-label text-base-text/55 truncate">{project.partner}</span>
                     <span className="shrink-0 p-2.5 rounded-full bg-forest/5 text-forest group-hover:bg-gold group-hover:text-forest transition-colors">
                       <ArrowUpRight size={18} strokeWidth={2.5} />
                     </span>

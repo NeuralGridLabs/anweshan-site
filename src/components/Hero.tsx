@@ -57,9 +57,9 @@ export default function Hero() {
       />
 
       {/* HERO TEXT */}
-      <div className="max-w-4xl mx-auto px-6 pb-12 text-center">
+      <div className="max-w-4xl mx-auto px-8 pt-6 pb-30 text-center">
 
-        <p className="text-primary eyebrow mb-5">
+        <p className="text-primary eyebrow mb-5 text-base">
           Redefining Research in Nepal
         </p>
 
@@ -67,7 +67,7 @@ export default function Hero() {
           Field Research That Drives Real Health Impact
         </h1>
 
-        <p className="text-base-text/60 body mb-10 max-w-lg mx-auto">
+        <p className="text-base-text/75 body mb-10 max-w-lg mx-auto">
           Clinical research, policy dialogue, and data-driven survey work
           across Nepal, from HPV vaccination studies to nationwide household
           health data.
@@ -77,7 +77,7 @@ export default function Hero() {
 
           <button
             onClick={() => scrollTo("projects")}
-            className="flex items-center gap-2 rounded-full bg-primary text-white text-sm font-semibold px-7 py-3.5 hover:bg-primary-dark transition-colors"
+            className="flex items-center gap-2 rounded-full bg-primary text-white text-md font-semibold px-7 py-3.5 hover:bg-primary-dark transition-colors"
           >
             Our work
             <ArrowRight size={14} />
@@ -85,7 +85,7 @@ export default function Hero() {
 
           <button
             onClick={() => (window.location.href = "/clients")}
-            className="flex items-center gap-2 rounded-full bg-accent text-accent-dark text-sm font-semibold px-7 py-3.5 hover:brightness-95 transition"
+            className="flex items-center gap-2 rounded-full bg-accent text-accent-dark text-md font-semibold px-7 py-3.5 hover:brightness-100 transition"
           >
             Our clients
             <ArrowRight size={14} />

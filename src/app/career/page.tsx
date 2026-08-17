@@ -98,11 +98,11 @@ export default function CareerPage() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-14">
             <div className="md:col-span-7">
-              <p className="text-petrol eyebrow mb-6">Current openings</p>
+              <p className="text-petrol eyebrow mb-6 text-base">Current openings</p>
               <h2 className="h2-section text-base-text">Six roles open across the practice.</h2>
             </div>
             <div className="md:col-span-4 md:col-start-9 flex md:items-end">
-              <p className="text-base-text/55 body-sm">
+              <p className="text-base-text/55 body-base">
                 Applications are reviewed as they arrive. If nothing here fits, send a speculative
                 application and we will keep it on file.
               </p>
@@ -127,24 +127,24 @@ export default function CareerPage() {
                       <span className="block h3-card text-base-text group-hover:text-petrol transition-colors">
                         {role.title}
                       </span>
-                      <span className="block text-base-text/60 body-sm mt-2 max-w-md">
+                      <span className="block text-base-text/75 body-base mt-2 max-w-md">
                         {role.summary}
                       </span>
                     </span>
 
                     <span className="col-span-12 md:col-span-4 flex flex-wrap items-center gap-x-6 gap-y-2 md:pt-1.5">
-                      <span className="inline-flex items-center gap-2 text-base-text/55 text-xs font-medium">
+                      <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
                         <MapPin size={13} className="text-petrol" />
                         {role.location}
                       </span>
-                      <span className="inline-flex items-center gap-2 text-base-text/55 text-xs font-medium">
+                      <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
                         <Clock size={13} className="text-petrol" />
                         {role.type}
                       </span>
                     </span>
 
                     <span className="col-span-12 md:col-span-2 flex md:justify-end md:pt-1">
-                      <span className="inline-flex items-center gap-2 text-sm font-semibold text-base-text group-hover:text-petrol transition-colors">
+                      <span className="inline-flex items-center gap-2 text-base font-semibold text-base-text group-hover:text-petrol transition-colors">
                         Apply
                         <ArrowUpRight
                           size={16}
@@ -159,7 +159,7 @@ export default function CareerPage() {
           </ul>
 
           <Reveal>
-            <p className="text-base-text/40 text-xs mt-8">
+            <p className="text-base-text/40 text-md mt-8">
               These listings are placeholders for layout review and are not live vacancies.
             </p>
           </Reveal>
@@ -167,6 +167,7 @@ export default function CareerPage() {
       </section>
 
       {/* Applying */}
+
       <section className="bg-mist py-20 md:py-28">
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <Reveal className="lg:col-span-5">
@@ -183,7 +184,7 @@ export default function CareerPage() {
 
           <div className="lg:col-span-6 lg:col-start-7">
             <Reveal>
-              <p className="text-petrol eyebrow mb-6">How to apply</p>
+              <p className="text-petrol eyebrow mb-6 text-base">How to apply</p>
             </Reveal>
             <Reveal delay={90}>
               <h2 className="h2-section text-base-text mb-10">

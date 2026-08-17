@@ -19,7 +19,7 @@ const objectives = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-snow">
+    <main className="min-h-screen text-base bg-snow">
       <PageHeader
         tone="ink"
         eyebrow="About us"
@@ -41,7 +41,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-petrol/88" />
         <div className="relative max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
           <Reveal className="md:col-span-3">
-            <p className="text-forest eyebrow">
+            <p className="text-forest eyebrow text-base mb-2">
                 Our vision
               </p>
           </Reveal>
@@ -70,7 +70,7 @@ export default function AboutPage() {
 
           <div className="lg:col-span-6 lg:col-start-7">
             <Reveal>
-              <p className="text-petrol eyebrow mb-8">
+              <p className="text-petrol eyebrow mb-8 text-base">
                   Our mission
                 </p>
             </Reveal>
@@ -100,7 +100,7 @@ export default function AboutPage() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16 md:mb-20">
             <div className="md:col-span-8">
-              <p className="text-forest/70 eyebrow mb-6">Our objective</p>
+              <p className="text-forest/70 eyebrow mb-6 text-base">Our objective</p>
               <h2 className="h2-section text-forest">
                 Two commitments that shape every engagement.
               </h2>

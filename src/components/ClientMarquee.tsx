@@ -101,7 +101,7 @@ export default function ClientMarquee() {
     <section className="relative bg-snow py-10 overflow-hidden">
       {/* Heading */}
       <div className="max-w-7xl mx-auto px-6 mb-5">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-base-text">
+        <p className="text-sm font-semibold tracking-[0.2em] uppercase text-base-text">
           Trusted by
         </p>
       </div>

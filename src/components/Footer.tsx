@@ -27,14 +27,14 @@ export default function Footer() {
               height={36}
               className="object-contain mb-4"
             />
-            <p className="text-ivory/55 body-sm max-w-sm">
+            <p className="text-ivory/55 body-md max-w-sm">
               A contemporary issue focused research organization committed to evidence based
               analysis of development challenges.
             </p>
           </div>
 
           <nav className="md:col-span-3">
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm text-white/60">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-md text-white/60">
               {siteLinks.map((link) => (
                 <li key={link.label}>
                   <Link href={link.href} className="hover:text-white transition-colors">
@@ -46,7 +46,7 @@ export default function Footer() {
           </nav>
 
           <address className="md:col-span-4 not-italic">
-            <ul className="space-y-2.5 text-sm text-white/60">
+            <ul className="space-y-2.5 text-md text-white/60">
               <li className="flex items-start gap-2.5">
                 <MapPin size={14} className="mt-0.5 shrink-0 text-mint" />
                 Talchikhel, Lalitpur, Nepal

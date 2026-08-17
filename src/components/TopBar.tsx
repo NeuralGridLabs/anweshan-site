@@ -3,8 +3,8 @@ import { FaFacebookF, FaLinkedinIn, FaInstagram, FaXTwitter } from "react-icons/
 
 export default function TopBar() {
   return (
-    <div className="bg-mint text-forest text-xs border-b border-forest/10">
-      <div className="max-w-[1400px] mx-auto px-6 py-2.5 flex items-center justify-between">
+    <div className="bg-mint text-forest text-sm border-b border-forest/10 text-md">
+      <div className="max-w-[1400px] mx-auto px-6 py-2.5 flex items-center justify-between text-sm">
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-1.5">
             <MapPin size={13} className="text-forest/80" />
@@ -21,7 +21,7 @@ export default function TopBar() {
         </div>
         <div className="flex items-center gap-3">
           {[FaFacebookF, FaLinkedinIn, FaInstagram, FaXTwitter].map((Icon, i) => (
-            <Icon key={i} size={12} className="hover:text-forest cursor-pointer transition-colors" />
+            <Icon key={i} size={15} className="hover:text-forest cursor-pointer transition-colors" />
           ))}
         </div>
       </div>
