@@ -38,10 +38,10 @@ export default function AboutPage() {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-petrol/88" />
+        <div className="absolute inset-0 bg-light/88" />
         <div className="relative max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
           <Reveal className="md:col-span-3">
-            <p className="text-forest eyebrow text-base mb-2">
+            <p className="text-white eyebrow text-base mb-2">
                 Our vision
               </p>
           </Reveal>
@@ -70,7 +70,7 @@ export default function AboutPage() {
 
           <div className="lg:col-span-6 lg:col-start-7">
             <Reveal>
-              <p className="text-petrol eyebrow mb-8 text-base">
+              <p className="text-forest eyebrow mb-8 text-base">
                   Our mission
                 </p>
             </Reveal>

@@ -62,8 +62,10 @@ export default function ClientsPage() {
           </div>
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {clients.map((client, i) => {
-              const band = ["bg-mint", "bg-sage", "bg-jade", "bg-aqua", "bg-teal", "bg-cream"][i % 6];
-              return (
+              const bands = ["bg-primary", "bg-accent", "bg-sage", "bg-cream"];
+              const row = Math.floor(i / 4);
+              const band = bands[(i + row) % 4];          
+            return (
               <Reveal as="li" key={client.name} delay={(i % 4) * 80}>
                 <article className="group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-forest/10 hover:border-forest/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-400">
                   <div className={`relative h-12 ${band} flex items-center px-4`}>

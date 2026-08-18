@@ -165,7 +165,7 @@ export default async function ProjectPage({
                 <ul className="space-y-3 mb-8">
                   {project.methods.map((method) => (
                     <li key={method} className="flex gap-3 text-base-text/75 body-sm">
-                      <span className="w-1 h-1 rounded-full bg-petrol mt-2 shrink-0" />
+                      <span className="w-1 h-1 rounded-full bg-primary mt-2 shrink-0" />
                       {method}
                     </li>
                   ))}
@@ -191,10 +191,10 @@ export default async function ProjectPage({
         <div className="max-w-[1400px] mx-auto px-6">
           <p className="text-base-text/45 meta-label mb-6">Next project</p>
           <Link href={`/projects/${nextProject.slug}`} className="group flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <h2 className="h2-section text-base-text group-hover:text-petrol transition-colors max-w-3xl">
+            <h2 className="h2-section text-base-text group-hover:text-primary transition-colors max-w-3xl">
               {nextProject.title}
             </h2>
-            <span className="shrink-0 p-4 rounded-full bg-forest text-ivory group-hover:bg-forest/80 transition-colors">
+            <span className="shrink-0 p-4 rounded-full bg-accent text-dark group-hover:bg-primary transition-colors">
               <ArrowRight size={22} />
             </span>
           </Link>
