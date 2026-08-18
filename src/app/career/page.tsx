@@ -98,7 +98,7 @@ export default function CareerPage() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-14">
             <div className="md:col-span-7">
-              <p className="text-petrol eyebrow mb-6 text-base">Current openings</p>
+              <p className="text-primary eyebrow mb-6 text-base">Current openings</p>
               <h2 className="h2-section text-base-text">Six roles open across the practice.</h2>
             </div>
             <div className="md:col-span-4 md:col-start-9 flex md:items-end">
@@ -109,7 +109,7 @@ export default function CareerPage() {
             </div>
           </div>
 
-          <ul className="border-t border-petrol/15">
+          <ul className="border-t border-accent-dark/15">
             {vacancies.map((role, i) => (
               <Reveal key={role.id} delay={i * 70}>
                 <li>
@@ -117,14 +117,14 @@ export default function CareerPage() {
                     href={`mailto:info@anweshan.org?subject=${encodeURIComponent(
                       "Application: " + role.title
                     )}`}
-                    className="group grid grid-cols-12 items-start gap-4 md:gap-8 py-8 border-b border-petrol/15 hover:bg-petrol/[0.04] transition-colors"
+                    className="group grid grid-cols-12 items-start gap-4 md:gap-8 py-8 border-b border-accent-dark/15 hover:bg-accent-dark/[0.04] transition-colors"
                   >
                     <span className="col-span-2 md:col-span-1 text-base-text/30 text-xs font-semibold tabular-nums pt-1.5">
                       {role.id}
                     </span>
 
                     <span className="col-span-10 md:col-span-5">
-                      <span className="block h3-card text-base-text group-hover:text-petrol transition-colors">
+                      <span className="block h3-card text-base-text group-hover:text-accent-dark transition-colors">
                         {role.title}
                       </span>
                       <span className="block text-base-text/75 body-base mt-2 max-w-md">
@@ -134,17 +134,17 @@ export default function CareerPage() {
 
                     <span className="col-span-12 md:col-span-4 flex flex-wrap items-center gap-x-6 gap-y-2 md:pt-1.5">
                       <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
-                        <MapPin size={13} className="text-petrol" />
+                        <MapPin size={13} className="text-accent-dark" />
                         {role.location}
                       </span>
                       <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
-                        <Clock size={13} className="text-petrol" />
+                        <Clock size={13} className="text-accent-dark" />
                         {role.type}
                       </span>
                     </span>
 
                     <span className="col-span-12 md:col-span-2 flex md:justify-end md:pt-1">
-                      <span className="inline-flex items-center gap-2 text-base font-semibold text-base-text group-hover:text-petrol transition-colors">
+                      <span className="inline-flex items-center gap-2 text-base font-semibold text-base-text group-hover:text-accent-dark transition-colors">
                         Apply
                         <ArrowUpRight
                           size={16}
@@ -184,7 +184,7 @@ export default function CareerPage() {
 
           <div className="lg:col-span-6 lg:col-start-7">
             <Reveal>
-              <p className="text-petrol eyebrow mb-6 text-base">How to apply</p>
+              <p className="text-primary-dark eyebrow mb-6 text-base">How to apply</p>
             </Reveal>
             <Reveal delay={90}>
               <h2 className="h2-section text-base-text mb-10">
@@ -192,11 +192,11 @@ export default function CareerPage() {
               </h2>
             </Reveal>
 
-            <ul className="border-t border-petrol/15 mb-10">
+            <ul className="border-t border-accent-dark/15 mb-10">
               {checklist.map((item, i) => (
                 <Reveal key={item} delay={140 + i * 70}>
-                  <li className="flex gap-5 py-4 border-b border-petrol/15">
-                    <span className="text-petrol text-xs font-semibold tabular-nums pt-1">
+                  <li className="flex gap-5 py-4 border-b border-accent-dark/15">
+                    <span className="text-accent-dark text-xs font-semibold tabular-nums pt-1">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="text-base-text/75 body">{item}</span>
@@ -208,7 +208,7 @@ export default function CareerPage() {
             <Reveal delay={400}>
               <a
                 href="mailto:info@anweshan.org?subject=Speculative%20application"
-                className="group inline-flex items-center gap-3 rounded-full bg-forest text-white text-sm font-semibold px-8 py-4 hover:bg-petrol transition-colors"
+                className="group inline-flex items-center gap-3 rounded-full bg-accent text-forest text-sm font-semibold px-8 py-4 hover:bg-primary transition-colors"
               >
                 <Mail size={16} />
                 Email info@anweshan.org

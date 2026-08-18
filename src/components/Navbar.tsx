@@ -67,7 +67,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/contact"
-              className="hidden md:flex items-center gap-2 rounded-full bg-white text-forest text-sm font-semibold px-5 py-2.5 hover:bg-gold transition-colors transition-colors"
+              className="hidden md:flex items-center gap-2 rounded-full bg-primary text-white text-sm font-semibold px-5 py-2.5 hover:bg-gold transition-colors transition-colors"
             >
               Get in touch
               <ArrowRight size={14} />

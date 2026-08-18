@@ -150,8 +150,8 @@ export default function Explore() {
                     <span
                       className={`inline-flex items-center justify-center w-11 h-11 rounded-full transition-all duration-400 ${
                         isActive
-                          ? "bg-forest text-cream rotate-0"
-                          : "bg-forest/10 text-forest/50 -rotate-45"
+                          ? "bg-primary text-cream rotate-0"
+                          : "bg-primary/10 text-forest/50 -rotate-45"
                       }`}
                     >
                       <ArrowUpRight size={20} strokeWidth={2.5} />

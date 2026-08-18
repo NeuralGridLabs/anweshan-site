@@ -85,7 +85,7 @@ export default function Hero() {
 
           <button
             onClick={() => (window.location.href = "/clients")}
-            className="flex items-center gap-2 rounded-full bg-accent text-accent-dark text-md font-semibold px-7 py-3.5 hover:brightness-100 transition"
+            className="flex items-center gap-2 rounded-full bg-accent text-forest-dark text-md font-semibold px-7 py-3.5 hover:brightness-100 transition"
           >
             Our clients
             <ArrowRight size={14} />

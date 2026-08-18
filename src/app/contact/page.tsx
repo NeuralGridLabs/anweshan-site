@@ -34,18 +34,18 @@ export default function ContactPage() {
 
           <div className="lg:col-span-4">
             <Reveal>
-              <p className="text-petrol eyebrow mb-8 text-base">
+              <p className="text-primary eyebrow mb-8 text-base">
                 Reach us
               </p>
             </Reveal>
 
-            <ul className="border-t border-petrol/15">
+            <ul className="border-t border-primary/15">
               {details.map((item, i) => (
                 <Reveal key={item.label} delay={i * 80}>
-                  <li className="group flex items-start gap-4 py-6 border-b border-petrol/15">
+                  <li className="group flex items-start gap-4 py-6 border-b border-primary/15">
                     <item.icon
                       size={17}
-                      className="text-petrol mt-1 shrink-0 group-hover:scale-110 transition-transform"
+                      className="text-primary mt-1 shrink-0 group-hover:scale-110 transition-transform"
                     />
                     <div>
                       <p className="text-base-text/55 text-base font-medium mb-1">
@@ -92,7 +92,7 @@ export default function ContactPage() {
                     name={field.id}
                     type={field.type}
                     required={field.required}
-                    className="bg-transparent border-0 border-b border-petrol/25 pb-3 text-base-text text-base outline-none focus:border-petrol transition-colors"
+                    className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
                   />
                 </Reveal>
               ))}
@@ -107,7 +107,7 @@ export default function ContactPage() {
                 <select
                   id="subject"
                   name="subject"
-                  className="bg-transparent border-0 border-b border-petrol/25 pb-3 text-base-text text-base outline-none focus:border-petrol transition-colors"
+                  className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
                 >
                   <option>Clinical Research Services (CRO)</option>
                   <option>Q-Squared Research</option>
@@ -132,14 +132,14 @@ export default function ContactPage() {
                   name="message"
                   rows={6}
                   required
-                  className="bg-transparent border-0 border-b border-petrol/25 pb-3 text-base-text text-base outline-none focus:border-petrol transition-colors resize-y"
+                  className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors resize-y"
                 />
               </Reveal>
 
               <Reveal delay={340} className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-5 pt-4">
                 <button
                   type="submit"
-                  className="rounded-full bg-forest text-white text-md font-semibold px-9 py-4 hover:bg-petrol transition-colors"
+                  className="rounded-full bg-accent text-dark text-md font-semibold px-9 py-4 hover:bg-primary transition-colors"
                 >
                   Send message
                 </button>

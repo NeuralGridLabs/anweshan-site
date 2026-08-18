@@ -42,15 +42,15 @@ export default function ProjectsPage() {
                     </span>
                   </div>
 
-                  <h2 className="h3-card text-forest mb-3 group-hover:text-forest transition-colors">
+                  <h2 className="h3-card text-forest mb-3 group-hover:text-accent-dark transition-colors">
                     {project.title}
                   </h2>
 
-                  <p className="text-sm text-forest/75 leading-relaxed mb-5 flex-1">
+                  <p className="text-md text-forest/75 leading-relaxed mb-5 flex-1">
                     {project.description}
                   </p>
 
-                  <p className="text-forest meta-label pt-4 border-t border-forest/15">
+                  <p className="text-primary meta-label pt-4 border-t border-forest/15">
                     {project.partner}
                   </p>
                 </Link>
