@@ -53,13 +53,13 @@ export default async function ProjectPage({
             sizes="100vw"
             className="object-cover opacity-30"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-mint via-mint/90 to-mint/70" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary via-mint/90 to-mint/70" />
         </div>
 
         <div className="relative max-w-[1400px] mx-auto px-6 pt-14 pb-16 md:pt-20 md:pb-24">
           <Link
             href="/projects"
-            className="group inline-flex items-center gap-2 text-white/60 hover:text-white text-sm font-semibold mb-12 transition-colors"
+            className="group inline-flex items-center gap-2 text-white/100 hover:text-white text-sm font-semibold mb-12 transition-colors"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             All projects
@@ -71,15 +71,15 @@ export default async function ProjectPage({
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.06] tracking-tight mb-8">
                 {project.title}
               </h1>
-              <p className="text-white/70 body-lg max-w-2xl">{project.description}</p>
+              <p className="text-dark/100 body-lg max-w-2xl">{project.description}</p>
             </div>
           </div>
 
           <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8 mt-16 pt-10 border-t border-white/15">
             {meta.map((item) => (
               <div key={item.label}>
-                <dt className="text-white/45 meta-label mb-2">{item.label}</dt>
-                <dd className="text-white text-base font-semibold leading-snug">{item.value}</dd>
+                <dt className="text-dark meta-label mb-2">{item.label}</dt>
+                <dd className="text-dark text-base font-semibold leading-snug">{item.value}</dd>
               </div>
             ))}
           </dl>
@@ -91,7 +91,7 @@ export default async function ProjectPage({
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:divide-x lg:divide-white/15">
           {project.facts.map((fact) => (
             <Reveal key={fact.label} className="lg:px-8 lg:first:pl-0">
-              <p className="text-3xl md:text-4xl font-bold tracking-tight tabular-nums">
+              <p className="text-3xl text-primary-dark md:text-4xl font-bold tracking-tight tabular-nums">
                 {fact.value}
               </p>
               <p className="text-white/55 meta-label mt-2">{fact.label}</p>
@@ -160,8 +160,8 @@ export default async function ProjectPage({
             </Reveal>
 
             <Reveal delay={120}>
-              <div className="bg-cream rounded-2xl p-8">
-                <p className="text-base-text/45 meta-label mb-5">Methods</p>
+              <div className="bg-accent rounded-2xl p-8">
+                <p className="text-base-text/95 meta-label mb-5">Methods</p>
                 <ul className="space-y-3 mb-8">
                   {project.methods.map((method) => (
                     <li key={method} className="flex gap-3 text-base-text/75 body-sm">
@@ -189,7 +189,7 @@ export default async function ProjectPage({
       {/* Next project */}
       <section className="bg-cream py-16 md:py-20">
         <div className="max-w-[1400px] mx-auto px-6">
-          <p className="text-base-text/45 meta-label mb-6">Next project</p>
+          <p className="text-base-text/75 meta-label mb-6">Next project</p>
           <Link href={`/projects/${nextProject.slug}`} className="group flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h2 className="h2-section text-base-text group-hover:text-primary transition-colors max-w-3xl">
               {nextProject.title}

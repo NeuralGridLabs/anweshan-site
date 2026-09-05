@@ -3,54 +3,51 @@ import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import Cutouts from "@/components/Cutouts";
 
-/* Photographs are placeholder portraits pending real staff photography.
-   Replace the photo field with /images/team/<name>.jpg once supplied. */
 type Member = { name: string; role: string; group: string; photo: string };
 
 const team: Member[] = [
-  { name: "Manish Gautam", role: "Managing Director", group: "Leadership", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Dharma Gautam", role: "Director", group: "Leadership", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Dr. Niraj Poudyal", role: "Senior Research Advisor", group: "Research", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Dr. Binod Kumar Sah", role: "Senior Research Advisor", group: "Research", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Bhogendra Raj Dotel", role: "Senior Health Systems Adviser", group: "Research", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Kaushal Joshi", role: "Lead Graphic Communications Advisor", group: "Communications", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Shanker Dev Kattel", role: "Health and Wellness Research Specialist", group: "Research", photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Manisha Budhathoki", role: "Research Officer", group: "Research", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Sanju Maharjan", role: "Programme Manager", group: "Operations", photo: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Palistha Bajracharya", role: "Operations Manager", group: "Operations", photo: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Surendra Koirala", role: "Business Development Officer", group: "Operations", photo: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Sabitra Acharya", role: "Finance Officer", group: "Operations", photo: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Dr. Sunita Shrestha", role: "Clinical Research Physician", group: "Clinical", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Rajan Thapa", role: "Clinical Trial Manager", group: "Clinical", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Anita Gurung", role: "Clinical Research Associate", group: "Clinical", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Prakash Adhikari", role: "GCP Monitoring Officer", group: "Clinical", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Bimala Rai", role: "Pharmacovigilance Officer", group: "Clinical", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Dipesh Karki", role: "Regulatory Affairs Officer", group: "Clinical", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Sarita Tamang", role: "Site Coordinator", group: "Clinical", photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Nabin Bhattarai", role: "Senior Data Manager", group: "Data", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Puja Sharma", role: "Data Analyst", group: "Data", photo: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Kiran Lama", role: "Database Developer", group: "Data", photo: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Sujata Pandey", role: "Statistician", group: "Data", photo: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Ramesh Magar", role: "GIS and Mapping Officer", group: "Data", photo: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Anjali Basnet", role: "Qualitative Research Officer", group: "Research", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Bikash Chaudhary", role: "Field Research Coordinator", group: "Research", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Nisha Khadka", role: "Research Assistant", group: "Research", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Suman Regmi", role: "Monitoring and Evaluation Officer", group: "Research", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Rekha Yadav", role: "Health Communication Officer", group: "Communications", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Aayush Shakya", role: "Multimedia and Motion Designer", group: "Communications", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Pratima Dahal", role: "Content and Editorial Lead", group: "Communications", photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Milan Subedi", role: "Web and Systems Developer", group: "Communications", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Sneha Joshi", role: "Human Resources Officer", group: "Operations", photo: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=600&h=750" },
-  { name: "Deepak Bhandari", role: "Logistics and Procurement Officer", group: "Operations", photo: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&q=80&w=600&h=750" },
+  { name: "Manish Gautam", role: "Managing Director", group: "Leadership", photo: "/images/team/manish-gautam.jpg" },
+  { name: "Dharma Gautam", role: "Director", group: "Leadership", photo: "/images/team/dharma-gautam.jpg" },
+  { name: "Sanju Maharjan", role: "Chairperson & Programme Director", group: "Leadership", photo: "/images/team/sanju-maharjan.jpg" },
+  { name: "Dr. Niraj Poudyal", role: "Senior Research Advisor", group: "Research & Policy", photo: "/images/team/niraj-poudyal.jpg" },
+  { name: "Dr. Binod Kumar Sah", role: "Senior Research Advisor", group: "Research & Policy", photo: "/images/team/binod-kumar-sah.jpg" },
+  { name: "Bhogendra Raj Dotel", role: "Senior Health Systems Adviser", group: "Research & Policy", photo: "/images/team/bhogendra-raj-dotel.jpg" },
+  { name: "Shanker Dev Kattel", role: "Health and Wellness Research Specialist", group: "Research & Policy", photo: "/images/team/shanker-dev-kattel.jpg" },
+  { name: "Shreya Shrestha", role: "Research Coordinator", group: "Research & Policy", photo: "/images/team/shreya-shrestha.jpg" },
+  { name: "Aayushi Thapa", role: "Sr. Qualitative Research Officer", group: "Research & Policy", photo: "/images/team/aayushi-thapa.jpg" },
+  { name: "Kamal Ranabhat", role: "Sr. Project Officer", group: "Research & Policy", photo: "/images/team/kamal-ranabhat.jpg" },
+  { name: "Samiksha Baral", role: "Research Officer", group: "Research & Policy", photo: "/images/team/samiksha-baral.jpg" },
+  { name: "Shourya KC", role: "Research Associate", group: "Research & Policy", photo: "/images/team/shourya-kc.jpg" },
+  { name: "Jamina Prajapati", role: "Research Associate", group: "Research & Policy", photo: "/images/team/jamina-prajapati.jpg" },
+  { name: "Bipana Shrestha", role: "Research Associate", group: "Research & Policy", photo: "/images/team/bipana-shrestha.jpg" },
+  { name: "Situ Manandhar", role: "Research Assistant", group: "Research & Policy", photo: "/images/team/situ-manandhar.jpg" },
+  { name: "Juna Bhusal", role: "Research Assistant", group: "Research & Policy", photo: "/images/team/juna-bhusal.jpg" },
+  { name: "Sudisha Shakya", role: "Research Assistant", group: "Research & Policy", photo: "/images/team/sudisha-shakya.jpg" },
+  { name: "Pawan Pandeya", role: "Research Assistant", group: "Research & Policy", photo: "/images/team/pawan-pandeya.jpg" },
+  { name: "Kirti Kaushal Joshi", role: "Lead Graphic Communications Advisor", group: "Communications & Technology", photo: "/images/team/kirti-kaushal-joshi.jpg" },
+  { name: "Luniva Shakya", role: "Graphic Designer and Coordinator", group: "Communications & Technology", photo: "/images/team/luniva-shakya.jpg" },
+  { name: "Madhu Sharma", role: "Full-Stack Developer", group: "Communications & Technology", photo: "/images/team/madhu-sharma.jpg" },
+  { name: "Shreya Laxmi Tandukar", role: "Full-Stack Developer", group: "Communications & Technology", photo: "/images/team/shreya-laxmi-tandukar.jpg" },
+  { name: "Sujal Yogi", role: "Full-Stack Developer", group: "Communications & Technology", photo: "/images/team/sujal-yogi.jpg" },
+  { name: "Surendra Koirala", role: "Business Development Officer", group: "Programmes & Operations", photo: "/images/team/surendra-koirala.jpg" },
+  { name: "Sabitra Acharya", role: "Admin & Finance Officer", group: "Programmes & Operations", photo: "/images/team/sabitra-acharya.jpg" },
+  { name: "Manisha Budhathoki", role: "Programme Officer", group: "Programmes & Operations", photo: "/images/team/manisha-budhathoki.jpg" },
+  { name: "Prakriti Maharjan", role: "Operations Associate", group: "Programmes & Operations", photo: "/images/team/prakriti-maharjan.jpg" },
+  { name: "Supriya Bhushal", role: "Finance Assistant", group: "Programmes & Operations", photo: "/images/team/supriya-bhushal.jpg" },
+  { name: "Krishna Khadka", role: "Data Coordinator", group: "Programmes & Operations", photo: "/images/team/krishna-khadka.jpg" },
+  { name: "Akhilesh Mishra", role: "Data Associate", group: "Programmes & Operations", photo: "/images/team/akhilesh-mishra.jpg" },
+  { name: "Prabin Parajuli", role: "Data Associate", group: "Programmes & Operations", photo: "/images/team/prabin-parajuli.jpg" },
+  { name: "Anju Thapa", role: "Office Housekeeping Assistant", group: "Support Services", photo: "/images/team/anju-thapa.jpg" },
+  { name: "Ganesh Rana Magar", role: "Office and Transport Assistant", group: "Support Services", photo: "/images/team/ganesh-rana-magar.jpg" },
+  { name: "Chhatra Malla", role: "Office Assistant", group: "Support Services", photo: "/images/team/chhatra-malla.jpg" },
 ];
 
 const groups = [
-  { name: "Leadership", blurb: "Direction, partnerships, and institutional oversight." },
-  { name: "Research", blurb: "Study design, qualitative and quantitative enquiry, evaluation." },
-  { name: "Clinical", blurb: "Trial delivery, GCP monitoring, regulatory and safety reporting." },
-  { name: "Data", blurb: "Data management, analysis, statistics, and geospatial work." },
-  { name: "Communications", blurb: "Design, editorial, motion, and digital systems." },
-  { name: "Operations", blurb: "Programme management, finance, people, and logistics." },
+  { name: "Leadership", blurb: "Direction, partnerships, and institutional oversight that steers strategy." },
+  { name: "Research & Policy", blurb: "Study design, qualitative and quantitative enquiry, evaluation, and policy analysis." },
+  { name: "Programmes & Operations", blurb: "Programme management, finance, data, and partnerships that keep delivery running." },
+  { name: "Communications & Technology", blurb: "Design, editorial, and digital development that power our communications." },
+  { name: "Support Services", blurb: "Office administration and logistics that keep the organisation running smoothly." },
 ];
 
 export default function TeamPage() {
@@ -65,8 +62,8 @@ export default function TeamPage() {
         imageAlt="Team collaborating in a meeting"
         meta={[
           { label: "Team members", value: "34" },
-          { label: "Practice groups", value: "6" },
-          { label: "Senior advisors", value: "4" },
+          { label: "Practice groups", value: "5" },
+          { label: "Senior advisors", value: "3" },
           { label: "Based in", value: "Lalitpur" },
         ]}
       />
@@ -85,7 +82,7 @@ export default function TeamPage() {
             <div className="max-w-[1400px] mx-auto px-6">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
                 <div className="md:col-span-4">
-                  <p className={`${dark ? "text-primary-dark" : "text-primary-dark"} text-2xl md:text-3xl font-bold mb-4`}>
+                  <p className={`${dark ? "text-dark" : "text--dark"} whitespace-nowrap text-2xl md:text-3xl font-bold mb-4`}>
                     {group.name}
                   </p>
                   <p className={`${dark ?"text-forest/77" : "text-forest/75"} text-base md:text-lg leading-relaxed whitespace-nowrap`}>
@@ -109,7 +106,7 @@ export default function TeamPage() {
                           alt={person.name}
                           fill
                           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 22vw"
-                          className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-[1.04]"
+                          className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.04]"
                         />
                       </div>
                       <h2 className={`text-base md:text-lg font-bold leading-tight tracking-tight ${dark ? "text-forest" : "text-forest"}`}>

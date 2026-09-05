@@ -140,7 +140,7 @@ export default function AboutPage() {
           <Reveal delay={220}>
             <Link
               href="/team"
-              className="group inline-flex items-center gap-3 rounded-full bg-gold text-forest text-sm font-semibold px-8 py-4 mt-16 hover:bg-white transition-colors"
+              className="group inline-flex items-center gap-3 rounded-full bg-gold text-forest text-sm font-semibold px-8 py-4 mt-16 hover:bg-primary transition-colors"
             >
               Meet our team
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
