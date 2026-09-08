@@ -134,11 +134,11 @@ export default function CareerPage() {
 
                     <span className="col-span-12 md:col-span-4 flex flex-wrap items-center gap-x-6 gap-y-2 md:pt-1.5">
                       <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
-                        <MapPin size={13} className="text-accent-dark" />
+                        <MapPin size={13} className="text-accent/100" />
                         {role.location}
                       </span>
                       <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
-                        <Clock size={13} className="text-accent-dark" />
+                        <Clock size={13} className="text-accent/100" />
                         {role.type}
                       </span>
                     </span>
