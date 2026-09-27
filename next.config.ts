@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig: NextConfig = { experimental: { turbopack: false },
   allowedDevOrigins: ["192.168.110.39"],
   images: {
     remotePatterns: [
@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     "sanity",
     "@sanity/vision",
     "next-sanity",
+    "next-sanity/studio",
     "swr",
     "styled-components",
     "@sanity/ui",
