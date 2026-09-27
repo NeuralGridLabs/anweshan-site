@@ -1,6 +1,11 @@
+@"
 [build]
-  command = "npx next build --turbopack=false"
+  command = "npm run build"
   publish = ".next"
+
+[build.environment]
+  NEXT_TURBOPACK = "0"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+"@ | Set-Content netlify.toml
