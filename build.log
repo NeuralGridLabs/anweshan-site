@@ -1,0 +1,43 @@
+
+> anweshan-site@0.1.0 build
+> next build
+
+▲ Next.js 16.2.10 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 6.6s
+  Running TypeScript ...
+  Finished TypeScript in 4.2s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/23) ...
+  Generating static pages using 11 workers (5/23) 
+  Generating static pages using 11 workers (11/23) 
+  Generating static pages using 11 workers (17/23) 
+✓ Generating static pages using 11 workers (23/23) in 631ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ƒ /admin/[[...tool]]
+├ ○ /career
+├ ○ /clients
+├ ○ /contact
+├ ƒ /gallery
+├ ○ /projects
+├ ● /projects/[slug]
+│ ├ /projects/predeparture-orientation-training
+│ ├ /projects/covid-19-vaccination-sudurpaschim
+│ ├ /projects/national-health-insurance-policy
+│ └ [+9 more paths]
+├ ƒ /publications
+├ ○ /services
+└ ○ /team
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

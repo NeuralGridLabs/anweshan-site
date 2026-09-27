@@ -2,9 +2,12 @@
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
-import { projects } from "@/lib/projects";
+import { projectsQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await fetchSanity(projectsQuery) || [];
+
   return (
     <main className="min-h-screen bg-snow">
       <PageHeader
@@ -15,8 +18,8 @@ export default function ProjectsPage() {
         image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Field researchers collecting data"
         meta={[
-          { label: "Studies listed", value: "12" },
-          { label: "Themes", value: "8" },
+          { label: "Studies listed", value: projects.length.toString() },
+          { label: "Themes", value: new Set(projects.map((p: any) => p.category).filter(Boolean)).size.toString() },
           { label: "AMR records", value: "600000" },
           { label: "Hospitals & labs", value: "28" },
         ]}
@@ -25,12 +28,12 @@ export default function ProjectsPage() {
       <section className="py-20 md:py-28">
         <div className="max-w-[1240px] mx-auto px-6 md:px-10">
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project, i) => (
-              <Reveal as="li" key={project.slug} delay={(i % 3) * 110}>
-                <Link href={`/projects/${project.slug}`} className="group h-full flex flex-col outline-none">
+            {projects.map((project: any, i: number) => (
+              <Reveal as="li" key={project.slug?.current || project._id} delay={(i % 3) * 110}>
+                <Link href={`/projects/${project.slug?.current || project._id}`} className="group h-full flex flex-col outline-none">
                   <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
                     <Image
-                      src={project.image}
+                      src={project.coverImage?.asset?._ref ? `https://cdn.sanity.io/images/10g74skr/production/${project.coverImage.asset._ref.replace('image-', '').replace('-', '.')}` : project.image}
                       alt={project.title}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 30vw"
@@ -38,7 +41,7 @@ export default function ProjectsPage() {
                     />
                     <div className="absolute inset-0 bg-forest/0 group-hover:bg-forest/6 transition-colors duration-500" />
                     <span className="absolute top-4 left-4 bg-snow/95 backdrop-blur text-forest text-[11px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full">
-                      {project.theme}
+                      {project.category}
                     </span>
                   </div>
 
@@ -47,11 +50,11 @@ export default function ProjectsPage() {
                   </h2>
 
                   <p className="text-md text-forest/75 leading-relaxed mb-5 flex-1">
-                    {project.description}
+                    {project.summary || project.description}
                   </p>
 
                   <p className="text-primary meta-label pt-4 border-t border-forest/15">
-                    {project.partner}
+                    {project.client}
                   </p>
                 </Link>
               </Reveal>

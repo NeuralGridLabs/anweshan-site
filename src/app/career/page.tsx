@@ -2,10 +2,16 @@
 import Image from "next/image";
 import { Mail, ArrowUpRight, MapPin, Clock } from "lucide-react";
 import Reveal from "@/components/Reveal";
+import { careerQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 
-/* Placeholder vacancies for layout purposes. Replace with real
-   postings, including a closing date, before publishing. */
-const vacancies = [
+type CareerData = {
+  heading?: string;
+  intro?: string;
+  vacancies?: { title: string; group: string; type: string; location: string; closes: string; summary: string }[];
+};
+
+const fallbackVacancies = [
   {
     id: "01",
     title: "Clinical Research Associate",
@@ -13,8 +19,7 @@ const vacancies = [
     type: "Full time",
     location: "Lalitpur, with field travel",
     closes: "Rolling",
-    summary:
-      "Support trial delivery across study sites, from participant recruitment and informed consent through to GCP-compliant source data verification.",
+    summary: "Support trial delivery across study sites, from participant recruitment and informed consent through to GCP-compliant source data verification.",
   },
   {
     id: "02",
@@ -23,8 +28,7 @@ const vacancies = [
     type: "Full time",
     location: "Lalitpur",
     closes: "Rolling",
-    summary:
-      "Design and run focus group discussions and in-depth interviews, lead coding and thematic analysis, and draft findings chapters.",
+    summary: "Design and run focus group discussions and in-depth interviews, lead coding and thematic analysis, and draft findings chapters.",
   },
   {
     id: "03",
@@ -33,8 +37,7 @@ const vacancies = [
     type: "Full time",
     location: "Lalitpur",
     closes: "Rolling",
-    summary:
-      "Own study databases end to end: schema design, validation rules, quality assurance routines, and analysis-ready extracts.",
+    summary: "Own study databases end to end: schema design, validation rules, quality assurance routines, and analysis-ready extracts.",
   },
   {
     id: "04",
@@ -43,8 +46,7 @@ const vacancies = [
     type: "Contract",
     location: "Lalitpur, with provincial travel",
     closes: "Rolling",
-    summary:
-      "Build indicator frameworks, run routine data quality assessments, and produce evaluation reporting for programme partners.",
+    summary: "Build indicator frameworks, run routine data quality assessments, and produce evaluation reporting for programme partners.",
   },
   {
     id: "05",
@@ -53,8 +55,7 @@ const vacancies = [
     type: "Full time",
     location: "Lalitpur",
     closes: "Rolling",
-    summary:
-      "Turn research findings into infographics, factsheets, and motion pieces for government and development partners.",
+    summary: "Turn research findings into infographics, factsheets, and motion pieces for government and development partners.",
   },
   {
     id: "06",
@@ -63,8 +64,7 @@ const vacancies = [
     type: "Short term",
     location: "Multiple districts",
     closes: "Rolling",
-    summary:
-      "Collect household and facility data on assigned surveys, working to sampling protocols under a field supervisor.",
+    summary: "Collect household and facility data on assigned surveys, working to sampling protocols under a field supervisor.",
   },
 ];
 
@@ -75,19 +75,22 @@ const checklist = [
   "Earliest availability",
 ];
 
-export default function CareerPage() {
+export default async function CareerPage() {
+  const sanityData = await fetchSanity(careerQuery);
+  const vacancies = sanityData?.vacancies?.length ? sanityData.vacancies : fallbackVacancies;
+
   return (
     <main className="min-h-screen bg-paper">
       <PageHeader
         tone="primary"
         eyebrow="Work with us"
         title="Work with a team committed to evidence."
-        lead="Anweshan is a contemporary issue focused research organization of highly motivated young professionals seeking to contribute to the wellbeing of poor, vulnerable and marginalized people."
+        lead={sanityData?.intro || "Anweshan is a contemporary issue focused research organization of highly motivated young professionals seeking to contribute to the wellbeing of poor, vulnerable and marginalized people."}
         image="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Colleagues working together"
         meta={[
-          { label: "Open roles", value: "6" },
-          { label: "Practice groups", value: "6" },
+          { label: "Open roles", value: vacancies.length.toString() },
+          { label: "Practice groups", value: new Set(vacancies.map((v: any) => v.group)).size.toString() },
           { label: "Team size", value: "34" },
           { label: "Based in", value: "Lalitpur" },
         ]}
@@ -99,7 +102,7 @@ export default function CareerPage() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-14">
             <div className="md:col-span-7">
               <p className="text-primary eyebrow mb-6 text-base">Current openings</p>
-              <h2 className="h2-section text-base-text">Six roles open across the practice.</h2>
+              <h2 className="h2-section text-base-text">{vacancies.length} roles open across the practice.</h2>
             </div>
             <div className="md:col-span-4 md:col-start-9 flex md:items-end">
               <p className="text-base-text/55 body-base">
@@ -111,16 +114,14 @@ export default function CareerPage() {
 
           <ul className="border-t border-accent-dark/15">
             {vacancies.map((role, i) => (
-              <Reveal key={role.id} delay={i * 70}>
+              <Reveal key={role.id || role.title} delay={i * 70}>
                 <li>
                   <a
-                    href={`mailto:info@anweshan.org?subject=${encodeURIComponent(
-                      "Application: " + role.title
-                    )}`}
+                    href={`mailto:info@anweshan.org?subject=${encodeURIComponent("Application: " + role.title)}`}
                     className="group grid grid-cols-12 items-start gap-4 md:gap-8 py-8 border-b border-accent-dark/15 hover:bg-accent-dark/[0.04] transition-colors"
                   >
                     <span className="col-span-2 md:col-span-1 text-base-text/30 text-xs font-semibold tabular-nums pt-1.5">
-                      {role.id}
+                      {role.id || String(i + 1).padStart(2, "0")}
                     </span>
 
                     <span className="col-span-10 md:col-span-5">
@@ -167,7 +168,6 @@ export default function CareerPage() {
       </section>
 
       {/* Applying */}
-
       <section className="bg-mist py-20 md:py-28">
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <Reveal className="lg:col-span-5">

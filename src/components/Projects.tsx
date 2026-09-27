@@ -4,14 +4,45 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { projects } from "@/lib/projects";
+import { featuredProjectsQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 import Cutouts from "@/components/Cutouts";
+
+interface Project {
+  _id: string;
+  title: string;
+  slug: { current: string } | string;
+  client: string;
+  year: number;
+  category: string;
+  summary: string;
+  status: string;
+  years: string;
+  location: string;
+  methods: string[];
+  team: string;
+  overview: string[];
+  approach: string[];
+  outcomes: string[];
+  facts: { label: string; value: string }[];
+  coverImage: any;
+  featured: boolean;
+}
 
 export default function Projects() {
   const scroller = useRef<HTMLUListElement>(null);
   const [progress, setProgress] = useState(0);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    async function loadProjects() {
+      const data = await fetchSanity(featuredProjectsQuery);
+      if (data) setProjects(data);
+    }
+    loadProjects();
+  }, []);
 
   /* Native scroll drives the state, so wheel, trackpad, touch,
      scrollbar, and keyboard all stay in sync. */
@@ -69,6 +100,13 @@ export default function Projects() {
     }
   };
 
+  // Helper to build Sanity image URL
+  const getImageUrl = (image: any) => {
+    if (!image?.asset?._ref) return image;
+    const ref = image.asset._ref;
+    return `https://cdn.sanity.io/images/10g74skr/production/${ref.replace('image-', '').replace('-', '.')}`;
+  };
+
   return (
     <section className="relative bg-sage py-20 md:py-28 overflow-hidden">
       <Cutouts variant="featured" />
@@ -124,16 +162,16 @@ export default function Projects() {
           >
           {projects.map((project) => (
             <li
-              key={project.slug}
+              key={project._id}
               className="snap-start shrink-0 w-[clamp(250px,21vw,324px)]"
             >
               <Link
-                href={`/projects/${project.slug}`}
+                href={`/projects/${project.slug?.current || project._id}`}
                 className="group flex h-full flex-col rounded-2xl overflow-hidden bg-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 focus-visible:-translate-y-1.5 outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-sage"
               >
                 <div className="relative h-[210px] shrink-0 overflow-hidden">
                   <Image
-                    src={project.image}
+                    src={getImageUrl(project.coverImage)}
                     alt={project.title}
                     fill
                     sizes="360px"
@@ -141,7 +179,7 @@ export default function Projects() {
                     className="object-cover pointer-events-none transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.07]"
                   />
                   <span className="absolute top-4 left-4 bg-white/95 backdrop-blur text-base-text text-[11px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full">
-                    {project.theme}
+                    {project.category}
                   </span>
                 </div>
 
@@ -150,11 +188,11 @@ export default function Projects() {
                     {project.title}
                   </h3>
                   <p className="body-sm text-base-text/75 line-clamp-3 mb-6">
-                    {project.description}
+                    {project.summary}
                   </p>
 
                   <div className="mt-auto flex items-center justify-between gap-4 pt-5 border-t border-forest/15">
-                    <span className="meta-label text-base-text/55 truncate">{project.partner}</span>
+                    <span className="meta-label text-base-text/55 truncate">{project.client}</span>
                     <span className="shrink-0 p-2.5 rounded-full bg-forest/5 text-forest group-hover:bg-gold group-hover:text-forest transition-colors">
                       <ArrowUpRight size={18} strokeWidth={2.5} />
                     </span>

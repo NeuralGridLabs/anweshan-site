@@ -4,7 +4,11 @@ import { ArrowRight, PlayCircle } from "lucide-react";
 import { FaYoutube } from "react-icons/fa";
 import { useState } from "react";
 
-export default function About() {
+interface AboutData {
+  aboutBlurb?: string;
+}
+
+export default function About({ data }: { data?: AboutData }) {
   const [playing, setPlaying] = useState(false);
 
   const scrollTo = (id: string) => {
@@ -13,11 +17,10 @@ export default function About() {
   };
 
   return (
-      <section className="bg-accent py-16 md:py-24 transition-colors">      {/* Increased max-width to allow the video to grow larger */}
+      <section className="bg-accent py-16 md:py-24 transition-colors">
       <div className="max-w-7xl mx-auto px-6">
-        {/* Changed to items-start to fix the top gap issue */}
         <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-16">
-          
+         
           {/* Left Column: Video Player (Takes up 60% width on large screens) */}
           <div className="w-full lg:w-3/5">
             {!playing ? (
@@ -56,7 +59,7 @@ export default function About() {
 
           {/* Right Column: Text & Actions (Takes up 40% width on large screens) */}
           <div className="w-full lg:w-2/5 flex flex-col pt-2">
-            
+           
             {/* Top Labels Grouped Together */}
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-2">
@@ -73,9 +76,9 @@ export default function About() {
               Advancing Nepal&apos;s <span className="text-primary-dark">public health.</span> Through evidence.
             </h2>
 
-            {/* Body Copy */}
+            {/* Body Copy from Sanity or fallback */}
             <p className="text-base-text/80 body-lg mb-4 font-medium">
-              Anweshan Pvt. Ltd. is a multidisciplinary Clinical Research Organization and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives.
+              {data?.aboutBlurb || "Anweshan Pvt. Ltd. is a multidisciplinary Clinical Research Organization and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives."}
             </p>
             <p className="text-base-text/80 body-lg mb-10 font-medium">
               From clinical trials to nationwide household surveys, and from HPV vaccination research to community health toolkit deployments, our work spans the full spectrum of health research across Nepal.

@@ -3,8 +3,20 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
+import { aboutQuery, homeQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 
-const objectives = [
+type AboutData = {
+  heading?: string;
+  body?: string;
+  image?: any;
+};
+
+type HomeData = {
+  aboutBlurb?: string;
+};
+
+const fallbackObjectives = [
   {
     id: "01",
     text: "To conduct contemporary research and foster evidence-based policy analysis, formulation and planning, and nurture an academic milieu.",
@@ -17,15 +29,20 @@ const objectives = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [aboutData, homeData] = await Promise.all([
+    fetchSanity(aboutQuery),
+    fetchSanity(homeQuery),
+  ]);
+
   return (
     <main className="min-h-screen text-base bg-snow">
       <PageHeader
         tone="ink"
         eyebrow="About us"
-        title="Fostering evidence-based policy planning."
-        lead="Anweshan Private Limited is a contemporary issue focused research organization of a highly motivated team of young professionals committed to evidence based analysis regarding development challenges."
-        image="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=2000"
+        title={aboutData?.heading || "Fostering evidence-based policy planning."}
+        lead={homeData?.aboutBlurb || aboutData?.body || "Anweshan Private Limited is a contemporary issue focused research organization of a highly motivated team of young professionals committed to evidence based analysis regarding development challenges."}
+        image={aboutData?.image?.asset?._ref ? `https://cdn.sanity.io/images/10g74skr/production/${aboutData.image.asset._ref.replace('image-', '').replace('-', '.')}` : "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=2000"}
         imageAlt="Research team working together"
       />
 
@@ -38,7 +55,7 @@ export default function AboutPage() {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-light/88" />
+        <div className="absolute inset-0 bg-snow/88" />
         <div className="relative max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
           <Reveal className="md:col-span-3">
             <p className="text-white eyebrow text-base mb-2">
@@ -114,7 +131,7 @@ export default function AboutPage() {
               className="hidden md:block absolute inset-y-8 left-1/2 w-px bg-forest/15"
             />
 
-            {objectives.map((item, i) => (
+            {fallbackObjectives.map((item, i) => (
               <Reveal key={item.id} delay={i * 140}>
                 <div
                   className={`h-full py-10 md:py-4 ${

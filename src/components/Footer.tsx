@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Mail, Phone, ArrowUpRight } from "lucide-react";
+import { MapPin, Mail, Phone } from "lucide-react";
 import { FaFacebookF, FaLinkedinIn, FaInstagram, FaXTwitter } from "react-icons/fa6";
 
 const siteLinks = [
@@ -24,7 +24,7 @@ export default function Footer() {
               src="/images/logo-light.png"
               alt="Anweshan logo"
               width={150}
-              height={36}
+              height={50}
               className="object-contain mb-4"
             />
             <p className="text-ivory/55 body-md max-w-sm">

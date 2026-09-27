@@ -1,10 +1,17 @@
 ﻿import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import ClientMarquee from "@/components/ClientMarquee";
+import { clientsQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 
 type Client = { name: string; work: string[]; sector: string };
 
-const clients: Client[] = [
+type ClientsData = {
+  heading?: string;
+  items?: { name: string; logo?: any }[];
+};
+
+const fallbackClients: Client[] = [
   { name: "Ministry of Health", sector: "Government", work: ['Report: "Respond and Beyond: The Road to Resilience"', "Photo story book: Earthquake 2015 Health Sector Response and Lessons", "Reference material to build resilient health systems", "Electronic Health Record (EHR) System", "HMIS e-reporting workshop"] },
   { name: "World Health Organization", sector: "Multilateral", work: ["DIY video", "2D animation video", "AMR website", "Information book", "Awareness video and standee"] },
   { name: "UNICEF", sector: "Multilateral", work: ["Case studies", "Infographics designing and development"] },
@@ -30,7 +37,14 @@ const clients: Client[] = [
   { name: "JICA", sector: "Bilateral", work: ["Leaflet designing and production"] },
 ];
 
-export default function ClientsPage() {
+export default async function ClientsPage() {
+  const sanityData = await fetchSanity(clientsQuery);
+  const clients = sanityData?.items?.length ? sanityData.items.map((item: any) => ({
+    name: item.name,
+    sector: "Partner",
+    work: [],
+  })) : fallbackClients;
+
   return (
     <main className="min-h-screen bg-snow">
       <PageHeader
@@ -41,8 +55,8 @@ export default function ClientsPage() {
         image="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Partners in discussion"
         meta={[
-          { label: "Clients", value: "23" },
-          { label: "UN agencies", value: "3" },
+          { label: "Clients", value: clients.length.toString() },
+          { label: "UN agencies", value: new Set(clients.filter((c: Client) => c.sector === "Multilateral").map((c: Client) => c.name)).size.toString() },
           { label: "AMR records", value: "600000" },
           { label: "Hospitals & labs", value: "28" },
         ]}
@@ -64,7 +78,7 @@ export default function ClientsPage() {
             {clients.map((client, i) => {
               const bands = ["bg-primary", "bg-accent", "bg-sage", "bg-cream"];
               const row = Math.floor(i / 4);
-              const band = bands[(i + row) % 4];          
+              const band = bands[(i + row) % 4];
             return (
               <Reveal as="li" key={client.name} delay={(i % 4) * 80}>
                 <article className="group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-forest/10 hover:border-forest/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-400">
@@ -94,8 +108,7 @@ export default function ClientsPage() {
                   </div>
                 </article>
               </Reveal>
-              );
-            })}
+            );})}
           </ul>
         </div>
       </section>

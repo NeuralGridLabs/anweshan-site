@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Reveal from "@/components/Reveal";
-import { projects } from "@/lib/projects";
+import { projectBySlugQuery, projectsQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 
-export function generateStaticParams() {
-  return projects.map((project) => ({ slug: project.slug }));
+export async function generateStaticParams() {
+  const projects = await fetchSanity(projectsQuery) || [];
+  return projects.map((project: any) => ({ slug: project.slug?.current || project._id }));
 }
 
 export async function generateMetadata({
@@ -15,9 +17,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = projects.find((p) => p.slug === slug);
+  const project = await fetchSanity(projectBySlugQuery, { slug });
   if (!project) return {};
-  return { title: `${project.title} | Anweshan`, description: project.description };
+  return { title: `${project.title} | Anweshan`, description: project.summary };
 }
 
 export default async function ProjectPage({
@@ -26,18 +28,26 @@ export default async function ProjectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const index = projects.findIndex((p) => p.slug === slug);
-  if (index === -1) notFound();
+  const project = await fetchSanity(projectBySlugQuery, { slug });
+  if (!project) notFound();
 
-  const project = projects[index];
-  const nextProject = projects[(index + 1) % projects.length];
+  const allProjects = await fetchSanity(projectsQuery) || [];
+  const index = allProjects.findIndex((p: any) => (p.slug?.current || p._id) === slug);
+  const nextProject = allProjects[(index + 1) % allProjects.length];
 
   const meta = [
     { label: "Status", value: project.status },
     { label: "Timeline", value: project.years },
-    { label: "Partner", value: project.partner },
+    { label: "Partner", value: project.client },
     { label: "Location", value: project.location },
   ];
+
+  // Helper to build Sanity image URL
+  const getImageUrl = (image: any) => {
+    if (!image?.asset?._ref) return image;
+    const ref = image.asset._ref;
+    return `https://cdn.sanity.io/images/10g74skr/production/${ref.replace('image-', '').replace('-', '.')}`;
+  };
 
   return (
     <main className="min-h-screen bg-snow">
@@ -46,7 +56,7 @@ export default async function ProjectPage({
       <section className="relative bg-mint text-forest">
         <div className="absolute inset-0">
           <Image
-            src={project.image}
+            src={getImageUrl(project.coverImage)}
             alt={project.title}
             fill
             priority
@@ -67,11 +77,11 @@ export default async function ProjectPage({
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-9">
-              <p className="text-forest eyebrow mb-6">{project.theme}</p>
+              <p className="text-forest eyebrow mb-6">{project.category}</p>
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.06] tracking-tight mb-8">
                 {project.title}
               </h1>
-              <p className="text-dark/100 body-lg max-w-2xl">{project.description}</p>
+              <p className="text-dark/100 body-lg max-w-2xl">{project.summary}</p>
             </div>
           </div>
 
@@ -89,7 +99,7 @@ export default async function ProjectPage({
       {/* Key figures */}
       <section className="relative bg-sage text-forest py-12 border-y border-forest/15 overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:divide-x lg:divide-white/15">
-          {project.facts.map((fact) => (
+          {project.facts?.map((fact: any) => (
             <Reveal key={fact.label} className="lg:px-8 lg:first:pl-0">
               <p className="text-3xl text-primary-dark md:text-4xl font-bold tracking-tight tabular-nums">
                 {fact.value}
@@ -108,7 +118,7 @@ export default async function ProjectPage({
             <Reveal>
               <h2 className="h2-section text-base-text mb-8">Overview</h2>
             </Reveal>
-            {project.overview.map((para, i) => (
+            {project.overview?.map((para: string, i: number) => (
               <Reveal key={i} delay={i * 90}>
                 <p className="text-base-text/70 body-lg mb-6">{para}</p>
               </Reveal>
@@ -118,7 +128,7 @@ export default async function ProjectPage({
               <h2 className="h2-section text-base-text mt-16 mb-10">How we worked</h2>
             </Reveal>
             <ol className="border-t border-forest/12">
-              {project.approach.map((step, i) => (
+              {project.approach?.map((step: string, i: number) => (
                 <Reveal key={i} delay={i * 90}>
                   <li className="flex gap-6 py-7 border-b border-forest/12">
                     <span className="text-forest text-xs font-semibold tabular-nums shrink-0 pt-1">
@@ -134,7 +144,7 @@ export default async function ProjectPage({
               <h2 className="h2-section text-base-text mt-16 mb-8">What it produced</h2>
             </Reveal>
             <ul className="space-y-5">
-              {project.outcomes.map((item, i) => (
+              {project.outcomes?.map((item: string, i: number) => (
                 <Reveal key={i} delay={i * 90}>
                   <li className="flex gap-4 text-base-text/75 body">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-yellow mt-2.5 shrink-0" />
@@ -150,7 +160,7 @@ export default async function ProjectPage({
             <Reveal>
               <div className="relative aspect-[4/5] rounded-2xl overflow-hidden mb-8">
                 <Image
-                  src={project.image}
+                  src={getImageUrl(project.coverImage)}
                   alt={project.title}
                   fill
                   sizes="(max-width: 1024px) 100vw, 32vw"
@@ -163,7 +173,7 @@ export default async function ProjectPage({
               <div className="bg-accent rounded-2xl p-8">
                 <p className="text-base-text/95 meta-label mb-5">Methods</p>
                 <ul className="space-y-3 mb-8">
-                  {project.methods.map((method) => (
+                  {project.methods?.map((method: string) => (
                     <li key={method} className="flex gap-3 text-base-text/75 body-sm">
                       <span className="w-1 h-1 rounded-full bg-primary mt-2 shrink-0" />
                       {method}
@@ -190,7 +200,7 @@ export default async function ProjectPage({
       <section className="bg-cream py-16 md:py-20">
         <div className="max-w-[1400px] mx-auto px-6">
           <p className="text-base-text/75 meta-label mb-6">Next project</p>
-          <Link href={`/projects/${nextProject.slug}`} className="group flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <Link href={`/projects/${nextProject.slug?.current || nextProject._id}`} className="group flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h2 className="h2-section text-base-text group-hover:text-primary transition-colors max-w-3xl">
               {nextProject.title}
             </h2>

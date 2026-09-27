@@ -48,14 +48,13 @@ export default function Navbar() {
       >
         <nav className="max-w-[1400px] mx-auto flex items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            {/* Wordmark recoloured white; the yellow and green marks are
-                preserved from the original artwork. */}
             <Image
               src="/images/logo-light.png"
               alt="Anweshan logo"
               width={180}
-              height={44}
+              height={60}
               priority
+              loading="eager"
               className={`object-contain transition-all duration-300 ${
                 scrolled ? "h-10" : "h-15"
               } w-auto`}

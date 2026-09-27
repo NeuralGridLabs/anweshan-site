@@ -1,13 +1,27 @@
 import Image from "next/image";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
+import { servicesQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 
-const services = [
+type ServiceItem = {
+  title: string;
+  description?: string;
+  icon?: string;
+};
+
+type ServicesData = {
+  heading?: string;
+  intro?: string;
+  items?: ServiceItem[];
+};
+
+// Fallback static data
+const fallbackServices = [
   {
     id: "01",
     title: "Clinical Research Services: A Full-Spectrum CRO in Nepal",
-    summary:
-      "Anweshan is Nepal's leading Clinical Research Organization, offering full-spectrum support for ethical and high-quality clinical research, from protocol development and regulatory approvals with the Nepal Health Research Council (NHRC) and the Department of Drug Administration (DDA), to site management, participant recruitment, GCP-compliant monitoring, data management, and pharmacovigilance.",
+    summary: "Anweshan is Nepal's leading Clinical Research Organization, offering full-spectrum support for ethical and high-quality clinical research, from protocol development and regulatory approvals with the Nepal Health Research Council (NHRC) and the Department of Drug Administration (DDA), to site management, participant recruitment, GCP-compliant monitoring, data management, and pharmacovigilance.",
     items: [
       "NHRC ethical approval",
       "DDA trial registration",
@@ -27,8 +41,7 @@ const services = [
   {
     id: "02",
     title: "Q-Squared Research",
-    summary:
-      "Our firm specializes mainly in Quantitative and Qualitative (Q-squared) research and surveys. Monitoring and Evaluation also lies in our area of specialization, alongside socio-economic mapping and poverty analysis.",
+    summary: "Our firm specializes mainly in Quantitative and Qualitative (Q-squared) research and surveys. Monitoring and Evaluation also lies in our area of specialization, alongside socio-economic mapping and poverty analysis.",
     items: [
       "Census surveys",
       "Randomized Control Trials",
@@ -49,8 +62,7 @@ const services = [
   {
     id: "03",
     title: "Research and Policy Dialogue in Nepal",
-    summary:
-      "Policy dialogue is a vehicle through which people can be helped to see problems and issues in society from different perspectives. It intends to identify areas and gaps in the health and development sector where it is in the best interest of all to make improvements and reforms.",
+    summary: "Policy dialogue is a vehicle through which people can be helped to see problems and issues in society from different perspectives. It intends to identify areas and gaps in the health and development sector where it is in the best interest of all to make improvements and reforms.",
     items: [
       "Multi-stakeholder platforms",
       "Advocacy and reform agendas",
@@ -66,8 +78,7 @@ const services = [
   {
     id: "04",
     title: "Health and Development Communication",
-    summary:
-      "Anweshan works in designing and drafting communication research plans and communication strategy. We help our clients disseminate their information through the most appropriate mediums.",
+    summary: "Anweshan works in designing and drafting communication research plans and communication strategy. We help our clients disseminate their information through the most appropriate mediums.",
     items: [
       "2D animation",
       "Infographic design",
@@ -85,8 +96,7 @@ const services = [
   {
     id: "05",
     title: "Information Technology",
-    summary:
-      "Information Technology Services provides innovative, customer-focused and issue-orientated solutions that enable academicians and the general public to pursue excellence in research, education, health and development.",
+    summary: "Information Technology Services provides innovative, customer-focused and issue-orientated solutions that enable academicians and the general public to pursue excellence in research, education, health and development.",
     items: [
       "Web-based evaluation tools",
       "GIS mapping",
@@ -103,8 +113,7 @@ const services = [
   {
     id: "06",
     title: "Political Economic Analysis",
-    summary:
-      "Anweshan conducts political economy analysis to help clients understand how particular institutions, cultures, incentives, political motives and actions shape their intended project development and implementation.",
+    summary: "Anweshan conducts political economy analysis to help clients understand how particular institutions, cultures, incentives, political motives and actions shape their intended project development and implementation.",
     items: [
       "Interest and incentive mapping",
       "Power distribution analysis",
@@ -121,18 +130,33 @@ const services = [
 
 const blackSummaryIds = ["02", "03", "04", "06"];
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const sanityData = await fetchSanity(servicesQuery);
+  
+  // Use Sanity data if available, otherwise fallback
+  const services = sanityData?.items?.length ? sanityData.items.map((item: ServiceItem, i: number) => ({
+    id: String(i + 1).padStart(2, "0"),
+    title: item.title,
+    summary: item.description || "",
+    items: [item.icon].filter(Boolean) || [], // Sanity only has icon, not detailed items
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200",
+    bg: i % 2 === 0 ? "bg-forest" : "bg-cream",
+    text: i % 2 === 0 ? "text-white" : "text-forest",
+    chip: i % 2 === 0 ? "border-white/25 text-white/90" : "border-forest/25 text-forest/80",
+    label: i % 2 === 0 ? "text-ivory" : "text-forest",
+  })) : fallbackServices;
+
   return (
     <main className="min-h-screen bg-snow">
       <PageHeader
         tone="primary"
         eyebrow="What we do"
         title="Six practices, one evidence pipeline."
-        lead="From full-spectrum clinical research to communication design and political economy analysis, Anweshan supports the whole arc from research question to policy decision."
+        lead={sanityData?.intro || "From full-spectrum clinical research to communication design and political economy analysis, Anweshan supports the whole arc from research question to policy decision."}
         image="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Clinical research laboratory"
         meta={[
-          { label: "Service areas", value: "6" },
+          { label: "Service areas", value: services.length.toString() },
           { label: "Trial phases", value: "4" },
           { label: "Regulators", value: "2" },
           { label: "Standard", value: "GCP" },

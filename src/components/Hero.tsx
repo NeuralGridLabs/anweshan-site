@@ -1,166 +1,175 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 
-const slides = [
+interface HeroSlide {
+  image: string;
+  label: string;
+}
+
+interface HeroData {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroSubtext?: string;
+  primaryCtaLabel?: string;
+  secondaryCtaLabel?: string;
+  slides?: HeroSlide[];
+}
+
+const DEFAULT_SLIDES: HeroSlide[] = [
   {
-    image:
-      "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=1600",
+    image: "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=1600",
     label: "Community Health Surveys",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=1600",
+    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=1600",
     label: "HPV Vaccination Research",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=1600",
+    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=1600",
     label: "Household Data Collection",
   },
 ];
 
-export default function Hero() {
+export default function Hero({ data }: { data?: HeroData }) {
   const [current, setCurrent] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Automatic slide change
-  useEffect(() => {
-    const timer = setInterval(() => {
+  const slides = data?.slides?.length ? data.slides : DEFAULT_SLIDES;
+
+  const startTimer = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (progressRef.current) clearInterval(progressRef.current);
+
+    setProgress(0);
+
+    progressRef.current = setInterval(() => {
+      setProgress((p) => Math.min(p + 100 / 70, 100));
+    }, 100);
+
+    intervalRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 7000); // image stays for 7 seconds
+      setProgress(0);
+    }, 7000);
+  };
 
-    return () => clearInterval(timer);
-  }, []);
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (progressRef.current) clearInterval(progressRef.current);
+    };
+  }, [slides.length]);
+
+  const goTo = (index: number) => {
+    setCurrent(index);
+    startTimer();
+  };
 
   const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-
-    if (el) {
-      el.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden" style={{ backgroundColor: "#EAB308" }}>
 
-      {/* Background */}
-      <Image
-        src="/images/bg.png"
-        alt=""
-        fill
-        className="object-cover object-center -z-10"
-        priority
-      />
+      {/* Waves pattern */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="waves" x="0" y="0" width="40" height="16" patternUnits="userSpaceOnUse">
+            <path d="M0 8 Q10 2 20 8 Q30 14 40 8" fill="none" stroke="#1a3a1a" strokeWidth="0.9" opacity="0.07"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#waves)"/>
+      </svg>
 
-      {/* HERO TEXT */}
-      <div className="max-w-4xl mx-auto px-8 pt-6 pb-30 text-center">
+      <div className="relative max-w-[1400px] mx-auto px-6 md:px-10 pt-16 pb-14">
 
-        <p className="text-primary eyebrow mb-5 text-base">
-          Redefining Research in Nepal
-        </p>
+        {/* Centered copy */}
+        <div className="text-center max-w-2xl mx-auto mb-14">
 
-        <h1 className="text-4xl md:text-5xl font-bold text-base-text leading-tight mb-6 max-w-2xl mx-auto">
-          Field Research That Drives Real Health Impact
-        </h1>
+          <span className="inline-flex items-center gap-2 text-forest text-sm font-medium mb-6">
+            <span className="w-6 h-px bg-forest/50" />
+            {data?.heroEyebrow || "Field research in Nepal"}
+            <span className="w-6 h-px bg-forest/50" />
+          </span>
 
-        <p className="text-base-text/75 body mb-10 max-w-lg mx-auto">
-          Clinical research, policy dialogue, and data-driven survey work
-          across Nepal, from HPV vaccination studies to nationwide household
-          health data.
-        </p>
+          <h1 className="text-4xl md:text-5xl font-bold text-forest leading-[1.12] mb-6">
+            {data?.heroHeading || "Research that moves health policy forward"}
+          </h1>
 
-        <div className="flex items-center justify-center gap-4">
+          <p className="text-forest/70 text-lg leading-relaxed mb-10">
+            {data?.heroSubtext ||
+              "Clinical trials, HPV vaccination studies, and nationwide household surveys that shape Nepal's health landscape."}
+          </p>
 
-          <button
-            onClick={() => scrollTo("projects")}
-            className="flex items-center gap-2 rounded-full bg-primary text-white text-md font-semibold px-7 py-3.5 hover:bg-primary-dark transition-colors"
-          >
-            Our work
-            <ArrowRight size={14} />
-          </button>
-
-          <button
-            onClick={() => (window.location.href = "/clients")}
-            className="flex items-center gap-2 rounded-full bg-accent text-forest-dark text-md font-semibold px-7 py-3.5 hover:bg-accent-dark transition-colors"
-          >
-            Our clients
-            <ArrowRight size={14} />
-          </button>
-
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => scrollTo("projects")}
+              className="flex items-center gap-2 rounded-full bg-forest text-white text-sm font-semibold px-6 py-3 hover:bg-forest/90 transition-colors"
+            >
+              {data?.primaryCtaLabel || "See our work"}
+              <ArrowRight size={14} />
+            </button>
+            <button
+              onClick={() => (window.location.href = "/clients")}
+              className="flex items-center gap-2 rounded-full border border-forest/30 text-forest text-sm font-semibold px-6 py-3 hover:border-forest hover:bg-forest/10 transition-colors"
+            >
+              {data?.secondaryCtaLabel || "Our clients"}
+            </button>
+          </div>
         </div>
-      </div>
 
+        {/* Image slider */}
+        <div className="relative w-full h-72 md:h-[420px] rounded-3xl overflow-hidden shadow-2xl">
 
-      {/* IMAGE SLIDER */}
-      <div className="max-w-5xl mx-auto px-8 pb-12">
-
-        <div className="relative w-full h-72 md:h-96 rounded-3xl overflow-hidden bg-primary-light shadow-lg">
-
-          {/* ALL IMAGES STAY MOUNTED */}
           {slides.map((slide, index) => (
             <Image
               key={slide.image}
               src={slide.image}
               alt={slide.label}
               fill
-              sizes="(max-width: 1024px) 100vw, 1000px"
-              className={`
-                absolute inset-0 object-cover
-                transition-opacity
-                duration-[2000ms]
-                ease-in-out
-                ${
-                  index === current
-                    ? "opacity-100 z-10"
-                    : "opacity-0 z-0"
-                }
-              `}
+              sizes="(max-width: 1400px) 100vw, 1400px"
+              className={`object-cover transition-opacity duration-[1500ms] ease-in-out ${
+                index === current ? "opacity-100" : "opacity-0"
+              }`}
               priority={index === 0}
             />
           ))}
 
-          {/* DARK GRADIENT */}
-          <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-
-          {/* LABEL + DOTS */}
-          <div className="absolute bottom-5 left-6 right-6 z-30 flex items-end justify-between">
-
+          <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between z-10">
             <span className="text-white text-sm font-semibold">
               {slides[current].label}
             </span>
 
-            <div className="flex gap-2">
-
+            <div className="flex items-center gap-2">
               {slides.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrent(index)}
+                  onClick={() => goTo(index)}
                   aria-label={`Slide ${index + 1}`}
-                  className={`
-                    rounded-full
-                    transition-all
-                    duration-700
-                    ${
-                      index === current
-                        ? "bg-white w-5 h-2"
-                        : "bg-white/50 w-2 h-2"
-                    }
-                  `}
-                />
+                  className="relative h-1 rounded-full overflow-hidden transition-all duration-500"
+                  style={{ width: index === current ? 48 : 8, background: "rgba(255,255,255,0.3)" }}
+                >
+                  {index === current && (
+                    <span
+                      className="absolute inset-y-0 left-0 bg-white rounded-full"
+                      style={{ width: `${progress}%` }}
+                    />
+                  )}
+                </button>
               ))}
-
             </div>
-
           </div>
-
         </div>
-      </div>
 
+      </div>
     </section>
   );
 }

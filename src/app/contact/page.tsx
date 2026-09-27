@@ -2,8 +2,23 @@
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { MapPin, Mail, Phone, Smartphone, Globe } from "lucide-react";
+import { contactQuery, siteSettingsQuery } from "@/lib/queries";
+import { fetchSanity } from "@/lib/sanity";
 
-const details = [
+type ContactData = {
+  heading?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  mapEmbed?: string;
+};
+
+type SiteSettings = {
+  orgName?: string;
+  tagline?: string;
+};
+
+const fallbackDetails = [
   { icon: MapPin, label: "Office", value: "Anweshan Pvt. Ltd., Talchikhel, Lalitpur, Nepal" },
   { icon: Phone, label: "Phone", value: "977-01-5526674" },
   { icon: Smartphone, label: "Mobile", value: "977-9801210115" },
@@ -11,13 +26,22 @@ const details = [
   { icon: Globe, label: "Website", value: "www.anweshan.org" },
 ];
 
-const fields = [
-  { id: "name", label: "Full name", type: "text", required: true },
-  { id: "email", label: "Email", type: "email", required: true },
-  { id: "organization", label: "Organization", type: "text", required: false },
-];
+export default async function ContactPage() {
+  const [contactData, siteSettings] = await Promise.all([
+    fetchSanity(contactQuery),
+    fetchSanity(siteSettingsQuery),
+  ]);
 
-export default function ContactPage() {
+  const details = contactData ? [
+    { icon: MapPin, label: "Office", value: contactData.address || fallbackDetails[0].value },
+    { icon: Phone, label: "Phone", value: contactData.phone || fallbackDetails[1].value },
+    { icon: Smartphone, label: "Mobile", value: "977-9801210115" },
+    { icon: Mail, label: "Email", value: contactData.email || fallbackDetails[3].value },
+    { icon: Globe, label: "Website", value: "www.anweshan.org" },
+  ] : fallbackDetails;
+
+  const orgName = siteSettings?.orgName || "Anweshan";
+
   return (
     <main className="min-h-screen bg-paper">
       <PageHeader
@@ -79,25 +103,52 @@ export default function ContactPage() {
             </Reveal>
 
             <form className="grid grid-cols-1 md:grid-cols-2 gap-7">
-              {fields.map((field, i) => (
-                <Reveal key={field.id} delay={i * 70} className="flex flex-col">
-                  <label
-                    htmlFor={field.id}
-                    className="text-base-text/55 text-base font-medium mb-3"
-                  >
-                    {field.label}
-                  </label>
-                  <input
-                    id={field.id}
-                    name={field.id}
-                    type={field.type}
-                    required={field.required}
-                    className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
-                  />
-                </Reveal>
-              ))}
+              <Reveal delay={0} className="flex flex-col">
+                <label
+                  htmlFor="name"
+                  className="text-base-text/55 text-base font-medium mb-3"
+                >
+                  Full name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
+                />
+              </Reveal>
+              <Reveal delay={70} className="flex flex-col">
+                <label
+                  htmlFor="email"
+                  className="text-base-text/55 text-base font-medium mb-3"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
+                />
+              </Reveal>
+              <Reveal delay={140} className="flex flex-col">
+                <label
+                  htmlFor="organization"
+                  className="text-base-text/55 text-base font-medium mb-3"
+                >
+                  Organization
+                </label>
+                <input
+                  id="organization"
+                  name="organization"
+                  type="text"
+                  className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
+                />
+              </Reveal>
 
-              <Reveal delay={210} className="flex flex-col">
+              <Reveal delay={210} className="flex flex-col md:col-span-2">
                 <label
                   htmlFor="subject"
                   className="text-base-text/55 text-base font-medium mb-3"
@@ -111,8 +162,8 @@ export default function ContactPage() {
                 >
                   <option>Clinical Research Services (CRO)</option>
                   <option>Q-Squared Research</option>
-                  <option>Research &amp; Policy Dialogue</option>
-                  <option>Health &amp; Development Communication</option>
+                  <option>Research & Policy Dialogue</option>
+                  <option>Health & Development Communication</option>
                   <option>Information Technology</option>
                   <option>Political Economic Analysis</option>
                   <option>Career</option>
