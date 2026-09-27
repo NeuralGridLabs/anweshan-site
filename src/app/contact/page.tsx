@@ -18,29 +18,79 @@ type SiteSettings = {
   tagline?: string;
 };
 
-const fallbackDetails = [
-  { icon: MapPin, label: "Office", value: "Anweshan Pvt. Ltd., Talchikhel, Lalitpur, Nepal" },
-  { icon: Phone, label: "Phone", value: "977-01-5526674" },
-  { icon: Smartphone, label: "Mobile", value: "977-9801210115" },
-  { icon: Mail, label: "Email", value: "info@anweshan.org" },
-  { icon: Globe, label: "Website", value: "www.anweshan.org" },
+type ContactDetail = {
+  icon: typeof MapPin;
+  label: string;
+  value: string;
+};
+
+const fallbackDetails: ContactDetail[] = [
+  {
+    icon: MapPin,
+    label: "Office",
+    value: "Anweshan Pvt. Ltd., Talchikhel, Lalitpur, Nepal",
+  },
+  {
+    icon: Phone,
+    label: "Phone",
+    value: "977-01-5526674",
+  },
+  {
+    icon: Smartphone,
+    label: "Mobile",
+    value: "977-9801210115",
+  },
+  {
+    icon: Mail,
+    label: "Email",
+    value: "info@anweshan.org",
+  },
+  {
+    icon: Globe,
+    label: "Website",
+    value: "www.anweshan.org",
+  },
 ];
 
 export default async function ContactPage() {
-  const [contactData, siteSettings] = await Promise.all([
+  const [rawContactData, rawSiteSettings] = await Promise.all([
     fetchSanity(contactQuery),
     fetchSanity(siteSettingsQuery),
   ]);
 
-  const details = contactData ? [
-    { icon: MapPin, label: "Office", value: contactData.address || fallbackDetails[0].value },
-    { icon: Phone, label: "Phone", value: contactData.phone || fallbackDetails[1].value },
-    { icon: Smartphone, label: "Mobile", value: "977-9801210115" },
-    { icon: Mail, label: "Email", value: contactData.email || fallbackDetails[3].value },
-    { icon: Globe, label: "Website", value: "www.anweshan.org" },
-  ] : fallbackDetails;
+  // Sanity can return null, so always fall back to an empty object.
+  const contactData = (rawContactData as ContactData) || {};
+  const siteSettings = (rawSiteSettings as SiteSettings) || {};
 
-  const orgName = siteSettings?.orgName || "Anweshan";
+  const details: ContactDetail[] = [
+    {
+      icon: MapPin,
+      label: "Office",
+      value: contactData.address || fallbackDetails[0].value,
+    },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: contactData.phone || fallbackDetails[1].value,
+    },
+    {
+      icon: Smartphone,
+      label: "Mobile",
+      value: fallbackDetails[2].value,
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: contactData.email || fallbackDetails[3].value,
+    },
+    {
+      icon: Globe,
+      label: "Website",
+      value: fallbackDetails[4].value,
+    },
+  ];
+
+  const orgName = siteSettings.orgName || "Anweshan";
 
   return (
     <main className="min-h-screen bg-paper">
@@ -55,7 +105,7 @@ export default async function ContactPage() {
 
       <section className="py-20 md:py-28">
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-8">
-
+          {/* Contact details */}
           <div className="lg:col-span-4">
             <Reveal>
               <p className="text-primary eyebrow mb-8 text-base">
@@ -71,11 +121,15 @@ export default async function ContactPage() {
                       size={17}
                       className="text-primary mt-1 shrink-0 group-hover:scale-110 transition-transform"
                     />
+
                     <div>
                       <p className="text-base-text/55 text-base font-medium mb-1">
                         {item.label}
                       </p>
-                      <p className="text-base-text text-lg font-medium">{item.value}</p>
+
+                      <p className="text-base-text text-lg font-medium">
+                        {item.value}
+                      </p>
                     </div>
                   </li>
                 </Reveal>
@@ -95,6 +149,7 @@ export default async function ContactPage() {
             </Reveal>
           </div>
 
+          {/* Contact form */}
           <div className="lg:col-span-7 lg:col-start-6">
             <Reveal>
               <h2 className="h2-section text-base-text mb-12">
@@ -103,13 +158,17 @@ export default async function ContactPage() {
             </Reveal>
 
             <form className="grid grid-cols-1 md:grid-cols-2 gap-7">
-              <Reveal delay={0} className="flex flex-col">
+              <Reveal
+                delay={0}
+                className="flex flex-col"
+              >
                 <label
                   htmlFor="name"
                   className="text-base-text/55 text-base font-medium mb-3"
                 >
                   Full name
                 </label>
+
                 <input
                   id="name"
                   name="name"
@@ -118,13 +177,18 @@ export default async function ContactPage() {
                   className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
                 />
               </Reveal>
-              <Reveal delay={70} className="flex flex-col">
+
+              <Reveal
+                delay={70}
+                className="flex flex-col"
+              >
                 <label
                   htmlFor="email"
                   className="text-base-text/55 text-base font-medium mb-3"
                 >
                   Email
                 </label>
+
                 <input
                   id="email"
                   name="email"
@@ -133,13 +197,18 @@ export default async function ContactPage() {
                   className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
                 />
               </Reveal>
-              <Reveal delay={140} className="flex flex-col">
+
+              <Reveal
+                delay={140}
+                className="flex flex-col"
+              >
                 <label
                   htmlFor="organization"
                   className="text-base-text/55 text-base font-medium mb-3"
                 >
                   Organization
                 </label>
+
                 <input
                   id="organization"
                   name="organization"
@@ -148,13 +217,17 @@ export default async function ContactPage() {
                 />
               </Reveal>
 
-              <Reveal delay={210} className="flex flex-col md:col-span-2">
+              <Reveal
+                delay={210}
+                className="flex flex-col md:col-span-2"
+              >
                 <label
                   htmlFor="subject"
                   className="text-base-text/55 text-base font-medium mb-3"
                 >
                   Enquiry about
                 </label>
+
                 <select
                   id="subject"
                   name="subject"
@@ -171,13 +244,17 @@ export default async function ContactPage() {
                 </select>
               </Reveal>
 
-              <Reveal delay={280} className="flex flex-col md:col-span-2">
+              <Reveal
+                delay={280}
+                className="flex flex-col md:col-span-2"
+              >
                 <label
                   htmlFor="message"
                   className="text-base-text/55 text-base font-medium mb-3"
                 >
                   Message
                 </label>
+
                 <textarea
                   id="message"
                   name="message"
@@ -187,16 +264,23 @@ export default async function ContactPage() {
                 />
               </Reveal>
 
-              <Reveal delay={340} className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-5 pt-4">
+              <Reveal
+                delay={340}
+                className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-5 pt-4"
+              >
                 <button
                   type="submit"
                   className="rounded-full bg-accent text-dark text-md font-semibold px-9 py-4 hover:bg-primary transition-colors"
                 >
                   Send message
                 </button>
+
                 <p className="text-base-text/45 text-md leading-relaxed">
                   This form is not yet wired to a backend. Until then, email{" "}
-                  <span className="text-base-text/70 font-medium">info@anweshan.org</span> directly.
+                  <span className="text-base-text/70 font-medium">
+                    info@anweshan.org
+                  </span>{" "}
+                  directly.
                 </p>
               </Reveal>
             </form>

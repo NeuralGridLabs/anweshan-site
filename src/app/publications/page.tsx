@@ -1,9 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import { FileText, Download, FileSpreadsheet } from "lucide-react";
+
+import {
+  FileText,
+  Download,
+  FileSpreadsheet,
+} from "lucide-react";
 
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
+
 import { publicationsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 
@@ -19,7 +25,11 @@ type Publication = {
       _ref?: string;
     };
   };
-  coverImage?: any;
+  coverImage?: {
+    asset?: {
+      _ref?: string;
+    };
+  };
   order?: number;
 };
 
@@ -50,7 +60,9 @@ function fileIcon(ext?: string) {
 }
 
 export default async function PublicationsPage() {
-  const publications = (await fetchSanity(publicationsQuery)) || [];
+  const rawPublications = await fetchSanity(publicationsQuery);
+
+  const publications = (rawPublications as Publication[]) || [];
 
   return (
     <main className="min-h-screen text-base bg-snow">
@@ -71,7 +83,8 @@ export default async function PublicationsPage() {
                 </p>
 
                 <p className="body-lg text-forest/70 max-w-xl mx-auto">
-                  Publications are added from the CMS. Open the admin studio at{" "}
+                  Publications are added from the CMS. Open the admin studio
+                  at{" "}
                   <Link
                     href="/admin"
                     className="underline-grow font-semibold text-forest"
@@ -96,7 +109,10 @@ export default async function PublicationsPage() {
                 const coverRef = pub.coverImage?.asset?._ref;
 
                 return (
-                  <Reveal key={pub._id} delay={i * 60}>
+                  <Reveal
+                    key={pub._id}
+                    delay={i * 60}
+                  >
                     <article className="h-full flex flex-col rounded-2xl overflow-hidden bg-ivory border border-forest/10 hover:border-forest/30 transition-colors">
                       {coverRef ? (
                         <div className="relative aspect-[16/10] bg-sage">

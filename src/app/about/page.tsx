@@ -1,15 +1,21 @@
 ﻿import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
+
 import { aboutQuery, homeQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 
 type AboutData = {
   heading?: string;
   body?: string;
-  image?: any;
+  image?: {
+    asset?: {
+      _ref?: string;
+    };
+  };
 };
 
 type HomeData = {
@@ -30,23 +36,39 @@ const fallbackObjectives = [
 ];
 
 export default async function AboutPage() {
-  const [aboutData, homeData] = await Promise.all([
+  const [rawAboutData, rawHomeData] = await Promise.all([
     fetchSanity(aboutQuery),
     fetchSanity(homeQuery),
   ]);
+
+  const aboutData = rawAboutData as AboutData;
+  const homeData = rawHomeData as HomeData;
 
   return (
     <main className="min-h-screen text-base bg-snow">
       <PageHeader
         tone="ink"
         eyebrow="About us"
-        title={aboutData?.heading || "Fostering evidence-based policy planning."}
-        lead={homeData?.aboutBlurb || aboutData?.body || "Anweshan Private Limited is a contemporary issue focused research organization of a highly motivated team of young professionals committed to evidence based analysis regarding development challenges."}
-        image={aboutData?.image?.asset?._ref ? `https://cdn.sanity.io/images/10g74skr/production/${aboutData.image.asset._ref.replace('image-', '').replace('-', '.')}` : "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=2000"}
+        title={
+          aboutData?.heading ||
+          "Fostering evidence-based policy planning."
+        }
+        lead={
+          homeData?.aboutBlurb ||
+          aboutData?.body ||
+          "Anweshan Private Limited is a contemporary issue focused research organization of a highly motivated team of young professionals committed to evidence based analysis regarding development challenges."
+        }
+        image={
+          aboutData?.image?.asset?._ref
+            ? `https://cdn.sanity.io/images/10g74skr/production/${aboutData.image.asset._ref
+                .replace("image-", "")
+                .replace("-", ".")}`
+            : "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=2000"
+        }
         imageAlt="Research team working together"
       />
 
-      {/* Vision - full-bleed image band */}
+      {/* Vision */}
       <section className="relative py-24 md:py-36 overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000"
@@ -55,13 +77,16 @@ export default async function AboutPage() {
           sizes="100vw"
           className="object-cover"
         />
+
         <div className="absolute inset-0 bg-snow/88" />
+
         <div className="relative max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
           <Reveal className="md:col-span-3">
             <p className="text-white eyebrow text-base mb-2">
-                Our vision
-              </p>
+              Our vision
+            </p>
           </Reveal>
+
           <Reveal delay={120} className="md:col-span-9">
             <p className="h2-section text-white">
               Fostering evidence-based policy planning.
@@ -88,43 +113,49 @@ export default async function AboutPage() {
           <div className="lg:col-span-6 lg:col-start-7">
             <Reveal>
               <p className="text-forest eyebrow mb-8 text-base">
-                  Our mission
-                </p>
+                Our mission
+              </p>
             </Reveal>
 
             <Reveal delay={100}>
               <p className="text-2xl md:text-4xl font-bold text-base-text leading-[1.22] tracking-tight mb-8">
-                To generate and translate high-quality evidence into actionable insights that
-                drive informed decision-making in public health.
+                To generate and translate high-quality evidence into
+                actionable insights that drive informed decision-making in
+                public health.
               </p>
             </Reveal>
 
             <Reveal delay={180}>
               <p className="text-base-text/70 body-lg">
-                We collaborate with governments, civil society, and the private sector to support
-                policy development, strengthen health systems, and advance innovative financing and
-                technological integration, addressing the underlying social determinants of
-                health. Our work is grounded in principles of participation, ownership, and
-                knowledge transfer, ensuring lasting impact for all stakeholders.
+                We collaborate with governments, civil society, and the
+                private sector to support policy development, strengthen
+                health systems, and advance innovative financing and
+                technological integration, addressing the underlying social
+                determinants of health. Our work is grounded in principles
+                of participation, ownership, and knowledge transfer,
+                ensuring lasting impact for all stakeholders.
               </p>
             </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Objectives, set as a book spread */}
+      {/* Objectives */}
       <section className="relative bg-ivory text-forest py-20 md:py-32 overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16 md:mb-20">
             <div className="md:col-span-8">
-              <p className="text-forest/70 eyebrow mb-6 text-base">Our objective</p>
+              <p className="text-forest/70 eyebrow mb-6 text-base">
+                Our objective
+              </p>
+
               <h2 className="h2-section text-forest">
                 Two commitments that shape every engagement.
               </h2>
             </div>
           </div>
 
-          {/* Spread: two leaves divided by a centre gutter */}
+          {/* Two-column objectives */}
           <div className="relative grid grid-cols-1 md:grid-cols-2">
             <span
               aria-hidden
@@ -148,7 +179,9 @@ export default async function AboutPage() {
                     {item.text}
                   </p>
 
-                  <p className="text-forest/60 body-sm max-w-md">{item.note}</p>
+                  <p className="text-forest/60 body-sm max-w-md">
+                    {item.note}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -160,12 +193,16 @@ export default async function AboutPage() {
               className="group inline-flex items-center gap-3 rounded-full bg-gold text-forest text-sm font-semibold px-8 py-4 mt-16 hover:bg-primary transition-colors"
             >
               Meet our team
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform"
+              />
             </Link>
           </Reveal>
         </div>
       </section>
-
     </main>
   );
 }
+

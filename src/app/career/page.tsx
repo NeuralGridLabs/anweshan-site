@@ -1,17 +1,29 @@
 ﻿import PageHeader from "@/components/PageHeader";
 import Image from "next/image";
 import { Mail, ArrowUpRight, MapPin, Clock } from "lucide-react";
+
 import Reveal from "@/components/Reveal";
+
 import { careerQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+
+type Vacancy = {
+  id?: string;
+  title: string;
+  group: string;
+  type: string;
+  location: string;
+  closes: string;
+  summary: string;
+};
 
 type CareerData = {
   heading?: string;
   intro?: string;
-  vacancies?: { title: string; group: string; type: string; location: string; closes: string; summary: string }[];
+  vacancies?: Vacancy[];
 };
 
-const fallbackVacancies = [
+const fallbackVacancies: Vacancy[] = [
   {
     id: "01",
     title: "Clinical Research Associate",
@@ -19,7 +31,8 @@ const fallbackVacancies = [
     type: "Full time",
     location: "Lalitpur, with field travel",
     closes: "Rolling",
-    summary: "Support trial delivery across study sites, from participant recruitment and informed consent through to GCP-compliant source data verification.",
+    summary:
+      "Support trial delivery across study sites, from participant recruitment and informed consent through to GCP-compliant source data verification.",
   },
   {
     id: "02",
@@ -28,7 +41,8 @@ const fallbackVacancies = [
     type: "Full time",
     location: "Lalitpur",
     closes: "Rolling",
-    summary: "Design and run focus group discussions and in-depth interviews, lead coding and thematic analysis, and draft findings chapters.",
+    summary:
+      "Design and run focus group discussions and in-depth interviews, lead coding and thematic analysis, and draft findings chapters.",
   },
   {
     id: "03",
@@ -37,7 +51,8 @@ const fallbackVacancies = [
     type: "Full time",
     location: "Lalitpur",
     closes: "Rolling",
-    summary: "Own study databases end to end: schema design, validation rules, quality assurance routines, and analysis-ready extracts.",
+    summary:
+      "Own study databases end to end: schema design, validation rules, quality assurance routines, and analysis-ready extracts.",
   },
   {
     id: "04",
@@ -46,7 +61,8 @@ const fallbackVacancies = [
     type: "Contract",
     location: "Lalitpur, with provincial travel",
     closes: "Rolling",
-    summary: "Build indicator frameworks, run routine data quality assessments, and produce evaluation reporting for programme partners.",
+    summary:
+      "Build indicator frameworks, run routine data quality assessments, and produce evaluation reporting for programme partners.",
   },
   {
     id: "05",
@@ -55,7 +71,8 @@ const fallbackVacancies = [
     type: "Full time",
     location: "Lalitpur",
     closes: "Rolling",
-    summary: "Turn research findings into infographics, factsheets, and motion pieces for government and development partners.",
+    summary:
+      "Turn research findings into infographics, factsheets, and motion pieces for government and development partners.",
   },
   {
     id: "06",
@@ -64,7 +81,8 @@ const fallbackVacancies = [
     type: "Short term",
     location: "Multiple districts",
     closes: "Rolling",
-    summary: "Collect household and facility data on assigned surveys, working to sampling protocols under a field supervisor.",
+    summary:
+      "Collect household and facility data on assigned surveys, working to sampling protocols under a field supervisor.",
   },
 ];
 
@@ -76,8 +94,14 @@ const checklist = [
 ];
 
 export default async function CareerPage() {
-  const sanityData = await fetchSanity(careerQuery);
-  const vacancies = sanityData?.vacancies?.length ? sanityData.vacancies : fallbackVacancies;
+  const rawSanityData = await fetchSanity(careerQuery);
+
+  const sanityData = rawSanityData as CareerData;
+
+  const vacancies =
+    sanityData?.vacancies?.length
+      ? sanityData.vacancies
+      : fallbackVacancies;
 
   return (
     <main className="min-h-screen bg-paper">
@@ -85,14 +109,29 @@ export default async function CareerPage() {
         tone="primary"
         eyebrow="Work with us"
         title="Work with a team committed to evidence."
-        lead={sanityData?.intro || "Anweshan is a contemporary issue focused research organization of highly motivated young professionals seeking to contribute to the wellbeing of poor, vulnerable and marginalized people."}
+        lead={
+          sanityData?.intro ||
+          "Anweshan is a contemporary issue focused research organization of highly motivated young professionals seeking to contribute to the wellbeing of poor, vulnerable and marginalized people."
+        }
         image="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Colleagues working together"
         meta={[
-          { label: "Open roles", value: vacancies.length.toString() },
-          { label: "Practice groups", value: new Set(vacancies.map((v: any) => v.group)).size.toString() },
-          { label: "Team size", value: "34" },
-          { label: "Based in", value: "Lalitpur" },
+          {
+            label: "Open roles",
+            value: vacancies.length.toString(),
+          },
+          {
+            label: "Practice groups",
+            value: new Set(vacancies.map((v) => v.group)).size.toString(),
+          },
+          {
+            label: "Team size",
+            value: "34",
+          },
+          {
+            label: "Based in",
+            value: "Lalitpur",
+          },
         ]}
       />
 
@@ -101,23 +140,35 @@ export default async function CareerPage() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-14">
             <div className="md:col-span-7">
-              <p className="text-primary eyebrow mb-6 text-base">Current openings</p>
-              <h2 className="h2-section text-base-text">{vacancies.length} roles open across the practice.</h2>
+              <p className="text-primary eyebrow mb-6 text-base">
+                Current openings
+              </p>
+
+              <h2 className="h2-section text-base-text">
+                {vacancies.length} roles open across the practice.
+              </h2>
             </div>
+
             <div className="md:col-span-4 md:col-start-9 flex md:items-end">
               <p className="text-base-text/55 body-base">
-                Applications are reviewed as they arrive. If nothing here fits, send a speculative
-                application and we will keep it on file.
+                Applications are reviewed as they arrive. If nothing here
+                fits, send a speculative application and we will keep it on
+                file.
               </p>
             </div>
           </div>
 
           <ul className="border-t border-accent-dark/15">
             {vacancies.map((role, i) => (
-              <Reveal key={role.id || role.title} delay={i * 70}>
+              <Reveal
+                key={role.id || role.title}
+                delay={i * 70}
+              >
                 <li>
                   <a
-                    href={`mailto:info@anweshan.org?subject=${encodeURIComponent("Application: " + role.title)}`}
+                    href={`mailto:info@anweshan.org?subject=${encodeURIComponent(
+                      "Application: " + role.title
+                    )}`}
                     className="group grid grid-cols-12 items-start gap-4 md:gap-8 py-8 border-b border-accent-dark/15 hover:bg-accent-dark/[0.04] transition-colors"
                   >
                     <span className="col-span-2 md:col-span-1 text-base-text/30 text-xs font-semibold tabular-nums pt-1.5">
@@ -128,6 +179,7 @@ export default async function CareerPage() {
                       <span className="block h3-card text-base-text group-hover:text-accent-dark transition-colors">
                         {role.title}
                       </span>
+
                       <span className="block text-base-text/75 body-base mt-2 max-w-md">
                         {role.summary}
                       </span>
@@ -135,11 +187,18 @@ export default async function CareerPage() {
 
                     <span className="col-span-12 md:col-span-4 flex flex-wrap items-center gap-x-6 gap-y-2 md:pt-1.5">
                       <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
-                        <MapPin size={13} className="text-accent/100" />
+                        <MapPin
+                          size={13}
+                          className="text-accent"
+                        />
                         {role.location}
                       </span>
+
                       <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
-                        <Clock size={13} className="text-accent/100" />
+                        <Clock
+                          size={13}
+                          className="text-accent"
+                        />
                         {role.type}
                       </span>
                     </span>
@@ -147,6 +206,7 @@ export default async function CareerPage() {
                     <span className="col-span-12 md:col-span-2 flex md:justify-end md:pt-1">
                       <span className="inline-flex items-center gap-2 text-base font-semibold text-base-text group-hover:text-accent-dark transition-colors">
                         Apply
+
                         <ArrowUpRight
                           size={16}
                           className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
@@ -161,7 +221,8 @@ export default async function CareerPage() {
 
           <Reveal>
             <p className="text-base-text/40 text-md mt-8">
-              These listings are placeholders for layout review and are not live vacancies.
+              These listings are placeholders for layout review and are not
+              live vacancies.
             </p>
           </Reveal>
         </div>
@@ -184,8 +245,11 @@ export default async function CareerPage() {
 
           <div className="lg:col-span-6 lg:col-start-7">
             <Reveal>
-              <p className="text-primary-dark eyebrow mb-6 text-base">How to apply</p>
+              <p className="text-primary-dark eyebrow mb-6 text-base">
+                How to apply
+              </p>
             </Reveal>
+
             <Reveal delay={90}>
               <h2 className="h2-section text-base-text mb-10">
                 Send us four things and we will take it from there.
@@ -194,12 +258,18 @@ export default async function CareerPage() {
 
             <ul className="border-t border-accent-dark/15 mb-10">
               {checklist.map((item, i) => (
-                <Reveal key={item} delay={140 + i * 70}>
+                <Reveal
+                  key={item}
+                  delay={140 + i * 70}
+                >
                   <li className="flex gap-5 py-4 border-b border-accent-dark/15">
                     <span className="text-accent-dark text-xs font-semibold tabular-nums pt-1">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="text-base-text/75 body">{item}</span>
+
+                    <span className="text-base-text/75 body">
+                      {item}
+                    </span>
                   </li>
                 </Reveal>
               ))}
@@ -211,7 +281,9 @@ export default async function CareerPage() {
                 className="group inline-flex items-center gap-3 rounded-full bg-accent text-forest text-sm font-semibold px-8 py-4 hover:bg-primary transition-colors"
               >
                 <Mail size={16} />
+
                 Email info@anweshan.org
+
                 <ArrowUpRight
                   size={16}
                   className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
@@ -224,3 +296,4 @@ export default async function CareerPage() {
     </main>
   );
 }
+
