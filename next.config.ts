@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = { experimental: { turbopack: false },
+const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.110.39"],
   images: {
     remotePatterns: [
