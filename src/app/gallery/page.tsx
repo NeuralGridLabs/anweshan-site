@@ -6,24 +6,8 @@ import Reveal from "@/components/Reveal";
 
 import { galleryEventsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type GalleryImage = {
-  _key?: string;
-  asset?: {
-    _ref?: string;
-  };
-  alt?: string;
-};
-
-type GalleryEvent = {
-  _id: string;
-  title: string;
-  date?: string;
-  description?: string;
-  images?: GalleryImage[];
-  coverImage?: unknown;
-  order?: number;
-};
+import { sanityImageUrl } from "@/lib/image";
+import type { GalleryEvent } from "@/lib/types";
 
 function formatDate(date?: string) {
   if (!date) return "";
@@ -39,20 +23,9 @@ function formatDate(date?: string) {
   });
 }
 
-function getImageUrl(image: GalleryImage) {
-  if (!image?.asset?._ref) return "";
-
-  const ref = image.asset._ref;
-
-  return `https://cdn.sanity.io/images/10g74skr/production/${ref
-    .replace("image-", "")
-    .replace(/-(jpg|jpeg|png|webp|gif)$/, ".$1")}`;
-}
-
 export default async function GalleryPage() {
-  const rawEvents = await fetchSanity(galleryEventsQuery);
-
-  const events = (rawEvents as GalleryEvent[]) || [];
+  const events =
+    (await fetchSanity<GalleryEvent[]>(galleryEventsQuery)) ?? [];
 
   return (
     <main className="min-h-screen text-base bg-snow">
@@ -115,16 +88,16 @@ export default async function GalleryPage() {
                   {event.images && event.images.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {event.images.map((img, j) => {
-                        const imageUrl = getImageUrl(img);
+                        const src = sanityImageUrl(img);
 
                         return (
                           <div
-                            key={img._key || `${event._id}-${j}`}
+                            key={img._key || j}
                             className="relative aspect-square overflow-hidden rounded-xl bg-sage"
                           >
-                            {imageUrl ? (
+                            {src ? (
                               <Image
-                                src={imageUrl}
+                                src={src}
                                 alt={img.alt || event.title}
                                 fill
                                 sizes="(max-width: 768px) 50vw, 25vw"

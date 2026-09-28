@@ -6,44 +6,16 @@ import Reveal from "@/components/Reveal";
 
 import { projectsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type Project = {
-  _id: string;
-  slug?: {
-    current?: string;
-  };
-  title: string;
-  category?: string;
-  summary?: string;
-  description?: string;
-  client?: string;
-  image?: string;
-  coverImage?: {
-    asset?: {
-      _ref?: string;
-    };
-  };
-};
+import { resolveProjects } from "@/lib/project-data";
+import type { Project } from "@/lib/types";
 
 export default async function ProjectsPage() {
-  const rawProjects = await fetchSanity(projectsQuery);
-
-  const projects = (rawProjects as Project[]) || [];
-
-  function getImageUrl(project: Project) {
-    if (project.coverImage?.asset?._ref) {
-      const ref = project.coverImage.asset._ref;
-
-      return `https://cdn.sanity.io/images/10g74skr/production/${ref
-        .replace("image-", "")
-        .replace(/-(jpg|jpeg|png|webp|gif)$/, ".$1")}`;
-    }
-
-    return project.image || "/placeholder.jpg";
-  }
+  const projects = resolveProjects(
+    await fetchSanity<Project[]>(projectsQuery),
+  );
 
   const themeCount = new Set(
-    projects.map((project) => project.category).filter(Boolean)
+    projects.map((project) => project.category).filter(Boolean),
   ).size;
 
   return (
@@ -56,22 +28,10 @@ export default async function ProjectsPage() {
         image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Field researchers collecting data"
         meta={[
-          {
-            label: "Studies listed",
-            value: projects.length.toString(),
-          },
-          {
-            label: "Themes",
-            value: themeCount.toString(),
-          },
-          {
-            label: "AMR records",
-            value: "600000",
-          },
-          {
-            label: "Hospitals & labs",
-            value: "28",
-          },
+          { label: "Studies listed", value: projects.length.toString() },
+          { label: "Themes", value: themeCount.toString() },
+          { label: "AMR records", value: "600000" },
+          { label: "Hospitals & labs", value: "28" },
         ]}
       />
 
@@ -93,27 +53,40 @@ export default async function ProjectsPage() {
           ) : (
             <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {projects.map((project, i) => {
-                const slug =
-                  project.slug?.current || project._id;
+                const coverUrl = project.cover;
 
                 return (
-                  <Reveal
-                    as="li"
-                    key={project._id}
-                    delay={(i % 3) * 110}
-                  >
+                  <Reveal as="li" key={project.key} delay={(i % 3) * 110}>
                     <Link
-                      href={`/projects/${slug}`}
+                      href={`/projects/${project.slug}`}
                       className="group h-full flex flex-col outline-none"
                     >
                       <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
-                        <Image
-                          src={getImageUrl(project)}
-                          alt={project.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 30vw"
-                          className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
-                        />
+                        {coverUrl ? (
+                          <Image
+                            src={coverUrl}
+                            alt={project.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 30vw"
+                            className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-mint/50 text-forest/30">
+                            <svg
+                              width="40"
+                              height="40"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              aria-hidden="true"
+                            >
+                              <rect x="3" y="4" width="18" height="16" rx="2" />
+                              <circle cx="9" cy="10" r="2" />
+                              <path d="m21 16-5-5L5 20" />
+                            </svg>
+                          </div>
+                        )}
 
                         <div className="absolute inset-0 bg-forest/0 group-hover:bg-forest/6 transition-colors duration-500" />
 
@@ -129,7 +102,7 @@ export default async function ProjectsPage() {
                       </h2>
 
                       <p className="text-md text-forest/75 leading-relaxed mb-5 flex-1">
-                        {project.summary || project.description}
+                        {project.summary}
                       </p>
 
                       {project.client && (

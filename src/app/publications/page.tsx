@@ -1,55 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-
-import {
-  FileText,
-  Download,
-  FileSpreadsheet,
-} from "lucide-react";
+import { ExternalLink, FileText, Download, FileSpreadsheet } from "lucide-react";
 
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 
 import { publicationsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type Publication = {
-  _id: string;
-  title: string;
-  authors?: string;
-  year?: number;
-  journal?: string;
-  abstract?: string;
-  file?: {
-    asset?: {
-      _ref?: string;
-    };
-  };
-  coverImage?: {
-    asset?: {
-      _ref?: string;
-    };
-  };
-  order?: number;
-};
-
-function fileUrl(ref: string | undefined): string | null {
-  if (!ref) return null;
-
-  const match = ref.match(/^file-([a-f0-9]+)-(\w+)$/);
-
-  if (!match) return null;
-
-  const [, hash, ext] = match;
-
-  return `https://cdn.sanity.io/files/10g74skr/production/${hash}.${ext}`;
-}
-
-function getImageUrl(ref: string): string {
-  return `https://cdn.sanity.io/images/10g74skr/production/${ref
-    .replace("image-", "")
-    .replace(/-(jpg|jpeg|png|webp|gif)$/, ".$1")}`;
-}
+import { sanityFileUrl, sanityImageUrl } from "@/lib/image";
+import { publicationActions } from "@/lib/publication-delivery";
+import type { Publication } from "@/lib/types";
 
 function fileIcon(ext?: string) {
   if (ext === "xls" || ext === "xlsx") {
@@ -60,9 +20,8 @@ function fileIcon(ext?: string) {
 }
 
 export default async function PublicationsPage() {
-  const rawPublications = await fetchSanity(publicationsQuery);
-
-  const publications = (rawPublications as Publication[]) || [];
+  const publications =
+    (await fetchSanity<Publication[]>(publicationsQuery)) ?? [];
 
   return (
     <main className="min-h-screen text-base bg-snow">
@@ -70,7 +29,7 @@ export default async function PublicationsPage() {
         tone="ink"
         eyebrow="Research & outputs"
         title="Publications"
-        lead="Working papers, reports and datasets from our research engagements, available to download."
+        lead="Working papers, reports and datasets from our research engagements, available to download or read online."
       />
 
       <section className="bg-cream py-20 md:py-32">
@@ -91,8 +50,8 @@ export default async function PublicationsPage() {
                   >
                     /admin
                   </Link>{" "}
-                  and create a Publication with a PDF, Word or Excel file to
-                  see it here.
+                  and create a Publication with a downloadable file or an
+                  external URL to see it here.
                 </p>
               </div>
             </Reveal>
@@ -106,7 +65,16 @@ export default async function PublicationsPage() {
 
                 const Icon = fileIcon(ext);
 
-                const coverRef = pub.coverImage?.asset?._ref;
+                const coverUrl = sanityImageUrl(pub.coverImage);
+
+                /* A publication is reachable by an uploaded file, an external
+                   link, or both. Each action renders only when its own source
+                   resolves, and the footer stays empty when neither does so
+                   card heights remain consistent. */
+                const actions = publicationActions({
+                  fileUrl: sanityFileUrl(pub.file),
+                  externalUrl: pub.externalUrl,
+                });
 
                 return (
                   <Reveal
@@ -114,10 +82,10 @@ export default async function PublicationsPage() {
                     delay={i * 60}
                   >
                     <article className="h-full flex flex-col rounded-2xl overflow-hidden bg-ivory border border-forest/10 hover:border-forest/30 transition-colors">
-                      {coverRef ? (
+                      {coverUrl ? (
                         <div className="relative aspect-[16/10] bg-sage">
                           <Image
-                            src={getImageUrl(coverRef)}
+                            src={coverUrl}
                             alt={pub.title}
                             fill
                             sizes="(max-width: 1024px) 100vw, 33vw"
@@ -171,24 +139,38 @@ export default async function PublicationsPage() {
                         )}
 
                         <div className="mt-auto pt-4 border-t border-forest/10">
-                          {ref ? (
-                            <a
-                              href={fileUrl(ref) || "#"}
-                              download
-                              className="group inline-flex items-center gap-2 text-forest font-semibold text-sm hover:text-forest/70 transition-colors"
-                            >
-                              <Download
-                                size={16}
-                                className="group-hover:translate-y-0.5 transition-transform"
-                              />
+                          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                            {actions.showFile && actions.fileUrl && (
+                              <a
+                                href={actions.fileUrl}
+                                download
+                                className="group inline-flex items-center gap-2 text-forest font-semibold text-sm hover:text-forest/70 transition-colors"
+                              >
+                                <Download
+                                  size={16}
+                                  className="group-hover:translate-y-0.5 transition-transform"
+                                />
 
-                              Download
-                            </a>
-                          ) : (
-                            <span className="text-forest/40 text-sm">
-                              No file attached
-                            </span>
-                          )}
+                                Download
+                              </a>
+                            )}
+
+                            {actions.showExternal && actions.externalUrl && (
+                              <a
+                                href={actions.externalUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group inline-flex items-center gap-2 text-forest font-semibold text-sm hover:text-forest/70 transition-colors"
+                              >
+                                <ExternalLink
+                                  size={16}
+                                  className="group-hover:-translate-y-0.5 transition-transform"
+                                />
+
+                                View online
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </article>

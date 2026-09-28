@@ -5,18 +5,7 @@ import Reveal from "@/components/Reveal";
 
 import { servicesQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type ServiceItem = {
-  title: string;
-  description?: string;
-  icon?: string;
-};
-
-type ServicesData = {
-  heading?: string;
-  intro?: string;
-  items?: ServiceItem[];
-};
+import type { Services as ServicesData } from "@/lib/types";
 
 type Service = {
   id: string;
@@ -157,10 +146,7 @@ const fallbackServices: Service[] = [
 const blackSummaryIds = ["02", "03", "04", "06"];
 
 export default async function ServicesPage() {
-  const rawSanityData = await fetchSanity(servicesQuery);
-
-  // Cast Sanity response to the expected structure
-  const sanityData = rawSanityData as ServicesData;
+  const sanityData = await fetchSanity<ServicesData>(servicesQuery);
 
   // Use Sanity data if available, otherwise fallback
   const services: Service[] = sanityData?.items?.length
@@ -168,7 +154,7 @@ export default async function ServicesPage() {
         id: String(i + 1).padStart(2, "0"),
         title: item.title,
         summary: item.description || "",
-        items: item.icon ? [item.icon] : [],
+        items: item.icon ? [item.icon] : [], // Sanity only has icon, not detailed items
         image:
           "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200",
         bg: i % 2 === 0 ? "bg-forest" : "bg-cream",

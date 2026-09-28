@@ -4,19 +4,7 @@ import Reveal from "@/components/Reveal";
 import { MapPin, Mail, Phone, Smartphone, Globe } from "lucide-react";
 import { contactQuery, siteSettingsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type ContactData = {
-  heading?: string;
-  address?: string;
-  email?: string;
-  phone?: string;
-  mapEmbed?: string;
-};
-
-type SiteSettings = {
-  orgName?: string;
-  tagline?: string;
-};
+import type { Contact as ContactData, SiteSettings } from "@/lib/types";
 
 type ContactDetail = {
   icon: typeof MapPin;
@@ -54,13 +42,13 @@ const fallbackDetails: ContactDetail[] = [
 
 export default async function ContactPage() {
   const [rawContactData, rawSiteSettings] = await Promise.all([
-    fetchSanity(contactQuery),
-    fetchSanity(siteSettingsQuery),
+    fetchSanity<ContactData>(contactQuery),
+    fetchSanity<SiteSettings>(siteSettingsQuery),
   ]);
 
   // Sanity can return null, so always fall back to an empty object.
-  const contactData = (rawContactData as ContactData) || {};
-  const siteSettings = (rawSiteSettings as SiteSettings) || {};
+  const contactData = rawContactData || {};
+  const siteSettings = rawSiteSettings || {};
 
   const details: ContactDetail[] = [
     {

@@ -6,6 +6,7 @@ export type Project = {
   partner: string;
   theme: string;
   image: string;
+  url?: string;
   /* Detail-page fields. Placeholder copy for layout purposes,
      to be replaced with the real project records. */
   status: string;
@@ -28,7 +29,7 @@ export const projects: Project[] = [
       "Conducted in partnership with Bournemouth University, assessing the effectiveness of health-related components integrated within pre-departure orientation training for aspiring Nepali migrants.",
     partner: "Bournemouth University",
     theme: "Migration health",
-    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=1200",
+    image: "/images/projects/predeparture-orientation-training.jpg",
     status: "Completed",
     years: "2022 - 2023",
     location: "Kathmandu, Pokhara, and three departure hubs",
@@ -68,7 +69,7 @@ export const projects: Project[] = [
       "Support to vaccination management across five selected districts of Sudurpaschim Province, covering planning, monitoring, and reporting systems.",
     partner: "Immunisation programme",
     theme: "Immunisation",
-    image: "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=1200",
+    image: "/images/projects/covid-19-vaccination-sudurpaschim.jpg",
     status: "Completed",
     years: "2021 - 2022",
     location: "Five districts of Sudurpaschim Province",
@@ -108,7 +109,7 @@ export const projects: Project[] = [
       "Research into the barriers facing implementation of Nepal's National Health Insurance Program and the reforms needed to close them.",
     partner: "Health financing",
     theme: "Health policy",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=1200",
+    image: "/images/projects/national-health-insurance-policy.jpg",
     status: "Completed",
     years: "2021 - 2022",
     location: "Federal, provincial, and municipal levels",
@@ -228,7 +229,7 @@ export const projects: Project[] = [
       "Analysis of the status of policies, institutional mechanisms, social support and practices required to ensure safe abortion as a human right.",
     partner: "Rights-based research",
     theme: "Reproductive health",
-    image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=1200",
+    image: "/images/projects/safe-abortion-services.png",
     status: "Completed",
     years: "2020 - 2021",
     location: "Six districts across three provinces",
@@ -388,7 +389,7 @@ export const projects: Project[] = [
       "Formative research examining household hygiene behaviour and the drivers of change, informing water, sanitation and hygiene programming.",
     partner: "WASH programme",
     theme: "WASH",
-    image: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&q=80&w=1200",
+    image: "/images/projects/hygiene-behavior-formative-research.jpg",
     status: "Completed",
     years: "2019 - 2020",
     location: "Peri-urban and rural households",
@@ -428,7 +429,7 @@ export const projects: Project[] = [
       "A baseline study of cross-border migration patterns, establishing reference indicators for follow-up monitoring and policy response.",
     partner: "Migration study",
     theme: "Migration health",
-    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=1200",
+    image: "/images/projects/cross-border-migration-baseline.png",
     status: "Completed",
     years: "2020 - 2021",
     location: "Southern border districts",
@@ -500,4 +501,137 @@ export const projects: Project[] = [
       { label: "Duration", value: "12 months" },
     ]
   },
+
+  /* Digital products built and operated by Anweshan. Recovered from the
+     pre-CMS stash; these carry no placeholder disclaimer because they describe
+     live products, and each `url` is a verifiable public destination. */
+  {
+    slug: "hire-enumerator",
+    id: "13",
+    title: "Hire Enumerator",
+    description:
+      "A web platform for discovering and connecting with verified enumerators in Nepal.",
+    partner: "Anweshan product development",
+    theme: "Digital platforms",
+    image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1200",
+    url: "https://hireenumerator.com/enumerator/home",
+    status: "Live",
+    years: "Ongoing",
+    location: "Nepal",
+    methods: [
+      "Enumerator directory",
+      "Search and filtering",
+      "Responsive web experience",
+    ],
+    team: "Digital product team",
+    overview: [
+      "Hire Enumerator is a web platform designed to help organizations and research teams find and connect with verified enumerators in Nepal.",
+      "The product turns a fragmented recruitment process into a clearer, more accessible digital experience for enumerators and the teams who work with them.",
+    ],
+    approach: [
+      "Defined the user journey for browsing profiles, searching by location and expertise, and contacting available enumerators.",
+      "Built a responsive interface that works across desktop and mobile devices.",
+      "Implemented profile and listing workflows to keep the experience clear for both enumerators and clients.",
+    ],
+    outcomes: [
+      "A public platform for discovering and contacting verified enumerators.",
+      "A reusable foundation for future recruitment and field workforce management tools.",
+    ],
+    facts: [
+      { label: "Product", value: "Web platform" },
+      { label: "Market", value: "Nepal" },
+      { label: "Audience", value: "Enumerators and research teams" },
+      { label: "Access", value: "Online" },
+    ]
+  },
+  {
+    slug: "bir-hospital-amr-guidelines",
+    id: "14",
+    title: "Bir Hospital AMR Guidelines",
+    description:
+      "A digital reference app bringing Bir Hospital's antimicrobial treatment guidelines to clinicians, residents, and trainees.",
+    partner: "Bir Hospital (NAMS)",
+    theme: "Digital health",
+    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1200",
+    url: "https://play.google.com/store/apps/details?id=com.madhusharma9.treatmentv2&pli=1",
+    status: "Live",
+    years: "Ongoing",
+    location: "Bir Hospital, Nepal",
+    methods: [
+      "Reference content digitisation",
+      "Clinical information architecture",
+      "Android app publishing",
+    ],
+    team: "Digital product team",
+    overview: [
+      "Bir Hospital AMR Guidelines is a digital reference and educational application for healthcare professionals, medical residents, and clinical trainees at Bir Hospital (NAMS).",
+      "The app provides a digitized version of Bir Hospital's antimicrobial reference guidelines as a portable resource for academic and clinical learning.",
+    ],
+    approach: [
+      "Structured the published antimicrobial reference material into an easy-to-navigate educational resource.",
+      "Designed the experience for clinicians, residents, and medical trainees studying antimicrobial use and stewardship.",
+      "Published the Android application with clear educational-use positioning and reference guidance for qualified professionals.",
+    ],
+    outcomes: [
+      "A portable digital reference for Bir Hospital's antimicrobial treatment guidelines.",
+      "An educational tool that supports antimicrobial stewardship learning for clinical trainees and healthcare professionals.",
+    ],
+    facts: [
+      { label: "Product", value: "Android app" },
+      { label: "Institution", value: "Bir Hospital (NAMS)" },
+      { label: "Category", value: "Books & reference" },
+      { label: "Purpose", value: "Clinical education" },
+    ]
+  },
+  {
+    slug: "giz-survey-fieldops",
+    id: "15",
+    title: "GIZ Survey Field Operations",
+    description:
+      "A field operations platform supporting survey teams with mobilisation, mapping, and data workflows.",
+    partner: "GIZ",
+    theme: "Field operations",
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1200",
+    url: "https://researchfieldops.com/",
+    status: "Live",
+    years: "Ongoing",
+    location: "Nepal",
+    methods: [
+      "Field team mobilisation",
+      "Survey mapping",
+      "Field data workflows",
+    ],
+    team: "Digital product team",
+    overview: [
+      "GIZ Survey Field Operations is a digital platform designed to support field teams responsible for survey mobilisation, mapping, and data collection.",
+      "The platform brings field coordination and survey operations into one focused workspace for teams working beyond the office.",
+    ],
+    approach: [
+      "Organized field mobilisation, mapping, and survey data workflows around the needs of distributed research teams.",
+      "Built a practical web experience for coordinating work and maintaining visibility across field operations.",
+      "Designed the platform to support repeatable survey implementation in changing field conditions.",
+    ],
+    outcomes: [
+      "A digital workspace for coordinating survey fieldwork and field teams.",
+      "A scalable foundation for future mapping, reporting, and data-collection improvements.",
+    ],
+    facts: [
+      { label: "Product", value: "Web platform" },
+      { label: "Partner", value: "GIZ" },
+      { label: "Use case", value: "Survey fieldwork" },
+      { label: "Access", value: "Online" },
+    ]
+  },
+];
+
+/* Research engagements, i.e. everything without a live product `url`. */
+export const researchProjects: Project[] = projects.filter((p) => !p.url);
+
+/* Products and platforms Anweshan built and runs itself. */
+export const productProjects: Project[] = projects.filter((p) => Boolean(p.url));
+
+/* Mirrors the pre-CMS home rail: the lead research study plus each product. */
+export const featuredLocalProjects: Project[] = [
+  ...researchProjects.slice(0, 1),
+  ...productProjects.slice(0, 3),
 ];

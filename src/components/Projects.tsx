@@ -3,71 +3,19 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import {
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
-import { featuredProjectsQuery } from "@/lib/queries";
-import { fetchSanity } from "@/lib/sanity";
+import type { ResolvedProject } from "@/lib/project-data";
 
 import Cutouts from "@/components/Cutouts";
 
-interface Project {
-  _id: string;
-  title: string;
-  slug: { current: string } | string;
-  client: string;
-  year: number;
-  category: string;
-  summary: string;
-  status: string;
-  years: string;
-  location: string;
-  methods: string[];
-  team: string;
-  overview: string[];
-  approach: string[];
-  outcomes: string[];
-  facts: {
-    label: string;
-    value: string;
-  }[];
-  coverImage?: {
-    asset?: {
-      _ref?: string;
-    };
-  };
-  featured: boolean;
-}
-
-export default function Projects() {
+export default function Projects({ projects }: { projects: ResolvedProject[] }) {
   const scroller = useRef<HTMLUListElement>(null);
 
   const [progress, setProgress] = useState(0);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-
-  useEffect(() => {
-    async function loadProjects() {
-      const rawData = await fetchSanity(featuredProjectsQuery);
-
-      const data = (rawData as Project[]) || [];
-
-      setProjects(data);
-    }
-
-    loadProjects();
-  }, []);
 
   // Native scroll drives the state, so wheel, trackpad,
   // touch, scrollbar, and keyboard all stay in sync.
@@ -162,19 +110,6 @@ export default function Projects() {
     }
   };
 
-  // Helper to build Sanity image URL
-  const getImageUrl = (image?: Project["coverImage"]) => {
-    if (!image?.asset?._ref) {
-      return "/placeholder.jpg";
-    }
-
-    const ref = image.asset._ref;
-
-    return `https://cdn.sanity.io/images/10g74skr/production/${ref
-      .replace("image-", "")
-      .replace(/-(jpg|jpeg|png|webp|gif)$/, ".$1")}`;
-  };
-
   return (
     <section className="relative bg-sage py-20 md:py-28 overflow-hidden">
       <Cutouts variant="featured" />
@@ -241,33 +176,57 @@ export default function Projects() {
             className="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pr-2 pb-2 cursor-grab active:cursor-grabbing"
           >
             {projects.map((project) => {
-              const slug =
-                typeof project.slug === "string"
-                  ? project.slug
-                  : project.slug?.current || project._id;
+              const coverUrl = project.cover;
+
+              /* Products Anweshan operates link out to their live destination. */
+              const href =
+                project.externalUrl ?? `/projects/${project.slug}`;
 
               return (
                 <li
-                  key={project._id}
+                  key={project.key}
                   className="snap-start shrink-0 w-[clamp(250px,21vw,324px)]"
                 >
                   <Link
-                    href={`/projects/${slug}`}
+                    href={href}
+                    {...(project.externalUrl
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                     className="group flex h-full flex-col rounded-2xl overflow-hidden bg-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 focus-visible:-translate-y-1.5 outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-sage"
                   >
                     <div className="relative h-[210px] shrink-0 overflow-hidden">
-                      <Image
-                        src={getImageUrl(project.coverImage)}
-                        alt={project.title}
-                        fill
-                        sizes="360px"
-                        draggable={false}
-                        className="object-cover pointer-events-none transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.07]"
-                      />
+                      {coverUrl ? (
+                        <Image
+                          src={coverUrl}
+                          alt={project.title}
+                          fill
+                          sizes="360px"
+                          draggable={false}
+                          className="object-cover pointer-events-none transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.07]"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-mint/50 text-forest/30">
+                          <svg
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            aria-hidden="true"
+                          >
+                            <rect x="3" y="4" width="18" height="16" rx="2" />
+                            <circle cx="9" cy="10" r="2" />
+                            <path d="m21 16-5-5L5 20" />
+                          </svg>
+                        </div>
+                      )}
 
-                      <span className="absolute top-4 left-4 bg-white/95 backdrop-blur text-base-text text-[11px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full">
-                        {project.category}
-                      </span>
+                      {project.category && (
+                        <span className="absolute top-4 left-4 bg-white/95 backdrop-blur text-base-text text-[11px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full">
+                          {project.category}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-1 flex-col p-7">

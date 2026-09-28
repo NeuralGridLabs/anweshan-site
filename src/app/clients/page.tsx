@@ -3,21 +3,12 @@ import Reveal from "@/components/Reveal";
 import ClientMarquee from "@/components/ClientMarquee";
 import { clientsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import type { Clients as ClientsData } from "@/lib/types";
 
 type Client = {
   name: string;
   work: string[];
   sector: string;
-};
-
-type ClientItem = {
-  name: string;
-  logo?: unknown;
-};
-
-type ClientsData = {
-  heading?: string;
-  items?: ClientItem[];
 };
 
 const fallbackClients: Client[] = [
@@ -207,11 +198,7 @@ const fallbackClients: Client[] = [
 ];
 
 export default async function ClientsPage() {
-  const rawSanityData = await fetchSanity(clientsQuery);
-
-  // fetchSanity currently returns `{}`, so tell TypeScript
-  // what shape this particular Sanity query returns.
-  const sanityData = rawSanityData as ClientsData;
+  const sanityData = await fetchSanity<ClientsData>(clientsQuery);
 
   const clients: Client[] = sanityData?.items?.length
     ? sanityData.items.map((item) => ({

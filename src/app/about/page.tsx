@@ -7,20 +7,13 @@ import Reveal from "@/components/Reveal";
 
 import { aboutQuery, homeQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type AboutData = {
-  heading?: string;
-  body?: string;
-  image?: {
-    asset?: {
-      _ref?: string;
-    };
-  };
-};
-
-type HomeData = {
-  aboutBlurb?: string;
-};
+import { sanityImageUrl } from "@/lib/image";
+import {
+  fallbackMission,
+  fallbackMissionPillars,
+  fallbackVision,
+} from "@/lib/about";
+import type { About, Home } from "@/lib/types";
 
 const fallbackObjectives = [
   {
@@ -36,35 +29,30 @@ const fallbackObjectives = [
 ];
 
 export default async function AboutPage() {
-  const [rawAboutData, rawHomeData] = await Promise.all([
-    fetchSanity(aboutQuery),
-    fetchSanity(homeQuery),
+  const [aboutData, homeData] = await Promise.all([
+    fetchSanity<About>(aboutQuery),
+    fetchSanity<Home>(homeQuery),
   ]);
 
-  const aboutData = rawAboutData as AboutData;
-  const homeData = rawHomeData as HomeData;
+  const aboutImage =
+    sanityImageUrl(aboutData?.image) ??
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=2000";
+
+  // Sanity wins when it has copy; otherwise the original site's wording is used.
+  const vision = aboutData?.vision || fallbackVision;
+  const mission = aboutData?.mission || fallbackMission;
+  const pillars = aboutData?.missionPillars?.length
+    ? aboutData.missionPillars
+    : fallbackMissionPillars;
 
   return (
     <main className="min-h-screen text-base bg-snow">
       <PageHeader
         tone="ink"
         eyebrow="About us"
-        title={
-          aboutData?.heading ||
-          "Fostering evidence-based policy planning."
-        }
-        lead={
-          homeData?.aboutBlurb ||
-          aboutData?.body ||
-          "Anweshan Private Limited is a contemporary issue focused research organization of a highly motivated team of young professionals committed to evidence based analysis regarding development challenges."
-        }
-        image={
-          aboutData?.image?.asset?._ref
-            ? `https://cdn.sanity.io/images/10g74skr/production/${aboutData.image.asset._ref
-                .replace("image-", "")
-                .replace("-", ".")}`
-            : "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=2000"
-        }
+        title={aboutData?.heading || "Fostering evidence-based policy planning."}
+        lead={homeData?.aboutBlurb || aboutData?.body || "Anweshan Private Limited is a contemporary issue focused research organization of a highly motivated team of young professionals committed to evidence based analysis regarding development challenges."}
+        image={aboutImage}
         imageAlt="Research team working together"
       />
 
@@ -77,9 +65,7 @@ export default async function AboutPage() {
           sizes="100vw"
           className="object-cover"
         />
-
-        <div className="absolute inset-0 bg-snow/88" />
-
+        <div className="absolute inset-0 bg-gradient-to-t from-forest/80 via-forest/40 to-forest/15" />
         <div className="relative max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
           <Reveal className="md:col-span-3">
             <p className="text-white eyebrow text-base mb-2">
@@ -88,8 +74,8 @@ export default async function AboutPage() {
           </Reveal>
 
           <Reveal delay={120} className="md:col-span-9">
-            <p className="h2-section text-white">
-              Fostering evidence-based policy planning.
+            <p className="text-white text-2xl md:text-4xl font-bold leading-[1.18] tracking-tight">
+              {vision}
             </p>
           </Reveal>
         </div>
@@ -119,14 +105,12 @@ export default async function AboutPage() {
 
             <Reveal delay={100}>
               <p className="text-2xl md:text-4xl font-bold text-base-text leading-[1.22] tracking-tight mb-8">
-                To generate and translate high-quality evidence into
-                actionable insights that drive informed decision-making in
-                public health.
+                {mission}
               </p>
             </Reveal>
 
             <Reveal delay={180}>
-              <p className="text-base-text/70 body-lg">
+              <p className="text-base-text/70 body-lg mb-8">
                 We collaborate with governments, civil society, and the
                 private sector to support policy development, strengthen
                 health systems, and advance innovative financing and
@@ -135,6 +119,23 @@ export default async function AboutPage() {
                 of participation, ownership, and knowledge transfer,
                 ensuring lasting impact for all stakeholders.
               </p>
+
+              <p className="text-forest/70 eyebrow mb-6 text-base">
+                Mission pillars
+              </p>
+
+              <ul className="flex flex-col gap-8">
+                {pillars.map((pillar, i) => (
+                  <li key={pillar.title ?? i} className="border-l-2 border-gold pl-5">
+                    {pillar.title && (
+                      <p className="text-lg md:text-xl font-bold text-forest mb-2">
+                        {pillar.title}
+                      </p>
+                    )}
+                    <p className="text-base-text/70 body-lg">{pillar.text}</p>
+                  </li>
+                ))}
+              </ul>
             </Reveal>
           </div>
         </div>

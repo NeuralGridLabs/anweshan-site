@@ -6,21 +6,17 @@ import Reveal from "@/components/Reveal";
 
 import { careerQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import type { Career as CareerData } from "@/lib/types";
 
+/** Display shape for the vacancy list. CMS records are mapped onto it. */
 type Vacancy = {
   id?: string;
   title: string;
   group: string;
   type: string;
   location: string;
-  closes: string;
+  closes?: string;
   summary: string;
-};
-
-type CareerData = {
-  heading?: string;
-  intro?: string;
-  vacancies?: Vacancy[];
 };
 
 const fallbackVacancies: Vacancy[] = [
@@ -94,14 +90,24 @@ const checklist = [
 ];
 
 export default async function CareerPage() {
-  const rawSanityData = await fetchSanity(careerQuery);
+  const sanityData = await fetchSanity<CareerData>(careerQuery);
 
-  const sanityData = rawSanityData as CareerData;
+  // Normalise CMS vacancies onto the display shape used by the list below:
+  // the schema has no `id`, and stores the blurb as `description`.
+  const vacancies: Vacancy[] = sanityData?.vacancies?.length
+    ? sanityData.vacancies.map((v, i) => ({
+        id: String(i + 1).padStart(2, "0"),
+        title: v.title,
+        summary: v.description ?? "",
+        location: v.location ?? "",
+        type: v.type ?? "",
+        group: v.group ?? "",
+      }))
+    : fallbackVacancies;
 
-  const vacancies =
-    sanityData?.vacancies?.length
-      ? sanityData.vacancies
-      : fallbackVacancies;
+  const practiceGroups = new Set(
+    vacancies.map((v) => v.group).filter((g): g is string => Boolean(g)),
+  ).size;
 
   return (
     <main className="min-h-screen bg-paper">
@@ -116,22 +122,10 @@ export default async function CareerPage() {
         image="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Colleagues working together"
         meta={[
-          {
-            label: "Open roles",
-            value: vacancies.length.toString(),
-          },
-          {
-            label: "Practice groups",
-            value: new Set(vacancies.map((v) => v.group)).size.toString(),
-          },
-          {
-            label: "Team size",
-            value: "34",
-          },
-          {
-            label: "Based in",
-            value: "Lalitpur",
-          },
+          { label: "Open roles", value: vacancies.length.toString() },
+          { label: "Practice groups", value: practiceGroups.toString() },
+          { label: "Team size", value: "34" },
+          { label: "Based in", value: "Lalitpur" },
         ]}
       />
 
