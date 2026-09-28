@@ -98,6 +98,39 @@ export function resolveProjects(records: SanityProject[] | null): ResolvedProjec
   return localProjects.map(fromLocal);
 }
 
+/* --------------------------------------------------------------------------
+    Anweshan-built platforms
+
+    The platforms the in-house IT team builds and runs are not research
+    engagements, so they get their own heading rather than being mixed into
+    the work grid or the home rail. Membership is keyed on slug so the same
+    three are recognised whether they came from Sanity or the local roster.
+   ----------------------------------------------------------------------- */
+
+const PLATFORM_SLUGS = new Set([
+  "hire-enumerator",
+  "bir-hospital-amr-guidelines",
+  "giz-survey-fieldops",
+]);
+
+function isPlatform(project: ResolvedProject): boolean {
+  return PLATFORM_SLUGS.has(project.slug);
+}
+
+/** Research engagements: everything that is not an Anweshan-built platform. */
+export function resolveResearchProjects(
+  records: SanityProject[] | null,
+): ResolvedProject[] {
+  return resolveProjects(records).filter((p) => !isPlatform(p));
+}
+
+/** The platforms Anweshan's IT team built, for the dedicated section. */
+export function resolvePlatforms(
+  records: SanityProject[] | null,
+): ResolvedProject[] {
+  return resolveProjects(records).filter(isPlatform);
+}
+
 /** A single project by slug, or null when neither source has it. */
 export function resolveProject(
   records: SanityProject[] | null,
@@ -106,11 +139,17 @@ export function resolveProject(
   return resolveProjects(records).find((p) => p.slug === slug) ?? null;
 }
 
-/** Home rail: Sanity's own `featured` flag when set, otherwise the local picks. */
+/** Home rail: Sanity's own `featured` flag when set, otherwise the local picks.
+    Platforms are filtered out of both routes, and if flagging only platforms
+    the rail falls back to the local research picks rather than rendering empty. */
 export function resolveFeaturedProjects(
   records: SanityProject[] | null,
 ): ResolvedProject[] {
-  const featured = records?.filter((p) => p.featured) ?? [];
-  if (featured.length) return featured.map(fromSanity);
+  const featured = (records ?? [])
+    .filter((p) => p.featured)
+    .map(fromSanity)
+    .filter((p) => !isPlatform(p));
+
+  if (featured.length) return featured;
   return featuredLocalProjects.map(fromLocal);
 }

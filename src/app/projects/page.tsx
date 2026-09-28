@@ -2,21 +2,25 @@
 import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
+import Platforms from "@/components/Platforms";
 import Reveal from "@/components/Reveal";
 
 import { projectsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-import { resolveProjects } from "@/lib/project-data";
+import {
+  resolvePlatforms,
+  resolveResearchProjects,
+} from "@/lib/project-data";
 import type { Project } from "@/lib/types";
 
 export default async function ProjectsPage() {
-  const projects = resolveProjects(
-    await fetchSanity<Project[]>(projectsQuery),
-  );
+  const records = await fetchSanity<Project[]>(projectsQuery);
 
-  const themeCount = new Set(
-    projects.map((project) => project.category).filter(Boolean),
-  ).size;
+  /* The platforms Anweshan's IT team built are pulled out of the research grid
+     and given their own section further down, so the work grid stays research
+     engagements only. */
+  const projects = resolveResearchProjects(records);
+  const platforms = resolvePlatforms(records);
 
   return (
     <main className="min-h-screen bg-snow">
@@ -27,16 +31,14 @@ export default async function ProjectsPage() {
         lead="A selection of studies, evaluations, and data engagements delivered for government bodies, UN agencies, universities, and international partners."
         image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Field researchers collecting data"
-        meta={[
-          { label: "Studies listed", value: projects.length.toString() },
-          { label: "Themes", value: themeCount.toString() },
-          { label: "AMR records", value: "600000" },
-          { label: "Hospitals & labs", value: "28" },
-        ]}
       />
 
       <section className="py-20 md:py-28">
         <div className="max-w-[1240px] mx-auto px-6 md:px-10">
+          <Reveal>
+            <h2 className="h2-section text-forest">Research engagements</h2>
+          </Reveal>
+
           {projects.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-forest/60">
@@ -51,7 +53,7 @@ export default async function ProjectsPage() {
               </Link>
             </div>
           ) : (
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <ul className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {projects.map((project, i) => {
                 const coverUrl = project.cover;
 
@@ -118,6 +120,8 @@ export default async function ProjectsPage() {
           )}
         </div>
       </section>
+
+      <Platforms platforms={platforms} />
     </main>
   );
 }

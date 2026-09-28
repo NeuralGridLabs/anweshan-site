@@ -179,24 +179,6 @@ export default async function ServicesPage() {
         }
         image="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Clinical research laboratory"
-        meta={[
-          {
-            label: "Service areas",
-            value: services.length.toString(),
-          },
-          {
-            label: "Trial phases",
-            value: "4",
-          },
-          {
-            label: "Regulators",
-            value: "2",
-          },
-          {
-            label: "Standard",
-            value: "GCP",
-          },
-        ]}
       />
 
       {services.map((service, i) => (

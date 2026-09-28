@@ -105,10 +105,6 @@ export default async function CareerPage() {
       }))
     : fallbackVacancies;
 
-  const practiceGroups = new Set(
-    vacancies.map((v) => v.group).filter((g): g is string => Boolean(g)),
-  ).size;
-
   return (
     <main className="min-h-screen bg-paper">
       <PageHeader
@@ -121,12 +117,6 @@ export default async function CareerPage() {
         }
         image="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Colleagues working together"
-        meta={[
-          { label: "Open roles", value: vacancies.length.toString() },
-          { label: "Practice groups", value: practiceGroups.toString() },
-          { label: "Team size", value: "34" },
-          { label: "Based in", value: "Lalitpur" },
-        ]}
       />
 
       {/* Vacancies */}

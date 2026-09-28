@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type AboutSlide = {
   src: string;
@@ -73,6 +73,29 @@ export default function AboutImages({ slides = SLIDES }: { slides?: AboutSlide[]
                 : "opacity-0 duration-[1200ms]"
             }`}
           >
+            {/* The two source photos are near-square (0.99) and 16:9 (1.78),
+                so no single fixed frame can hold both without either cropping
+                one or letterboxing the other. Fitting rather than filling is
+                what guarantees nothing is cut off.
+
+                This blurred, oversized copy sits behind the real image and
+                bleeds into whatever space `object-contain` leaves, so the
+                bars read as a soft extension of the photo instead of a flat
+                panel. It is also the only layer that carries the slow zoom:
+                `kenburns` scales up to 1.14, which would clip the edges of
+                the contained image it is not applied to. */}
+            <Image
+              src={slide.src}
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              draggable={false}
+              className={`object-cover scale-110 blur-xl opacity-45 ${
+                active && !reduceMotion ? "kenburns" : ""
+              }`}
+            />
+
             <Image
               src={slide.src}
               alt={active ? (slide.alt ?? "") : ""}
@@ -80,9 +103,7 @@ export default function AboutImages({ slides = SLIDES }: { slides?: AboutSlide[]
               priority={i === 0}
               sizes="(min-width: 1024px) 60vw, 100vw"
               draggable={false}
-              className={`object-cover select-none ${
-                active && !reduceMotion ? "kenburns" : ""
-              }`}
+              className="object-contain select-none"
             />
           </div>
         );

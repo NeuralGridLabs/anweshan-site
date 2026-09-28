@@ -58,13 +58,10 @@ export default async function Home() {
       <section id="about">
         <About data={{ aboutBlurb: homeData?.aboutBlurb }} />
       </section>
-
+      <Publications publications={featuredPublications} />
       <section id="projects">
         <Projects projects={featuredProjects} />
       </section>
-
-      <Publications publications={featuredPublications} />
-
       <section id="explore">
         <Explore />
       </section>

@@ -630,8 +630,7 @@ export const researchProjects: Project[] = projects.filter((p) => !p.url);
 /* Products and platforms Anweshan built and runs itself. */
 export const productProjects: Project[] = projects.filter((p) => Boolean(p.url));
 
-/* Mirrors the pre-CMS home rail: the lead research study plus each product. */
-export const featuredLocalProjects: Project[] = [
-  ...researchProjects.slice(0, 1),
-  ...productProjects.slice(0, 3),
-];
+/* Home rail: research engagements only. The platforms Anweshan's IT team built
+   are presented under their own heading instead, so they are deliberately kept
+   out of the featured-work rail; four research studies keep the rail's length. */
+export const featuredLocalProjects: Project[] = researchProjects.slice(0, 4);
