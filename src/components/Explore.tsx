@@ -9,9 +9,9 @@ import Cutouts from "@/components/Cutouts";
 const items = [
   {
     id: "01",
-    label: "Services",
+    label: "Expertise",
     href: "/services",
-    caption: "Six practices",
+    caption: "Six practices, trusted by partners",
     description:
       "Clinical research, Q-squared surveys, policy dialogue, communication, and information technology.",
     image:
@@ -29,16 +29,6 @@ const items = [
   },
   {
     id: "03",
-    label: "Clients",
-    href: "/clients",
-    caption: "Twenty-three partners",
-    description:
-      "Ministries, UN agencies, universities, and international organisations across Nepal.",
-    image:
-      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=1400",
-  },
-  {
-    id: "04",
     label: "Team",
     href: "/team",
     caption: "Researchers and advisors",

@@ -16,6 +16,12 @@ export const career = defineType({
           type: "object",
           fields: [
             defineField({ name: "title", title: "Title", type: "string", validation: (r) => r.required() }),
+            defineField({
+              name: "group",
+              title: "Practice group",
+              type: "string",
+              description: "Used to count distinct practice groups in the page header.",
+            }),
             defineField({ name: "location", title: "Location", type: "string" }),
             defineField({ name: "type", title: "Employment type", type: "string" }),
             defineField({ name: "description", title: "Description", type: "text" }),

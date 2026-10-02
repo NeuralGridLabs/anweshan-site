@@ -1,64 +1,35 @@
 "use client";
 
-import { ArrowRight, PlayCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FaYoutube } from "react-icons/fa";
-import { useState } from "react";
+import AboutImages from "@/components/AboutImages";
 
 interface AboutData {
   aboutBlurb?: string;
 }
 
 export default function About({ data }: { data?: AboutData }) {
-  const [playing, setPlaying] = useState(false);
-
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
       <section className="bg-accent py-16 md:py-24 transition-colors">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-16">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-12 lg:gap-20">
          
-          {/* Left Column: Video Player (Takes up 60% width on large screens) */}
-          <div className="w-full lg:w-3/5">
-            {!playing ? (
-              <div
-                className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-primary-light cursor-pointer group shadow-sm"
-                onClick={() => setPlaying(true)}
-              >
-                <img
-                  src="https://img.youtube.com/vi/VtcO4Ja4-Ao/maxresdefault.jpg"
-                  alt="About Anweshan"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/20 backdrop-blur-md border border-white/40 rounded-full p-4 group-hover:scale-105 transition-transform">
-                    <PlayCircle size={56} className="text-white" strokeWidth={1.5} />
-                  </div>
-                </div>
-                <div className="absolute bottom-6 left-6">
-                  <span className="bg-white text-accent-dark text-xs font-bold tracking-wide px-4 py-2 rounded-full shadow-sm">
-                    Watch our story
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-black shadow-sm">
-                <iframe
-                  src="https://www.youtube.com/embed/VtcO4Ja4-Ao?autoplay=1&modestbranding=1&rel=0"
-                  title="About Anweshan"
-                  allow="autoplay; fullscreen"
-                  className="w-full h-full"
-                />
-              </div>
-            )}
+          {/* Left Column: Image slider. Held to half the row so the copy
+              beside it gets a readable measure instead of a tall narrow
+              column — the slider keeps its aspect ratio, so it loses almost
+              no height from the wider container.
+
+              `lg:items-center` on the row centers the shorter slider against
+              the taller copy instead of pinning it to the top, which drops it
+              to sit beside the middle of the text rather than the first line.
+              It stays `items-start` on mobile: once the row stacks, `center`
+              would collapse both children to their content width. */}
+          <div className="w-full lg:w-1/2">
+            <AboutImages />
           </div>
 
-          {/* Right Column: Text & Actions (Takes up 40% width on large screens) */}
-          <div className="w-full lg:w-2/5 flex flex-col pt-2">
+          {/* Right Column: Text & Actions */}
+          <div className="w-full lg:w-1/2 flex flex-col">
            
             {/* Top Labels Grouped Together */}
             <div className="flex items-center gap-4 mb-6">
@@ -77,28 +48,22 @@ export default function About({ data }: { data?: AboutData }) {
             </h2>
 
             {/* Body Copy from Sanity or fallback */}
-            <p className="text-base-text/80 body-lg mb-4 font-medium">
+            <p className="text-base-text/80 mb-4 body-lg font-medium">
               {data?.aboutBlurb || "Anweshan Pvt. Ltd. is a multidisciplinary Clinical Research Organization and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives."}
             </p>
-            <p className="text-base-text/80 body-lg mb-10 font-medium">
+            <p className="text-base-text/80 mb-10 body-lg font-medium">
               From clinical trials to nationwide household surveys, and from HPV vaccination research to community health toolkit deployments, our work spans the full spectrum of health research across Nepal.
             </p>
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-4">
-              <button
-                onClick={() => window.open("https://www.youtube.com/@anweshan", "_blank")}
-                className="flex items-center gap-2 rounded-full bg-white border-2 border-transparent text-base-text text-sm font-bold px-6 py-3.5 hover:border-white hover:bg-white/80 transition-all shadow-sm"
-              >
-                <FaYoutube size={20} className="text-[#FF0000]" />
-                View our channel
-              </button>
+              
 
               <button
-                onClick={() => (window.location.href = "/team")}
+                onClick={() => (window.location.href = "/about")}
                 className="flex items-center gap-2 rounded-full bg-primary text-white text-sm font-bold px-7 py-3.5 hover:bg-primary-dark transition-colors shadow-sm"
               >
-                Meet our team
+                About Us
                 <ArrowRight size={18} />
               </button>
             </div>

@@ -1,50 +1,26 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
+import Platforms from "@/components/Platforms";
 import Reveal from "@/components/Reveal";
 
 import { projectsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type Project = {
-  _id: string;
-  slug?: {
-    current?: string;
-  };
-  title: string;
-  category?: string;
-  summary?: string;
-  description?: string;
-  client?: string;
-  image?: string;
-  coverImage?: {
-    asset?: {
-      _ref?: string;
-    };
-  };
-};
+import {
+  resolvePlatforms,
+  resolveResearchProjects,
+} from "@/lib/project-data";
+import type { Project } from "@/lib/types";
 
 export default async function ProjectsPage() {
-  const rawProjects = await fetchSanity(projectsQuery);
+  const records = await fetchSanity<Project[]>(projectsQuery);
 
-  const projects = (rawProjects as Project[]) || [];
-
-  function getImageUrl(project: Project) {
-    if (project.coverImage?.asset?._ref) {
-      const ref = project.coverImage.asset._ref;
-
-      return `https://cdn.sanity.io/images/10g74skr/production/${ref
-        .replace("image-", "")
-        .replace(/-(jpg|jpeg|png|webp|gif)$/, ".$1")}`;
-    }
-
-    return project.image || "/placeholder.jpg";
-  }
-
-  const themeCount = new Set(
-    projects.map((project) => project.category).filter(Boolean)
-  ).size;
+  /* The platforms Anweshan's IT team built are pulled out of the research grid
+     and given their own section further down, so the work grid stays research
+     engagements only. */
+  const projects = resolveResearchProjects(records);
+  const platforms = resolvePlatforms(records);
 
   return (
     <main className="min-h-screen bg-snow">
@@ -53,30 +29,15 @@ export default async function ProjectsPage() {
         eyebrow="Our work"
         title="Research that reaches the decision."
         lead="A selection of studies, evaluations, and data engagements delivered for government bodies, UN agencies, universities, and international partners."
-        image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2000"
-        imageAlt="Field researchers collecting data"
-        meta={[
-          {
-            label: "Studies listed",
-            value: projects.length.toString(),
-          },
-          {
-            label: "Themes",
-            value: themeCount.toString(),
-          },
-          {
-            label: "AMR records",
-            value: "600000",
-          },
-          {
-            label: "Hospitals & labs",
-            value: "28",
-          },
-        ]}
+        plain
       />
 
       <section className="py-20 md:py-28">
         <div className="max-w-[1240px] mx-auto px-6 md:px-10">
+          <Reveal>
+            <h2 className="h2-section text-forest">Research engagements</h2>
+          </Reveal>
+
           {projects.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-forest/60">
@@ -91,24 +52,20 @@ export default async function ProjectsPage() {
               </Link>
             </div>
           ) : (
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {projects.map((project, i) => {
-                const slug =
-                  project.slug?.current || project._id;
-
-                return (
-                  <Reveal
-                    as="li"
-                    key={project._id}
-                    delay={(i % 3) * 110}
+            <ul className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+              {projects.map((project, i) => (
+                <Reveal as="li" key={project.key} delay={(i % 3) * 110} className="h-full">
+                  <Link
+                    href={`/projects/${project.slug}`}
+                    className="group flex h-full flex-col outline-none"
                   >
-                    <Link
-                      href={`/projects/${slug}`}
-                      className="group h-full flex flex-col outline-none"
-                    >
+                    {/* Cover image, when the project has one in the CMS. Kept
+                        here deliberately: the request was to remove the page's
+                        background photo, not the project covers. */}
+                    {project.cover && (
                       <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
                         <Image
-                          src={getImageUrl(project)}
+                          src={project.cover}
                           alt={project.title}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 30vw"
@@ -123,28 +80,36 @@ export default async function ProjectsPage() {
                           </span>
                         )}
                       </div>
+                    )}
 
-                      <h2 className="h3-card text-forest mb-3 group-hover:text-accent-dark transition-colors">
-                        {project.title}
-                      </h2>
-
-                      <p className="text-md text-forest/75 leading-relaxed mb-5 flex-1">
-                        {project.summary || project.description}
+                    {!project.cover && project.category && (
+                      <p className="text-primary meta-label mb-4">
+                        {project.category}
                       </p>
+                    )}
 
-                      {project.client && (
-                        <p className="text-primary meta-label pt-4 border-t border-forest/15">
-                          {project.client}
-                        </p>
-                      )}
-                    </Link>
-                  </Reveal>
-                );
-              })}
+                    <h2 className="h3-card text-forest mb-3 text-balance group-hover:text-accent-dark transition-colors">
+                      {project.title}
+                    </h2>
+
+                    <p className="text-forest/75 body-lg leading-relaxed mb-5 flex-1">
+                      {project.summary}
+                    </p>
+
+                    {project.client && (
+                      <p className="text-primary meta-label pt-4 border-t border-forest/15">
+                        {project.client}
+                      </p>
+                    )}
+                  </Link>
+                </Reveal>
+              ))}
             </ul>
           )}
         </div>
       </section>
+
+      <Platforms platforms={platforms} />
     </main>
   );
 }

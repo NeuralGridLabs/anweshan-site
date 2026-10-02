@@ -117,6 +117,12 @@ html {
    h3-card   card / list-item headings
    eyebrow   small uppercase label above a heading
    body-lg / body / body-sm  running text
+
+   Reading sizes were raised across the board: body-lg is the size used for
+   every lead paragraph and service description, body is running text inside
+   cards and detail pages, and body-sm is the smallest running text (card
+   abstracts, meta lines). Only `eyebrow` and `meta-label` stay small, and
+   those are short uppercase labels rather than prose.
    ------------------------------------------------------------------ */
 @utility h1-page {
   @apply text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight;
@@ -125,22 +131,25 @@ html {
   @apply text-3xl md:text-5xl font-bold leading-[1.1] tracking-tight;
 }
 @utility h3-card {
-  @apply text-xl font-bold leading-[1.3] tracking-tight;
+  @apply text-xl md:text-2xl font-bold leading-[1.3] tracking-tight;
 }
 @utility eyebrow {
   @apply text-xs font-semibold tracking-[0.2em] uppercase;
 }
+/* Lead paragraphs, service descriptions, page intros. */
 @utility body-lg {
-  @apply text-base md:text-lg leading-relaxed;
+  @apply text-lg md:text-xl leading-relaxed;
 }
+/* Running text inside cards and detail pages. */
 @utility body {
+  @apply text-base md:text-[1.0625rem] leading-relaxed;
+}
+/* Smallest running text: card abstracts, bylines, meta lines. */
+@utility body-sm {
   @apply text-base leading-relaxed;
 }
-@utility body-sm {
-  @apply text-sm leading-relaxed;
-}
 @utility meta-label {
-  @apply text-[11px] font-semibold tracking-[0.15em] uppercase;
+  @apply text-xs font-semibold tracking-[0.15em] uppercase;
 }
 
 @utility no-scrollbar {
@@ -179,12 +188,6 @@ html {
 
 @media (prefers-reduced-motion: reduce) {
   .cutout-a, .cutout-b, .cutout-c { animation: none !important; }
-}
-
-/* Client marquee */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
 }
 
 /* Animated underline for links */

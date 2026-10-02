@@ -3,17 +3,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import NavLinks from "@/components/NavLinks";
 
 const mobileLinks = [
   { label: "Home", href: "/" },
   { label: "About us", href: "/about" },
-  { label: "Services", href: "/services" },
+  { label: "Expertise", href: "/services" },
   { label: "Projects", href: "/projects" },
-  { label: "Clients", href: "/clients" },
-  { label: "Team", href: "/team" },
+  {
+    label: "Team",
+    href: "/team",
+    children: [{ label: "Gallery", href: "/gallery" }],
+  },
   { label: "Career", href: "/career" },
   { label: "Contact", href: "/contact" },
 ];
@@ -106,24 +109,47 @@ export default function Navbar() {
             {mobileLinks.map((link, i) => {
               const isActive =
                 link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+              const slide = (delay: number) =>
+                `transition-all duration-500 ${
+                  open ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"
+                }`;
               return (
-                <li
-                  key={link.href}
-                  style={{ transitionDelay: open ? `${120 + i * 45}ms` : "0ms" }}
-                  className={`transition-all duration-500 ${
-                    open ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"
-                  }`}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className={`block text-3xl font-bold tracking-tight py-2.5 border-b border-white/12 ${
-                      isActive ? "text-gold" : "text-white/80 hover:text-white"
-                    } transition-colors`}
+                <Fragment key={link.href}>
+                  <li
+                    style={{ transitionDelay: open ? `${120 + i * 45}ms` : "0ms" }}
+                    className={slide(i)}
                   >
-                    {link.label}
-                  </Link>
-                </li>
+                    <Link
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className={`block text-3xl font-bold tracking-tight py-2.5 border-b border-white/12 ${
+                        isActive ? "text-gold" : "text-white/80 hover:text-white"
+                      } transition-colors`}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                  {/* Nested under its parent, indented, same list pattern. */}
+                  {link.children?.map((child, j) => (
+                    <li
+                      key={child.href}
+                      style={{ transitionDelay: open ? `${120 + (i + j + 1) * 45}ms` : "0ms" }}
+                      className={slide(i + j + 1)}
+                    >
+                      <Link
+                        href={child.href}
+                        onClick={() => setOpen(false)}
+                        className={`block pl-5 text-2xl font-semibold tracking-tight py-2 border-b border-white/8 ${
+                          pathname.startsWith(child.href)
+                            ? "text-gold"
+                            : "text-white/60 hover:text-white"
+                        } transition-colors`}
+                      >
+                        {child.label}
+                      </Link>
+                    </li>
+                  ))}
+                </Fragment>
               );
             })}
           </ul>

@@ -1,13 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Mail, Phone } from "lucide-react";
-import { FaFacebookF, FaLinkedinIn, FaInstagram, FaXTwitter } from "react-icons/fa6";
+import SocialIcons from "@/components/SocialIcons";
 
 const siteLinks = [
   { label: "About us", href: "/about" },
-  { label: "Services", href: "/services" },
+  { label: "Expertise", href: "/services" },
   { label: "Projects", href: "/projects" },
-  { label: "Clients", href: "/clients" },
   { label: "Team", href: "/team" },
   { label: "Career", href: "/career" },
 ];
@@ -67,13 +66,10 @@ export default function Footer() {
         <div className="mt-10 pt-6 border-t border-white/12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/40">
           <p>Copyrights &copy; {new Date().getFullYear()} All Rights Reserved by Anweshan Pvt. Ltd.</p>
           <div className="flex items-center gap-4">
-            {[FaFacebookF, FaLinkedinIn, FaInstagram, FaXTwitter].map((Icon, i) => (
-              <Icon
-                key={i}
-                size={13}
-                className="hover:text-mint cursor-pointer transition-colors"
-              />
-            ))}
+            <SocialIcons
+              size={13}
+              className="text-white/40 hover:text-mint transition-colors"
+            />
           </div>
         </div>
       </div>
