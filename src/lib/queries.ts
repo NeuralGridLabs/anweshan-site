@@ -34,7 +34,32 @@ export const aboutQuery = groq`*[_type == "about"][0]{
 export const servicesQuery = groq`*[_type == "services"][0]{
   heading,
   intro,
-  items[] { title, description, icon }
+  items[]{
+    _key,
+    title,
+    description,
+    icon,
+    "image": image{
+      ...,
+      alt,
+      "dims": asset->metadata.dimensions
+    },
+    slug,
+    hasDetailPage,
+    highlights,
+    sections[]{ _key, heading, body, bullets }
+  }
+}`;
+
+/* One service's long-form content, for the detail page.
+
+   Matches the overview query on `hasDetailPage` and requires at least one
+   section, so a service can never serve a detail page that has nothing on it.
+   The `!(_id in path("drafts.**"))` guard matches the other queries: the client
+   pins apiVersion 2024-01-01, which predates Sanity's published-only default. */
+export const serviceBySlugQuery = groq`*[_type == "services"][0]{
+  heading,
+  "items": items[slug.current == $slug && hasDetailPage == true && count(sections) > 0]
 }`;
 
 export const clientsQuery = groq`*[_type == "clients"][0]{
@@ -79,6 +104,7 @@ export const projectsQuery = groq`*[_type == "project"] | order(year desc) {
   facts[] { label, value },
   body,
   coverImage,
+  externalUrl,
   featured
 }`;
 
@@ -101,6 +127,7 @@ export const projectBySlugQuery = groq`*[_type == "project" && slug.current == $
   facts[] { label, value },
   body,
   coverImage,
+  externalUrl,
   featured
 }`;
 
@@ -123,6 +150,7 @@ export const featuredProjectsQuery = groq`*[_type == "project" && featured == tr
   facts[] { label, value },
   body,
   coverImage,
+  externalUrl,
   featured
 }`;
 
@@ -137,6 +165,28 @@ export const teamMembersQuery = groq`*[_type == "teamMember"] | order(order asc)
   order
 }`;
 
+/* --------------------------------------------------------------------------
+   Publication file assets
+
+   Both publication queries project `file` as a sub-object that keeps
+   `asset{ _ref, _type }` intact and ADDS the resolved `asset->url`.
+
+   The `asset->url` dereference is the whole point. A Sanity file `_ref` looks
+   like `file-<sha1>-pdf`, but the CDN path is `<sha1>.pdf` — note the dot. The
+   two are not interchangeable, so a `_ref` is not a URL and must never be
+   string-mangled into one. Reconstructing the path by hand yields a 404 from
+   cdn.sanity.io; reading `url` off the asset document cannot.
+
+   `asset` is projected as the plain reference rather than a bare `asset->{...}`
+   for the same reason as the gallery query below: a bare dereference REPLACES
+   the reference object and `_ref` would no longer be available. The resolved
+   URL is therefore a sibling key, not a replacement.
+
+   `asset->url` yields null when the referenced `sanity.fileAsset` is missing
+   (deleted, or an upload that never completed), which is what lets the page
+   hide the Download button instead of rendering a dead link.
+   ----------------------------------------------------------------------- */
+
 export const publicationsQuery = groq`*[_type == "publication" && !(_id in path("drafts.**"))] | order(order asc, year desc) {
   _id,
   title,
@@ -144,7 +194,15 @@ export const publicationsQuery = groq`*[_type == "publication" && !(_id in path(
   year,
   journal,
   abstract,
-  file,
+  file{
+    _type,
+    asset{ _ref, _type },
+    "url": asset->url,
+    "originalFilename": asset->originalFilename,
+    "extension": asset->extension,
+    "size": asset->size
+  },
+  "fileUrl": file.asset->url,
   externalUrl,
   coverImage,
   order
@@ -174,18 +232,37 @@ export const featuredPublicationsQuery = groq`*[_type == "publication" && !(_id 
   journal,
   year,
   abstract,
-  file,
+  file{
+    _type,
+    asset{ _ref, _type },
+    "url": asset->url,
+    "originalFilename": asset->originalFilename,
+    "extension": asset->extension,
+    "size": asset->size
+  },
+  "fileUrl": file.asset->url,
   externalUrl,
   coverImage,
   featuredOnHome
 }`;
 
+/**
+ * `asset` is projected as the plain reference so `sanityImageUrl()` still finds
+ * `_ref`. A bare `asset->{...}` would REPLACE the reference and break every
+ * image URL, so intrinsic dimensions are added as a sibling `dims` key instead.
+ */
 export const galleryEventsQuery = groq`*[_type == "galleryEvent"] | order(order asc, date desc) {
   _id,
   title,
+  category,
   date,
   description,
-  images[],
+  images[]{
+    ...,
+    alt,
+    asset{ _ref, _type },
+    "dims": asset->metadata.dimensions
+  },
   coverImage,
   order
 }`;

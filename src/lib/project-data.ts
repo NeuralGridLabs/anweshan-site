@@ -1,18 +1,13 @@
 /* --------------------------------------------------------------------------
     Project resolution
 
-    Sanity is the source of truth, but the dataset can be empty (or the fetch
-    can fail) and the pages would then render nothing. The local roster in
-    ./projects.ts is used in that case.
-
-    Both sources are normalised to `ResolvedProject` so the list, the detail
-    route, and the home rail render identically whichever one is in play.
+    Sanity is the source of truth. Records are normalised to `ResolvedProject`
+    so the list, the detail route and the home rail all read the same shape.
 
     Projects only. Publications (reports, papers, datasets) are a separate
     Sanity type and are deliberately not merged in here.
    ----------------------------------------------------------------------- */
 
-import { featuredLocalProjects, projects as localProjects, type Project as LocalProject } from "./projects";
 import { sanityImageUrl } from "./image";
 import type { Project as SanityProject, ProjectFact } from "./types";
 
@@ -40,12 +35,6 @@ export type ResolvedProject = {
   facts?: ProjectFact[];
 };
 
-function facts(
-  source: { label: string; value: string }[] | undefined,
-): ProjectFact[] | undefined {
-  return source?.map((f) => ({ label: f.label, value: f.value }));
-}
-
 function fromSanity(project: SanityProject): ResolvedProject {
   const slug = project.slug?.current || project._id;
 
@@ -67,35 +56,30 @@ function fromSanity(project: SanityProject): ResolvedProject {
     approach: project.approach,
     outcomes: project.outcomes,
     facts: project.facts,
+    externalUrl: project.externalUrl,
   };
 }
 
-function fromLocal(project: LocalProject): ResolvedProject {
-  return {
-    key: `local:${project.slug}`,
-    slug: project.slug,
-    title: project.title,
-    summary: project.description,
-    client: project.partner,
-    category: project.theme,
-    cover: project.image,
-    externalUrl: project.url,
-    status: project.status,
-    years: project.years,
-    location: project.location,
-    methods: project.methods,
-    team: project.team,
-    overview: project.overview,
-    approach: project.approach,
-    outcomes: project.outcomes,
-    facts: facts(project.facts),
-  };
-}
+/* -------------------------------------------------------------------------- *
+    Sanity is the ONLY source of project content.
 
-/** All projects, ordered as the source orders them. */
+    There used to be a fallback to ./projects.ts, which caused a specific and
+    confusing failure: the local roster holds placeholder narrative ("Detailed
+    figures and narrative on this page are placeholders...", "This page
+    presents a working outline of the study...") for the same slugs that exist
+    in Sanity. With a whole-roster fallback, a slug could resolve to the local
+    record instead of the CMS one, so edits made in Studio silently did not
+    appear on the site — the page rendered, it just rendered someone else's copy.
+
+    The fallback is gone. If the fetch fails or the dataset is empty, callers get
+    an empty list and render their existing "nothing yet" state, which is
+    honest: better no projects than stale projects that look live.
+   -------------------------------------------------------------------------- */
+
+/** All projects, ordered as the source orders them. Empty when CMS is unavailable. */
 export function resolveProjects(records: SanityProject[] | null): ResolvedProject[] {
-  if (records?.length) return records.map(fromSanity);
-  return localProjects.map(fromLocal);
+  if (!records?.length) return [];
+  return records.map(fromSanity);
 }
 
 /* --------------------------------------------------------------------------
@@ -104,7 +88,7 @@ export function resolveProjects(records: SanityProject[] | null): ResolvedProjec
     The platforms the in-house IT team builds and runs are not research
     engagements, so they get their own heading rather than being mixed into
     the work grid or the home rail. Membership is keyed on slug so the same
-    three are recognised whether they came from Sanity or the local roster.
+    three are recognised whichever dataset they come from.
    ----------------------------------------------------------------------- */
 
 const PLATFORM_SLUGS = new Set([
@@ -131,7 +115,7 @@ export function resolvePlatforms(
   return resolveProjects(records).filter(isPlatform);
 }
 
-/** A single project by slug, or null when neither source has it. */
+/** A single project by slug, or null when the CMS has no such record. */
 export function resolveProject(
   records: SanityProject[] | null,
   slug: string,
@@ -139,17 +123,14 @@ export function resolveProject(
   return resolveProjects(records).find((p) => p.slug === slug) ?? null;
 }
 
-/** Home rail: Sanity's own `featured` flag when set, otherwise the local picks.
-    Platforms are filtered out of both routes, and if flagging only platforms
-    the rail falls back to the local research picks rather than rendering empty. */
+/* Home rail. The `featured` flag is the only signal used: if no project is
+   flagged the rail is simply empty, rather than quietly borrowing the local
+   picks, which is the same class of bug as the roster fallback above. */
 export function resolveFeaturedProjects(
   records: SanityProject[] | null,
 ): ResolvedProject[] {
-  const featured = (records ?? [])
+  return (records ?? [])
     .filter((p) => p.featured)
     .map(fromSanity)
     .filter((p) => !isPlatform(p));
-
-  if (featured.length) return featured;
-  return featuredLocalProjects.map(fromLocal);
 }

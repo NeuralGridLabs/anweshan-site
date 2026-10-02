@@ -85,7 +85,7 @@ export default async function ContactPage() {
       <PageHeader
         tone="clay"
         eyebrow="Contact us"
-        title="Start a conversation about your research question."
+        title={contactData?.heading || "Start a conversation about your research question."}
         lead="Whether you need full CRO support, a Q-squared survey, an evaluation, or communication design, our team in Lalitpur will get back to you."
         image="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Kathmandu valley"

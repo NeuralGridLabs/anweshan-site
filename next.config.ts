@@ -10,18 +10,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "cdn.sanity.io" },
     ],
   },
-  serverExternalPackages: [
-    "sanity",
-    "@sanity/vision",
-    "next-sanity",
-    "next-sanity/studio",
-    "swr",
-    "styled-components",
-    "@sanity/ui",
-    "@sanity/icons",
-    "@sanity/client",
-    "@sanity/image-url",
-  ],
 };
 
 export default nextConfig;

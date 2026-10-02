@@ -1,5 +1,5 @@
 import { MapPin, Mail, Phone } from "lucide-react";
-import { FaFacebookF, FaLinkedinIn, FaInstagram, FaXTwitter } from "react-icons/fa6";
+import SocialIcons from "@/components/SocialIcons";
 
 export default function TopBar() {
   return (
@@ -20,9 +20,7 @@ export default function TopBar() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {[FaFacebookF, FaLinkedinIn, FaInstagram, FaXTwitter].map((Icon, i) => (
-            <Icon key={i} size={15} className="hover:text-forest cursor-pointer transition-colors" />
-          ))}
+          <SocialIcons className="text-forest/70 hover:text-forest transition-colors" />
         </div>
       </div>
     </div>

@@ -50,6 +50,12 @@ export default async function ProjectPage({
 
   const coverUrl = project.cover;
 
+  /* True only when the CMS record has no narrative at all, so the notice below
+     never contradicts real content that has been written. */
+  const hasNarrative = Boolean(
+    project.overview?.length || project.approach?.length || project.outcomes?.length,
+  );
+
   const meta = [
     { label: "Status", value: project.status },
     { label: "Timeline", value: project.years },
@@ -234,11 +240,14 @@ export default async function ProjectPage({
               </div>
             </Reveal>
 
-            {!project.externalUrl && (
+            {/* Only when the record genuinely has no narrative. This used to be
+                keyed on `externalUrl`, so it printed on every research project
+                and made real CMS content look like placeholder text. */}
+            {!hasNarrative && (
               <Reveal delay={180}>
                 <p className="text-base-text/40 text-xs leading-relaxed mt-6">
-                  Detailed figures and narrative on this page are placeholders
-                  pending the final project record.
+                  No detailed narrative has been added to this project record
+                  yet.
                 </p>
               </Reveal>
             )}

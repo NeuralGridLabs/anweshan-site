@@ -18,9 +18,13 @@ export type PublicationActions = {
   fileUrl: string | null;
   /** Trimmed external URL, when one is set. */
   externalUrl: string | null;
+  /** Where "View online" should point: the external URL if set, else the PDF. */
+  viewUrl: string | null;
   /** Whether a "Download" action should render. */
   showFile: boolean;
   /** Whether a "View online" action should render. */
+  showView: boolean;
+  /** Whether the publication's own external URL is set (publisher landing page). */
   showExternal: boolean;
   /** Whether any action should render at all. */
   showAny: boolean;
@@ -45,7 +49,13 @@ export function hasExternalUrl(externalUrl: unknown): boolean {
 
 /**
  * Builds the action set for one publication. `fileUrl` is passed in already
- * resolved (it depends on the configured project, so it cannot be derived here).
+ * resolved (it comes from the Sanity asset's `url` via the query, so it cannot
+ * be derived here).
+ *
+ * "View online" prefers the editor's external link — a DOI or publisher page is
+ * a better reading experience than the raw PDF — and falls back to the file URL
+ * so the action still leads somewhere real when no external URL was set. Either
+ * way it only ever renders with a URL in hand, never as a dead link.
  */
 export function publicationActions(input: {
   fileUrl: string | null | undefined;
@@ -55,11 +65,14 @@ export function publicationActions(input: {
   const externalUrl = hasExternalUrl(input.externalUrl)
     ? (input.externalUrl as string).trim()
     : null;
+  const viewUrl = externalUrl ?? fileUrl;
 
   return {
     fileUrl,
     externalUrl,
+    viewUrl,
     showFile: Boolean(fileUrl),
+    showView: viewUrl !== null,
     showExternal: externalUrl !== null,
     showAny: Boolean(fileUrl) || externalUrl !== null,
   };

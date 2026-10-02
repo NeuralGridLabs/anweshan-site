@@ -19,12 +19,9 @@ export default function Platforms({ platforms }: { platforms: ResolvedProject[] 
     <section className="relative bg-sage py-20 md:py-28">
       <div className="max-w-[1240px] mx-auto px-6 md:px-10">
         <Reveal>
-          <p className="eyebrow text-forest/70">Anweshan IT</p>
-
-          <h2 className="h2-section text-forest mt-4 max-w-[20ch] text-balance">
-            Anweshan IT built these platforms.
-          </h2>
-
+<h2 className="h2-section text-forest mt-4 max-w-[20ch] text-balance">
+  Anweshan IT
+</h2>
           <p className="body-lg text-forest/75 mt-5 max-w-[62ch]">
             Alongside our research practice, our in-house IT team designs, builds
             and runs digital products for health programmes, hospitals and field

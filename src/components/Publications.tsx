@@ -1,8 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight, Download } from "lucide-react";
 
-import { sanityFileUrl, sanityImageUrl } from "@/lib/image";
+import { sanityFileUrl } from "@/lib/image";
 import { publicationActions } from "@/lib/publication-delivery";
 import type { Publication } from "@/lib/types";
 
@@ -12,8 +11,11 @@ import type { Publication } from "@/lib/types";
    A short, curated read of recent outputs, placed between the featured-work
    rail and the explore band.
 
-   Each entry is one flat surface: cover, then text. No wrapper card around
-   the group, so this does not stack card-on-card with the rail above.
+   Each entry sits on its own light cream card, so the entries read as
+   separate objects against the gold section background instead of dissolving
+   into it. The section keeps the gradient; only the content surface is tinted.
+   The cover image is deliberately left square-cornered: the card's own padding
+   mats it, so it sits inside the card rather than fighting its rounded corners.
    ----------------------------------------------------------------------- */
 
 export default function Publications({
@@ -27,7 +29,9 @@ export default function Publications({
   if (publications.length === 0) return null;
 
   return (
-    <section id="publications" className="relative bg-snow py-20 md:py-28">
+<section
+  id="publications"
+className="relative bg-gradient-to-br from-[#FFF7C2] via-[#F9E68C] to-[#E8C65A] py-20 md:py-28">
       <div className="max-w-[1480px] mx-auto px-6 md:px-12">
         {/* Heading row mirrors the featured-work rail above. */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 mb-10 md:mb-12 border-b border-forest/15">
@@ -49,45 +53,24 @@ export default function Publications({
           {publications.map((pub) => {
             /* Same resolution as the publications page, so a record that is
                reachable there is reachable here: either a file, an external
-               URL, or both. */
+               URL, or both. `fileUrl` is the URL Sanity resolved from the file
+               asset; `sanityFileUrl()` remains the fallback. */
             const actions = publicationActions({
-              fileUrl: sanityFileUrl(pub.file),
+              fileUrl: pub.fileUrl ?? sanityFileUrl(pub.file),
               externalUrl: pub.externalUrl,
             });
 
-            const coverUrl = sanityImageUrl(pub.coverImage);
-
             return (
-              <li key={pub._id} className="group flex flex-col">
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-mint/30">
-                  {coverUrl ? (
-                    <Image
-                      src={coverUrl}
-                      alt=""
-                      fill
-                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-mint/50 text-forest/30">
-                      <svg
-                        width="34"
-                        height="34"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        aria-hidden="true"
-                      >
-                        <path d="M4 19.5V6a2 2 0 0 1 2-2h13v16H6a2 2 0 0 1-2-1.5Z" />
-                        <path d="M8 8h7M8 12h7M8 16h4" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
+              <li
+                key={pub._id}
+                className="group flex flex-col rounded-2xl bg-ivory p-5 md:p-6 border border-forest/15 shadow-sm transition-shadow duration-300 hover:shadow-md"
+              >
+                {/* No image panel: publication covers were removed from the CMS
+                    and from the publications page, so the cards are text-only
+                    and line up on a shared baseline instead. */}
 
                 {(pub.journal || pub.year) && (
-                  <p className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-forest/55">
+                  <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-forest/55">
                     {pub.journal && <span className="meta-label">{pub.journal}</span>}
 
                     {pub.year && (
@@ -108,9 +91,9 @@ export default function Publications({
 
                 {actions.showAny && (
                   <div className="mt-6 pt-5 border-t border-forest/15 flex flex-wrap items-center gap-x-6 gap-y-2">
-                    {actions.showExternal && actions.externalUrl && (
+                    {actions.showView && actions.viewUrl && (
                       <a
-                        href={actions.externalUrl}
+                        href={actions.viewUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group/link inline-flex items-center gap-2 text-forest font-semibold text-sm hover:text-forest/70 transition-colors"

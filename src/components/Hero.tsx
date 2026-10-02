@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 
 interface HeroSlide {
@@ -41,11 +41,26 @@ export default function Hero({ data }: { data?: HeroData }) {
 
   const slides = data?.slides?.length ? data.slides : DEFAULT_SLIDES;
 
-  const startTimer = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (progressRef.current) clearInterval(progressRef.current);
+  /* The two intervals are owned by the effect below; `clearTimers` tears them
+     down and is safe to call even when none exist. */
+  const clearTimers = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (progressRef.current) {
+      clearInterval(progressRef.current);
+      progressRef.current = null;
+    }
+  }, []);
 
-    setProgress(0);
+  /* Schedules the timers and nothing else. No state is written here, which is
+     what lets the effect below start the slider without a cascading render:
+     `progress` is already 0 on mount, so the reset this used to perform was a
+     no-op at that point. A reset is only genuinely needed when the user jumps
+     to a slide, and that happens in `goTo` — an event, not an effect. */
+  const startTimers = useCallback(() => {
+    clearTimers();
 
     progressRef.current = setInterval(() => {
       setProgress((p) => Math.min(p + 100 / 70, 100));
@@ -55,19 +70,17 @@ export default function Hero({ data }: { data?: HeroData }) {
       setCurrent((prev) => (prev + 1) % slides.length);
       setProgress(0);
     }, 7000);
-  };
+  }, [clearTimers, slides.length]);
 
   useEffect(() => {
-    startTimer();
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (progressRef.current) clearInterval(progressRef.current);
-    };
-  }, [slides.length]);
+    startTimers();
+    return clearTimers;
+  }, [startTimers, clearTimers]);
 
   const goTo = (index: number) => {
     setCurrent(index);
-    startTimer();
+    setProgress(0);
+    startTimers();
   };
 
   const scrollTo = (id: string) => {
@@ -116,7 +129,7 @@ export default function Hero({ data }: { data?: HeroData }) {
               <ArrowRight size={14} />
             </button>
             <button
-              onClick={() => (window.location.href = "/clients")}
+              onClick={() => (window.location.href = "/services#clients")}
               className="flex items-center gap-2 rounded-full border border-forest/30 text-forest text-sm font-semibold px-6 py-3 hover:border-forest hover:bg-forest/10 transition-colors"
             >
               {data?.secondaryCtaLabel || "Our clients"}

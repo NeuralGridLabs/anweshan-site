@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
@@ -29,8 +29,7 @@ export default async function ProjectsPage() {
         eyebrow="Our work"
         title="Research that reaches the decision."
         lead="A selection of studies, evaluations, and data engagements delivered for government bodies, UN agencies, universities, and international partners."
-        image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2000"
-        imageAlt="Field researchers collecting data"
+        plain
       />
 
       <section className="py-20 md:py-28">
@@ -53,42 +52,25 @@ export default async function ProjectsPage() {
               </Link>
             </div>
           ) : (
-            <ul className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {projects.map((project, i) => {
-                const coverUrl = project.cover;
-
-                return (
-                  <Reveal as="li" key={project.key} delay={(i % 3) * 110}>
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      className="group h-full flex flex-col outline-none"
-                    >
+            <ul className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+              {projects.map((project, i) => (
+                <Reveal as="li" key={project.key} delay={(i % 3) * 110} className="h-full">
+                  <Link
+                    href={`/projects/${project.slug}`}
+                    className="group flex h-full flex-col outline-none"
+                  >
+                    {/* Cover image, when the project has one in the CMS. Kept
+                        here deliberately: the request was to remove the page's
+                        background photo, not the project covers. */}
+                    {project.cover && (
                       <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
-                        {coverUrl ? (
-                          <Image
-                            src={coverUrl}
-                            alt={project.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 30vw"
-                            className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-mint/50 text-forest/30">
-                            <svg
-                              width="40"
-                              height="40"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              aria-hidden="true"
-                            >
-                              <rect x="3" y="4" width="18" height="16" rx="2" />
-                              <circle cx="9" cy="10" r="2" />
-                              <path d="m21 16-5-5L5 20" />
-                            </svg>
-                          </div>
-                        )}
+                        <Image
+                          src={project.cover}
+                          alt={project.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 30vw"
+                          className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+                        />
 
                         <div className="absolute inset-0 bg-forest/0 group-hover:bg-forest/6 transition-colors duration-500" />
 
@@ -98,24 +80,30 @@ export default async function ProjectsPage() {
                           </span>
                         )}
                       </div>
+                    )}
 
-                      <h2 className="h3-card text-forest mb-3 group-hover:text-accent-dark transition-colors">
-                        {project.title}
-                      </h2>
-
-                      <p className="text-md text-forest/75 leading-relaxed mb-5 flex-1">
-                        {project.summary}
+                    {!project.cover && project.category && (
+                      <p className="text-primary meta-label mb-4">
+                        {project.category}
                       </p>
+                    )}
 
-                      {project.client && (
-                        <p className="text-primary meta-label pt-4 border-t border-forest/15">
-                          {project.client}
-                        </p>
-                      )}
-                    </Link>
-                  </Reveal>
-                );
-              })}
+                    <h2 className="h3-card text-forest mb-3 text-balance group-hover:text-accent-dark transition-colors">
+                      {project.title}
+                    </h2>
+
+                    <p className="text-forest/75 body-lg leading-relaxed mb-5 flex-1">
+                      {project.summary}
+                    </p>
+
+                    {project.client && (
+                      <p className="text-primary meta-label pt-4 border-t border-forest/15">
+                        {project.client}
+                      </p>
+                    )}
+                  </Link>
+                </Reveal>
+              ))}
             </ul>
           )}
         </div>

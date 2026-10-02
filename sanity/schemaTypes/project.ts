@@ -82,6 +82,13 @@ export const project = defineType({
     }),
     defineField({ name: "body", title: "Body (Portable Text)", type: "array", of: [{ type: "block" }] }),
     defineField({ name: "coverImage", title: "Cover image", type: "image", options: { hotspot: true } }),
+    defineField({
+      name: "externalUrl",
+      title: "External URL",
+      type: "url",
+      description:
+        "Link to a live product or platform hosted elsewhere, e.g. a web app. Use this for the Anweshan-operated platforms, which link out instead of to an internal project route.",
+    }),
     defineField({ name: "featured", title: "Featured on home", type: "boolean", initialValue: false }),
   ],
   preview: { select: { title: "title", subtitle: "client", media: "coverImage" } },
