@@ -14,9 +14,11 @@ type NavItem = NavLink | NavGroup;
 const navLinks: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About us", href: "/about" },
-  { label: "Expertise", href: "/services" },
+  { label: "Services", href: "/services" },
   { label: "Projects", href: "/projects" },
   { label: "Publications", href: "/publications" },
+  /* Permanent redirect to the Our clients band on the home page. */
+  { label: "Clients", href: "/clients" },
   {
     /* "Team" is a trigger, not a link. Its two destinations live in the panel. */
     label: "Team",
@@ -77,7 +79,7 @@ export default function NavLinks() {
   }, [openMenu]);
 
   return (
-    <ul ref={navRef} className="hidden md:flex items-center gap-7 text-md">
+    <ul ref={navRef} className="hidden md:flex items-center gap-5 text-md">
       {navLinks.map((link) => {
         /* --- dropdown trigger --- */
         if ("children" in link) {

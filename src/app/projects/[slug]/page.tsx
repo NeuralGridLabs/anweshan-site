@@ -1,18 +1,66 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check } from "lucide-react";
 
+import ClientLogoTile from "@/components/ClientLogoTile";
+import HubProjectCard from "@/components/HubProjectCard";
 import Reveal from "@/components/Reveal";
-import { projectsQuery } from "@/lib/queries";
+import { projectBySlugQuery, projectsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-import { resolveProject, resolveProjects } from "@/lib/project-data";
-import type { Project } from "@/lib/types";
+import { sanityImageUrl } from "@/lib/image";
+import { categoryLabel } from "@/lib/categories";
+import type { Project, ProjectSibling } from "@/lib/types";
+
+/* A single project.
+
+   This used to fetch every project and pick one out of the list in JavaScript.
+   It now asks for exactly this project, which matters for two reasons: the
+   query applies the clearance filter, so a project not cleared for the web
+   returns nothing and 404s; and the hub and sibling data come back with it
+   instead of needing a second round trip.
+
+   Every block below renders only when its data exists, so a legacy project with
+   none of the new fields looks exactly as it did before. */
+
+/* The single-project query projects the project fields directly, with the hub
+   nested under `clientHub`, rather than the flat shape projectsQuery returns.
+   This maps it to the same HubProject shape the card components already take,
+   so no new card type was needed. */
+type ProjectDetail = Project & {
+  clientHub?: Project["clientHub"];
+  siblings?: ProjectSibling[];
+};
+
+/* `years` is the display string editors wrote; the structured years are the
+   fallback so a project with only those still shows a timeline. */
+function timelineOf(project: ProjectDetail): string {
+  if (project.years?.trim()) return project.years.trim();
+
+  const start = project.startYear;
+  const end = project.endYear;
+
+  if (!start) return "";
+  if (!end || end === start) return String(start);
+  return `${start} to ${end}`;
+}
+
+async function fetchProject(slug: string): Promise<ProjectDetail | null> {
+  const detail = await fetchSanity<ProjectDetail | null>(projectBySlugQuery, {
+    slug,
+  });
+
+  return detail ?? null;
+}
 
 export async function generateStaticParams() {
-  const projects = resolveProjects(await fetchSanity<Project[]>(projectsQuery));
+  const projects = await fetchSanity<Project[]>(projectsQuery);
 
-  return projects.map((project) => ({ slug: project.slug }));
+  /* projectsQuery already withholds anything not cleared for the web, so only
+     publishable slugs are prerendered. Anything else 404s at request time. */
+  return (projects ?? [])
+    .filter((project) => project.slug?.current)
+    .map((project) => ({ slug: project.slug?.current as string }));
 }
 
 export async function generateMetadata({
@@ -21,12 +69,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = resolveProject(await fetchSanity<Project[]>(projectsQuery), slug);
+  const project = await fetchProject(slug);
 
   if (!project) return {};
 
   return {
-    title: `${project.title} | Anweshan`,
+    title: `${project.title} | ${project.clientHub?.name ?? project.client ?? "Projects"}`,
     description: project.summary,
   };
 }
@@ -37,31 +85,37 @@ export default async function ProjectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const project = await fetchProject(slug);
 
-  const records = await fetchSanity<Project[]>(projectsQuery);
-  const project = resolveProject(records, slug);
-
+  /* Covers all three cases: an unknown slug, a project whose webStatus is not
+     ready (the query returns nothing), and an unpublished draft. */
   if (!project) notFound();
 
-  const allProjects = resolveProjects(records);
-  const index = allProjects.findIndex((p) => p.slug === slug);
-  const nextProject =
-    allProjects.length > 1 ? allProjects[(index + 1) % allProjects.length] : null;
+  const coverUrl = sanityImageUrl(project.coverImage);
+  const hub = project.clientHub;
+  const siblings = project.siblings ?? [];
 
-  const coverUrl = project.cover;
+  const timeline = timelineOf(project);
 
-  /* True only when the CMS record has no narrative at all, so the notice below
-     never contradicts real content that has been written. */
+  const meta = [
+    { label: "Status", value: project.status },
+    { label: "Timeline", value: timeline },
+    { label: "Partner", value: project.client },
+    { label: "Location", value: project.location },
+  ].filter((item): item is { label: string; value: string } =>
+    Boolean(item.value),
+  );
+
+  /* True only when the record genuinely has no narrative, so the notice below
+     never contradicts real content. */
   const hasNarrative = Boolean(
     project.overview?.length || project.approach?.length || project.outcomes?.length,
   );
 
-  const meta = [
-    { label: "Status", value: project.status },
-    { label: "Timeline", value: project.years },
-    { label: "Partner", value: project.client },
-    { label: "Location", value: project.location },
-  ].filter((item): item is { label: string; value: string } => Boolean(item.value));
+  const stats = (project.facts ?? []).filter((fact) => fact.value);
+  const methods = project.methods ?? [];
+  const steps = project.approach ?? [];
+  const outputs = project.outcomes ?? [];
 
   return (
     <main className="min-h-screen bg-snow">
@@ -83,21 +137,71 @@ export default async function ProjectPage({
         )}
 
         <div className="relative max-w-[1400px] mx-auto px-6 pt-14 pb-16 md:pt-20 md:pb-24">
-          <Link
-            href="/projects"
-            className="group inline-flex items-center gap-2 text-white hover:text-white text-sm font-semibold mb-12 transition-colors"
-          >
-            <ArrowLeft
-              size={16}
-              className="group-hover:-translate-x-1 transition-transform"
-            />
+          {/* Breadcrumb. With a client it names the route taken to get here;
+              without one it stays the original "All projects" link. */}
+          {hub ? (
+            <nav
+              aria-label="Breadcrumb"
+              className="mb-12 flex flex-wrap items-center gap-2 text-sm font-semibold"
+            >
+              <Link
+                href="/projects"
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                Projects
+              </Link>
 
-            All projects
-          </Link>
+              <span aria-hidden className="text-white/40">
+                /
+              </span>
+
+              <Link
+                href="/clients"
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                Clients
+              </Link>
+
+              <span aria-hidden className="text-white/40">
+                /
+              </span>
+
+              <Link
+                href={`/clients/${hub.slug?.current}`}
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                {hub.name}
+              </Link>
+
+              <span aria-hidden className="text-white/40">
+                /
+              </span>
+
+              <span className="text-white">{project.title}</span>
+            </nav>
+          ) : (
+            <Link
+              href="/projects"
+              className="group inline-flex items-center gap-2 text-white hover:text-white text-sm font-semibold mb-12 transition-colors"
+            >
+              <ArrowLeft
+                size={16}
+                className="group-hover:-translate-x-1 transition-transform"
+              />
+
+              All projects
+            </Link>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-9">
-              <p className="text-forest eyebrow mb-6">{project.category}</p>
+              {/* The long category label reads better here than the short chip
+                  form used on cards. */}
+              <p className="text-forest eyebrow mb-6">
+                {project.category
+                  ? categoryLabel(project.category)
+                  : project.category}
+              </p>
 
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.06] tracking-tight mb-8">
                 {project.title}
@@ -119,34 +223,38 @@ export default async function ProjectPage({
             </div>
           </div>
 
-          <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8 mt-16 pt-10 border-t border-white/15">
-            {meta.map((item) => (
-              <div key={item.label}>
-                <dt className="text-dark meta-label mb-2">{item.label}</dt>
+          {meta.length > 0 && (
+            <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8 mt-16 pt-10 border-t border-white/15">
+              {meta.map((item) => (
+                <div key={item.label}>
+                  <dt className="text-dark meta-label mb-2">{item.label}</dt>
 
-                <dd className="text-dark text-base font-semibold leading-snug">
-                  {item.value || "—"}
-                </dd>
-              </div>
-            ))}
-          </dl>
+                  <dd className="text-dark text-base font-semibold leading-snug">
+                    {item.value || "—"}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </div>
       </section>
 
       {/* Key figures */}
-      <section className="relative bg-sage text-forest py-12 border-y border-forest/15 overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:divide-x lg:divide-white/15">
-          {project.facts?.map((fact, i) => (
-            <Reveal key={fact.label || i} className="lg:px-8 lg:first:pl-0">
-              <p className="text-3xl text-primary-dark md:text-4xl font-bold tracking-tight tabular-nums">
-                {fact.value}
-              </p>
+      {stats.length > 0 && (
+        <section className="relative bg-sage text-forest py-12 border-y border-forest/15 overflow-hidden">
+          <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:divide-x lg:divide-white/15">
+            {stats.map((fact, i) => (
+              <Reveal key={fact.label || i} className="lg:px-8 lg:first:pl-0">
+                <p className="text-3xl text-primary-dark md:text-4xl font-bold tracking-tight tabular-nums">
+                  {fact.value}
+                </p>
 
-              <p className="text-white/55 meta-label mt-2">{fact.label}</p>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+                <p className="text-white/55 meta-label mt-2">{fact.label}</p>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Narrative */}
       <section className="py-20 md:py-28">
@@ -162,50 +270,83 @@ export default async function ProjectPage({
               </Reveal>
             ))}
 
-            <Reveal>
-              <h2 className="h2-section text-base-text mt-16 mb-10">
-                How we worked
-              </h2>
-            </Reveal>
-
-            <ol className="border-t border-forest/12">
-              {project.approach?.map((step, i) => (
-                <Reveal key={i} delay={i * 90}>
-                  <li className="flex gap-6 py-7 border-b border-forest/12">
-                    <span className="text-forest text-xs font-semibold tabular-nums shrink-0 pt-1">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-
-                    <p className="text-base-text/75 body">{step}</p>
-                  </li>
+            {methods.length > 0 && (
+              <>
+                <Reveal>
+                  <h2 className="h2-section text-base-text mt-16 mb-8">
+                    Expertise
+                  </h2>
                 </Reveal>
-              ))}
-            </ol>
 
-            <Reveal>
-              <h2 className="h2-section text-base-text mt-16 mb-8">
-                What it produced
-              </h2>
-            </Reveal>
+                <ul className="flex flex-wrap gap-2.5">
+                  {methods.map((method) => (
+                    <li
+                      key={method}
+                      className="rounded-full border border-forest/15 px-4 py-2 text-xs font-medium text-forest/75"
+                    >
+                      {method}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
 
-            <ul className="space-y-5">
-              {project.outcomes?.map((item, i) => (
-                <Reveal key={i} delay={i * 90}>
-                  <li className="flex gap-4 text-base-text/75 body">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-yellow mt-2.5 shrink-0" />
-
-                    {item}
-                  </li>
+            {steps.length > 0 && (
+              <>
+                <Reveal>
+                  <h2 className="h2-section text-base-text mt-16 mb-10">
+                    How we worked
+                  </h2>
                 </Reveal>
-              ))}
-            </ul>
+
+                <ol className="border-t border-forest/12">
+                  {steps.map((step, i) => (
+                    <Reveal key={i} delay={i * 90}>
+                      <li className="flex gap-6 py-7 border-b border-forest/12">
+                        <span className="text-forest text-xs font-semibold tabular-nums shrink-0 pt-1">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+
+                        <p className="text-base-text/75 body">{step}</p>
+                      </li>
+                    </Reveal>
+                  ))}
+                </ol>
+              </>
+            )}
+
+            {outputs.length > 0 && (
+              <>
+                <Reveal>
+                  <h2 className="h2-section text-base-text mt-16 mb-8">
+                    What it produced
+                  </h2>
+                </Reveal>
+
+                <ul className="space-y-5">
+                  {outputs.map((item, i) => (
+                    <Reveal key={i} delay={i * 90}>
+                      <li className="flex gap-4 text-base-text/75 body">
+                        <Check
+                          size={18}
+                          strokeWidth={2.5}
+                          className="text-primary shrink-0 mt-1"
+                        />
+
+                        {item}
+                      </li>
+                    </Reveal>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
 
           {/* Sidebar */}
           <aside className="lg:col-span-4 lg:col-start-9">
-            <Reveal>
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden mb-8">
-                {coverUrl && (
+            {coverUrl && (
+              <Reveal>
+                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden mb-8">
                   <Image
                     src={coverUrl}
                     alt={project.title}
@@ -213,32 +354,58 @@ export default async function ProjectPage({
                     sizes="(max-width: 1024px) 100vw, 32vw"
                     className="object-cover"
                   />
-                )}
-              </div>
-            </Reveal>
+                </div>
+              </Reveal>
+            )}
 
-            <Reveal delay={120}>
-              <div className="bg-accent rounded-2xl p-8">
-                <p className="text-base-text/95 meta-label mb-5">Methods</p>
+            {/* Client card. Only when the project is actually linked to a hub. */}
+            {hub && (
+              <Reveal delay={90}>
+                <div className="bg-accent rounded-2xl p-8 mb-8">
+                  <p className="text-base-text/95 meta-label mb-5">Client</p>
 
-                <ul className="space-y-3 mb-8">
-                  {project.methods?.map((method) => (
-                    <li
-                      key={method}
-                      className="flex gap-3 text-base-text/75 body-sm"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-primary mt-2 shrink-0" />
+                  <ClientLogoTile
+                    logo={hub.logo}
+                    name={hub.name}
+                    shortName={hub.shortName}
+                    className="h-20 w-full mb-5"
+                  />
 
-                      {method}
-                    </li>
-                  ))}
-                </ul>
+                  <p className="text-base-text font-semibold leading-snug">
+                    {hub.name}
+                  </p>
 
-                <p className="text-base-text/45 meta-label mb-3">Team</p>
+                  {hub.relationshipType && (
+                    <p className="mt-1 text-base-text/70 body-sm">
+                      {hub.relationshipType}
+                    </p>
+                  )}
 
-                <p className="text-base-text/75 body-sm">{project.team}</p>
-              </div>
-            </Reveal>
+                  <Link
+                    href={`/clients/${hub.slug?.current}`}
+                    className="mt-5 inline-flex items-center gap-2 text-base-text text-sm font-semibold hover:opacity-80 transition-opacity"
+                  >
+                    {hub.projectCount === 1
+                      ? "All 1 assignment"
+                      : `All ${hub.projectCount ?? 0} assignments`}
+                  </Link>
+                </div>
+              </Reveal>
+            )}
+
+            {project.category && (
+              <Reveal delay={120}>
+                <div className="bg-accent rounded-2xl p-8 mb-8">
+                  <p className="text-base-text/95 meta-label mb-5">
+                    Service area
+                  </p>
+
+                  <p className="text-base-text/75 body">
+                    {categoryLabel(project.category)}
+                  </p>
+                </div>
+              </Reveal>
+            )}
 
             {/* Only when the record genuinely has no narrative. This used to be
                 keyed on `externalUrl`, so it printed on every research project
@@ -255,27 +422,50 @@ export default async function ProjectPage({
         </div>
       </section>
 
-      {/* Next project */}
-      {nextProject && (
+      {/* Other assignments for the same client. Siblings arrive already
+          filtered to cleared work and ordered oldest first. */}
+      {siblings.length > 0 && (
         <section className="bg-cream py-16 md:py-20">
           <div className="max-w-[1400px] mx-auto px-6">
-            <p className="text-base-text/75 meta-label mb-6">Next project</p>
+            <p className="text-base-text/75 meta-label mb-8">
+              More from {hub?.name ?? project.client}
+            </p>
 
-            <Link
-              href={`/projects/${nextProject.slug}`}
-              className="group flex flex-col md:flex-row md:items-center justify-between gap-6"
-            >
-              <h2 className="h2-section text-base-text group-hover:text-primary transition-colors max-w-3xl">
-                {nextProject.title}
-              </h2>
-
-              <span className="shrink-0 p-4 rounded-full bg-accent text-dark group-hover:bg-primary transition-colors">
-                <ArrowRight size={22} />
-              </span>
-            </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {siblings.slice(0, 3).map((sibling, i) => (
+                <Reveal key={sibling._id} delay={i * 90}>
+                  <HubProjectCard
+                    project={{
+                      _id: sibling._id,
+                      title: sibling.title,
+                      slug: sibling.slug,
+                      years: sibling.years,
+                      startYear: sibling.startYear,
+                    }}
+                  />
+                </Reveal>
+              ))}
+            </div>
           </div>
         </section>
       )}
+
+      {/* Contact CTA */}
+      <section className="bg-snow py-16 md:py-20">
+        <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <h2 className="h2-section text-base-text max-w-2xl">
+            Have a question about this work?
+          </h2>
+
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-2 rounded-full bg-forest text-white text-sm font-semibold px-6 py-3 hover:bg-forest/90 transition-colors shrink-0"
+          >
+            Get in touch
+            <ArrowUpRight size={14} />
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

@@ -9,7 +9,7 @@ import Cutouts from "@/components/Cutouts";
 const items = [
   {
     id: "01",
-    label: "Expertise",
+    label: "Services",
     href: "/services",
     caption: "Six practices, trusted by partners",
     description:

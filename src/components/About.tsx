@@ -1,14 +1,62 @@
-"use client";
+﻿"use client";
 
 import { ArrowRight } from "lucide-react";
 import { FaYoutube } from "react-icons/fa";
 import AboutImages from "@/components/AboutImages";
+import { highlightText } from "@/lib/highlight";
 
 interface AboutData {
   aboutBlurb?: string;
+  aboutEyebrow?: string;
+  aboutBadge?: string;
+  aboutHeading?: string;
+  aboutHeadingHighlight?: string;
+  aboutCtaLabel?: string;
+}
+
+/* Today's copy, kept as the fallback for every field so an empty CMS document
+   renders exactly as before. */
+const DEFAULT_EYEBROW = "ANWESHAN";
+const DEFAULT_BADGE = "Working since 2016";
+const DEFAULT_HEADING = "Advancing Nepal's public health. Through evidence.";
+const DEFAULT_HEADING_HIGHLIGHT = "public health.";
+const DEFAULT_CTA_LABEL = "About Us";
+const DEFAULT_BLURB =
+  "Anweshan Pvt. Ltd. is a multidisciplinary Clinical Research Organization and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives.";
+const DEFAULT_BLURB_SECOND =
+  "From clinical trials to nationwide household surveys, and from HPV vaccination research to community health toolkit deployments, our work spans the full spectrum of health research across Nepal.";
+
+/* An editor may separate paragraphs with a blank line, or with a single newline
+   from a pasted block. Split on a line break surrounded by whitespace so both
+   produce the same result. */
+function toParagraphs(text: string) {
+  return text
+    .split(/\n\s*\n|\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
 export default function About({ data }: { data?: AboutData }) {
+  const heading = data?.aboutHeading?.trim() || DEFAULT_HEADING;
+  const highlight = data?.aboutHeadingHighlight?.trim() || DEFAULT_HEADING_HIGHLIGHT;
+
+  /* No CMS heading keeps the original markup verbatim, so the highlighted words
+     sit exactly where they always did. A CMS heading is highlighted by
+     matching the editor's phrase. */
+  const headingNode = data?.aboutHeading?.trim() ? (
+    highlightText(heading, highlight, "text-primary-dark")
+  ) : (
+    <>
+      Advancing Nepal&apos;s{" "}
+      <span className="text-primary-dark">public health.</span> Through
+      evidence.
+    </>
+  );
+
+  const paragraphs = data?.aboutBlurb?.trim()
+    ? toParagraphs(data.aboutBlurb)
+    : [DEFAULT_BLURB, DEFAULT_BLURB_SECOND];
+
   return (
       <section className="bg-accent py-16 md:py-24 transition-colors">
       <div className="max-w-[1400px] mx-auto px-6">
@@ -35,25 +83,30 @@ export default function About({ data }: { data?: AboutData }) {
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-2">
                 <p className="text-primary-dark text-sm font-bold tracking-wider uppercase">
-                ANWESHAN</p>
+                {(data?.aboutEyebrow?.trim() || DEFAULT_EYEBROW)}
+              </p>
               </div>
               <span className="bg-white text-primary-dark text-xs font-bold px-3 py-1.5 rounded-md shadow-sm">
-                Working since 2017
+                {data?.aboutBadge?.trim() || DEFAULT_BADGE}
               </span>
             </div>
 
             {/* Simple, Clean Heading */}
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.2] mb-6 text-base-text">
-              Advancing Nepal&apos;s <span className="text-primary-dark">public health.</span> Through evidence.
+              {headingNode}
             </h2>
 
-            {/* Body Copy from Sanity or fallback */}
-            <p className="text-base-text/80 mb-4 body-lg font-medium">
-              {data?.aboutBlurb || "Anweshan Pvt. Ltd. is a multidisciplinary Clinical Research Organization and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives."}
-            </p>
-            <p className="text-base-text/80 mb-10 body-lg font-medium">
-              From clinical trials to nationwide household surveys, and from HPV vaccination research to community health toolkit deployments, our work spans the full spectrum of health research across Nepal.
-            </p>
+            {/* Body Copy from Sanity, split into paragraphs, or the fallback */}
+            {paragraphs.map((paragraph, i) => (
+              <p
+                key={i}
+                className={`text-base-text/80 body-lg font-medium ${
+                  i === paragraphs.length - 1 ? "mb-10" : "mb-4"
+                }`}
+              >
+                {paragraph}
+              </p>
+            ))}
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-4">
@@ -63,7 +116,7 @@ export default function About({ data }: { data?: AboutData }) {
                 onClick={() => (window.location.href = "/about")}
                 className="flex items-center gap-2 rounded-full bg-primary text-white text-sm font-bold px-7 py-3.5 hover:bg-primary-dark transition-colors shadow-sm"
               >
-                About Us
+                {data?.aboutCtaLabel?.trim() || DEFAULT_CTA_LABEL}
                 <ArrowRight size={18} />
               </button>
             </div>

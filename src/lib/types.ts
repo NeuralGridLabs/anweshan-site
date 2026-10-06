@@ -46,7 +46,7 @@ export type SiteSettings = {
   stats?: StatEntry[];
 };
 
-export type HomeSlide = { image?: SanityImage; label?: string };
+export type HomeSlide = { image?: SanityImage; label?: string; alt?: string };
 
 export type Home = {
   heroEyebrow?: string;
@@ -54,13 +54,50 @@ export type Home = {
   heroSubtext?: string;
   primaryCtaLabel?: string;
   secondaryCtaLabel?: string;
+  /* Optional. "#id" scrolls to that id, "/path" or a full URL navigates.
+     Empty means the Hero keeps its built-in default target. */
+  primaryCtaLink?: string;
+  secondaryCtaLink?: string;
   slides?: HomeSlide[];
+  /* Split on blank lines into paragraphs when rendered. */
   aboutBlurb?: string;
+  /* About band on the home page. Each falls back to the component's own copy
+     when empty, so an untouched document renders exactly as before. */
+  aboutEyebrow?: string;
+  aboutBadge?: string;
+  aboutHeading?: string;
+  /* Exact phrase inside aboutHeading to colour; must match character for
+     character. Not found means no coloured words. */
+  aboutHeadingHighlight?: string;
+  aboutCtaLabel?: string;
+  /* Credibility markers in the strip under the hero. The schema caps this at
+     four; an empty array renders no strip at all. */
+  proofItems?: string[];
+  /* Our clients band on the home page, below Publications. Every field falls
+     back to the carousel's own copy, so an untouched document renders exactly
+     as before. */
+  clientsEyebrow?: string;
+  clientsHeading?: string;
+  clientsIntro?: string;
+  /* Both halves of the band's button are needed for it to appear. */
+  clientsCtaLabel?: string;
+  clientsCtaLink?: string;
 };
 
 export type MissionPillar = {
   title?: string;
   text: string;
+};
+
+export type AboutPromise = {
+  title?: string;
+  text?: string;
+};
+
+/* How-we-work step, and a values tile, share this shape. */
+export type AboutStep = {
+  title?: string;
+  text?: string;
 };
 
 export type About = {
@@ -70,6 +107,24 @@ export type About = {
   vision?: string;
   mission?: string;
   missionPillars?: MissionPillar[];
+  /* Story band on /about, under the page header. */
+  storyEyebrow?: string;
+  storyParagraphs?: string[];
+  /* Commitments band on /about. When `promises` is empty the page falls back
+     to the local objectives copy. */
+  purposeEyebrow?: string;
+  purpose?: string;
+  promisesHeading?: string;
+  promises?: AboutPromise[];
+  /* Dark band of /about. Hidden when there are no steps. */
+  howWeWorkHeading?: string;
+  howWeWorkSteps?: AboutStep[];
+  /* Values tiles. Hidden when empty. */
+  valuesHeading?: string;
+  values?: AboutStep[];
+  /* Closing check-list. Hidden when empty. */
+  whyHeading?: string;
+  whyItems?: string[];
 };
 
 /* One section of a service's long-form detail page. Every field is optional so
@@ -90,12 +145,21 @@ export type ServiceItem = {
   image?: SanityImage;
   /* Detail page URL segment. Present only when the service has a detail page. */
   slug?: { _type?: "slug"; current?: string };
-  /* Editor-controlled switch: a service gets a detail page only when this is on
-     AND long-form content exists. Keeps thin pages from being created. */
+  /* Editor-controlled switch: a service gets a detail page only when this is on.
+     Kept thin on purpose — thin pages are prevented here, not by a query that
+     silently 404s. */
   hasDetailPage?: boolean;
+  /* Detail page only. Never rendered on the band in the services list. */
+  tagline?: string;
+  detailBody?: string;
+  capabilities?: string[];
+  /* Shown on both the band and the detail page. */
+  ctaLabel?: string;
+  ctaLink?: string;
   /* Chips shown under the description in the services overview. */
   highlights?: string[];
-  /* Long-form content rendered on the detail page. */
+  /* Retired: superseded by tagline, detailBody and capabilities. Hidden in the
+     Studio, still projected so existing documents keep their data readable. */
   sections?: ServiceSection[];
 };
 
@@ -108,7 +172,12 @@ export type Services = {
 export type ClientItem = { name: string; logo?: SanityImage };
 
 export type Clients = {
+  eyebrow?: string;
   heading?: string;
+  intro?: string;
+  note?: string;
+  ctaLabel?: string;
+  ctaLink?: string;
   items?: ClientItem[];
 };
 
@@ -140,22 +209,93 @@ export type Project = {
   _id: string;
   title: string;
   slug?: { _type?: "slug"; current?: string };
+  /* Legacy free-text partner name. Predates the client hub and is still what the
+     "Partner" line on the project page shows. */
   client?: string;
+  /* Reference link to a clientHub document, projected as the object below. */
+  clientHub?: ClientHubRef;
   year?: number;
+  /* "ready" or "needs-clearance". Absent on legacy documents, which are ready. */
+  webStatus?: string;
+  /* Timeline range. `years` is the pre-existing display string; these two are the
+     structured years used for ordering and the client timeline. */
+  startYear?: number;
+  endYear?: number;
   category?: string;
   summary?: string;
   status?: string;
   years?: string;
   location?: string;
+  /* Doubles as the expertise chip list. */
   methods?: string[];
   team?: string;
   overview?: string[];
   approach?: string[];
   outcomes?: string[];
+  /* Key figures: { value, label }. Doubles as the stats tiles. */
   facts?: ProjectFact[];
   coverImage?: SanityImage;
   externalUrl?: string;
   featured?: boolean;
+};
+
+/** The hub fields a single project needs, as projected by projectBySlugQuery. */
+export type ClientHubRef = {
+  _id: string;
+  name: string;
+  slug?: { _type?: "slug"; current?: string };
+  logo?: SanityImage;
+  shortName?: string;
+  relationshipType?: string;
+  projectCount?: number;
+};
+
+/** One assignment inside a client hub, as projected by clientHubBySlugQuery. */
+export type HubProject = {
+  _id: string;
+  title: string;
+  slug?: { _type?: "slug"; current?: string };
+  summary?: string;
+  category?: string;
+  status?: string;
+  years?: string;
+  startYear?: number;
+  endYear?: number;
+  location?: string;
+  client?: string;
+  methods?: string[];
+  facts?: ProjectFact[];
+};
+
+/** A hub as it appears in the /clients card grid. */
+export type ClientHub = {
+  _id: string;
+  name: string;
+  slug?: { _type?: "slug"; current?: string };
+  logo?: SanityImage;
+  shortName?: string;
+  relationshipType?: string;
+  order?: number;
+  projectCount?: number;
+  firstYear?: number;
+  lastYear?: number;
+  categories?: string[];
+};
+
+/** A hub with its own page: the card fields plus intro, website and projects. */
+export type ClientHubDetail = ClientHub & {
+  intro?: string;
+  website?: string;
+  projects?: HubProject[];
+};
+
+/** One of a project's other assignments for the same client. */
+export type ProjectSibling = {
+  _id: string;
+  title: string;
+  slug?: { _type?: "slug"; current?: string };
+  years?: string;
+  startYear?: number;
 };
 
 export type TeamMember = {

@@ -50,7 +50,7 @@ export const services = defineType({
               name: "slug",
               title: "Slug",
               description:
-                "Used for the detail page URL. Only needed when this service has a detail page.",
+                "Forms the page URL /services/<slug> and the band anchor #<slug>. Needed whenever this service has a detail page.",
               type: "slug",
               options: { source: "title", maxLength: 96 },
             }),
@@ -58,9 +58,71 @@ export const services = defineType({
               name: "hasDetailPage",
               title: "Has detail page",
               description:
-                "When on, the card links to /services/<slug> and the long-form sections below are rendered there. Leave off for services that have no long-form content yet — this is how a detail page gets enabled later, without a code change.",
+                "Turn on to give this service its own page at /services/<slug> and a Learn more link on its band. Needs a slug, tagline, detail paragraph and capabilities.",
               type: "boolean",
               initialValue: false,
+            }),
+
+            /* --- detail page content: shown on the service's own page only,
+                   never on its band in the services list --- */
+
+            defineField({
+              name: "tagline",
+              title: "Tagline",
+              type: "string",
+              description:
+                'The short italic line under the title on the service detail page, for example "Evidence designed around the decision". Shown only on the detail page, not on the band.',
+              validation: (r) =>
+                r.max(70).warning(
+                  "Taglines past 70 characters wrap to two lines under the title.",
+                ),
+            }),
+            defineField({
+              name: "detailBody",
+              title: "Detail paragraph",
+              type: "text",
+              rows: 4,
+              description:
+                "The intro paragraph on the service detail page. Shown only on the detail page, not on the band.",
+              validation: (r) =>
+                r.max(450).warning(
+                  "Paragraphs past 450 characters are hard to read on the detail page.",
+                ),
+            }),
+            defineField({
+              name: "capabilities",
+              title: "Capabilities",
+              type: "array",
+              description:
+                'The "What this includes" bullet list on the service detail page. Shown only on the detail page, not on the band.',
+              of: [
+                defineArrayMember({
+                  type: "string",
+                  validation: (r) =>
+                    r.max(80).warning("Bullets past 80 characters wrap onto two lines."),
+                }),
+              ],
+              validation: (r) =>
+                r.max(8).warning("The detail page lists up to eight capabilities; extra ones are ignored."),
+            }),
+
+            /* --- call to action: shown on both the band and the detail page --- */
+
+            defineField({
+              name: "ctaLabel",
+              title: "Button label",
+              type: "string",
+              description:
+                "Label for this service's button. Shown on both its band in the services list and on its detail page.",
+              validation: (r) =>
+                r.max(40).warning("Shorter labels suit the pill button better."),
+            }),
+            defineField({
+              name: "ctaLink",
+              title: "Button link",
+              type: "string",
+              description:
+                'Where the button goes: an internal path such as "/contact", or a full https URL. Shown on both the band and the detail page.',
             }),
 
             /* --- long-form content, all optional --- */
@@ -73,9 +135,15 @@ export const services = defineType({
               type: "array",
               of: [defineArrayMember({ type: "string" })],
             }),
+            /* --- retired --- */
+
+            /* Superseded by tagline, detailBody and capabilities above. Kept in the
+               schema so existing documents keep their data, but hidden so no one
+               edits it and nothing new is written against it. */
             defineField({
               name: "sections",
               title: "Detail sections",
+              hidden: true,
               description:
                 "Long-form content for the detail page: a heading, an optional paragraph, and optional bullets. Every part is optional, so a section can be just a heading plus bullets.",
               type: "array",
@@ -106,10 +174,10 @@ export const services = defineType({
             }),
           ],
           preview: {
-            select: { title: "title", hasDetail: "hasDetailPage" },
-            prepare: ({ title, hasDetail }) => ({
+            select: { title: "title", slug: "slug", hasDetail: "hasDetailPage" },
+            prepare: ({ title, slug, hasDetail }) => ({
               title: title || "(untitled service)",
-              subtitle: hasDetail ? "Has detail page" : "Overview only",
+              subtitle: `${slug?.current || "no slug"} · Detail page ${hasDetail ? "on" : "off"}`,
             }),
           },
         },

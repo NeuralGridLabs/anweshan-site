@@ -10,8 +10,9 @@ import NavLinks from "@/components/NavLinks";
 const mobileLinks = [
   { label: "Home", href: "/" },
   { label: "About us", href: "/about" },
-  { label: "Expertise", href: "/services" },
+  { label: "Services", href: "/services" },
   { label: "Projects", href: "/projects" },
+  { label: "Clients", href: "/clients" },
   {
     label: "Team",
     href: "/team",

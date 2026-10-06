@@ -18,8 +18,21 @@ export const homeQuery = groq`*[_type == "home"][0]{
   heroSubtext,
   primaryCtaLabel,
   secondaryCtaLabel,
-  slides[] { image, label },
-  aboutBlurb
+  primaryCtaLink,
+  secondaryCtaLink,
+  slides[] { image, label, alt },
+  aboutBlurb,
+  aboutEyebrow,
+  aboutBadge,
+  aboutHeading,
+  aboutHeadingHighlight,
+  aboutCtaLabel,
+  proofItems,
+  clientsEyebrow,
+  clientsHeading,
+  clientsIntro,
+  clientsCtaLabel,
+  clientsCtaLink
 }`;
 
 export const aboutQuery = groq`*[_type == "about"][0]{
@@ -28,7 +41,19 @@ export const aboutQuery = groq`*[_type == "about"][0]{
   image,
   vision,
   mission,
-  missionPillars[]{ title, text }
+  missionPillars[]{ title, text },
+  storyEyebrow,
+  storyParagraphs,
+  purposeEyebrow,
+  purpose,
+  promisesHeading,
+  promises[]{ title, text },
+  howWeWorkHeading,
+  howWeWorkSteps[]{ title, text },
+  valuesHeading,
+  values[]{ title, text },
+  whyHeading,
+  whyItems
 }`;
 
 export const servicesQuery = groq`*[_type == "services"][0]{
@@ -46,24 +71,48 @@ export const servicesQuery = groq`*[_type == "services"][0]{
     },
     slug,
     hasDetailPage,
+    tagline,
+    detailBody,
+    capabilities,
+    ctaLabel,
+    ctaLink,
     highlights,
     sections[]{ _key, heading, body, bullets }
   }
 }`;
 
-/* One service's long-form content, for the detail page.
+/* One service's own page content.
 
-   Matches the overview query on `hasDetailPage` and requires at least one
-   section, so a service can never serve a detail page that has nothing on it.
-   The `!(_id in path("drafts.**"))` guard matches the other queries: the client
-   pins apiVersion 2024-01-01, which predates Sanity's published-only default. */
+   Matches on the `hasDetailPage` switch only. It used to require
+   `count(sections) > 0` as well, but `sections` is now a retired field, so that
+   clause would have made every lookup return nothing. $slug is always a GROQ
+   parameter: no caller input is ever concatenated into the query string. */
 export const serviceBySlugQuery = groq`*[_type == "services"][0]{
-  heading,
-  "items": items[slug.current == $slug && hasDetailPage == true && count(sections) > 0]
+  "items": items[slug.current == $slug && hasDetailPage == true]{
+    _key,
+    title,
+    tagline,
+    detailBody,
+    capabilities,
+    ctaLabel,
+    ctaLink,
+    "image": image{
+      ...,
+      alt,
+      "dims": asset->metadata.dimensions
+    },
+    slug,
+    hasDetailPage
+  }
 }`;
 
 export const clientsQuery = groq`*[_type == "clients"][0]{
+  eyebrow,
   heading,
+  intro,
+  note,
+  ctaLabel,
+  ctaLink,
   items[] { name, logo }
 }`;
 
@@ -85,12 +134,14 @@ export const contactQuery = groq`*[_type == "contact"][0]{
    COLLECTIONS (many documents each)
    ----------------------------------------------------------------------- */
 
-export const projectsQuery = groq`*[_type == "project"] | order(year desc) {
+export const projectsQuery = groq`*[_type == "project" && coalesce(webStatus, "ready") == "ready"] | order(year desc) {
   _id,
   title,
   slug,
   client,
   year,
+  startYear,
+  endYear,
   category,
   summary,
   status,
@@ -101,19 +152,78 @@ export const projectsQuery = groq`*[_type == "project"] | order(year desc) {
   overview,
   approach,
   outcomes,
-  facts[] { label, value },
+  facts[] { value, label },
   body,
   coverImage,
   externalUrl,
   featured
 }`;
 
-export const projectBySlugQuery = groq`*[_type == "project" && slug.current == $slug][0]{
+/* Siblings are the same client's other ready assignments, oldest first. Filtered
+   exactly like everything else, and this project is excluded from its own list.
+
+   Note: GROQ has no comment syntax, so every comment in this file must sit
+   OUTSIDE the backticks. One placed inside a query string parses as an error and
+   the fetch returns null, which fails silently as "no data". */
+export const projectBySlugQuery = groq`*[_type == "project"
+  && slug.current == $slug
+  && coalesce(webStatus, "ready") == "ready"][0]{
+  _id,
+  title,
+  slug,
+  client,
+  category,
+  summary,
+  status,
+  years,
+  startYear,
+  endYear,
+  location,
+  methods,
+  team,
+  overview,
+  approach,
+  outcomes,
+  facts[] { value, label },
+  body,
+  coverImage,
+  externalUrl,
+  featured,
+  year,
+  webStatus,
+  "clientHub": clientHub->{
+    _id,
+    name,
+    slug,
+    logo{ ..., alt },
+    shortName,
+    relationshipType,
+    "projectCount": count(*[_type == "project"
+      && references(^._id)
+      && coalesce(webStatus, "ready") == "ready"])
+  },
+  "siblings": *[_type == "project"
+    && coalesce(webStatus, "ready") == "ready"
+    && references(^.clientHub._ref)
+    && !(_id == ^._id)] | order(coalesce(startYear, year) asc){
+      _id,
+      title,
+      slug,
+      years,
+      startYear
+    }
+}`;
+
+export const featuredProjectsQuery = groq`*[_type == "project"
+  && featured == true
+  && coalesce(webStatus, "ready") == "ready"] | order(year desc) {
   _id,
   title,
   slug,
   client,
   year,
+  startYear,
+  endYear,
   category,
   summary,
   status,
@@ -124,34 +234,85 @@ export const projectBySlugQuery = groq`*[_type == "project" && slug.current == $
   overview,
   approach,
   outcomes,
-  facts[] { label, value },
+  facts[] { value, label },
   body,
   coverImage,
   externalUrl,
   featured
 }`;
 
-export const featuredProjectsQuery = groq`*[_type == "project" && featured == true] | order(year desc) {
+/* --------------------------------------------------------------------------
+    CLIENT HUBS AND PROJECTS
+
+    Every query below filters on `coalesce(webStatus, "ready") == "ready"`.
+    The coalesce is what makes this safe to add to a dataset that already has
+    documents: a legacy project with no webStatus at all is treated as ready,
+    so nothing disappears on deploy. Only a document explicitly set to
+    "needs-clearance" is withheld.
+
+    The same filter is applied to hubs, to the projects inside a hub, to the
+    sibling lookups and to the counts. A count that ignored it would advertise
+    assignments the visitor cannot open.
+   ----------------------------------------------------------------------- */
+
+/* A hub with nothing to show would render as an empty page, so the final
+   filter withholds it entirely rather than linking to a blank page. */
+export const clientHubsQuery = groq`*[_type == "clientHub" && coalesce(webStatus, "ready") == "ready"]{
   _id,
-  title,
+  name,
   slug,
-  client,
-  year,
-  category,
-  summary,
-  status,
-  years,
-  location,
-  methods,
-  team,
-  overview,
-  approach,
-  outcomes,
-  facts[] { label, value },
-  body,
-  coverImage,
-  externalUrl,
-  featured
+  logo{ ..., alt },
+  shortName,
+  relationshipType,
+  order,
+  "projectCount": count(*[_type == "project"
+    && references(^._id)
+    && coalesce(webStatus, "ready") == "ready"]),
+  "firstYear": math::min(*[_type == "project"
+    && references(^._id)
+    && coalesce(webStatus, "ready") == "ready"
+    && startYear > 0].startYear),
+  "lastYear": math::max(*[_type == "project"
+    && references(^._id)
+    && coalesce(webStatus, "ready") == "ready"
+    && coalesce(endYear, startYear) > 0]{
+      "y": coalesce(endYear, startYear)
+    }.y),
+  "categories": array::unique(*[_type == "project"
+    && references(^._id)
+    && coalesce(webStatus, "ready") == "ready"].category)
+}[projectCount > 0] | order(order asc, name asc)`;
+
+export const clientHubBySlugQuery = groq`*[_type == "clientHub"
+  && slug.current == $slug
+  && coalesce(webStatus, "ready") == "ready"][0]{
+  _id,
+  name,
+  slug,
+  logo{ ..., alt },
+  shortName,
+  relationshipType,
+  order,
+  intro,
+  website,
+  "projects": *[_type == "project"
+    && references(^._id)
+    && coalesce(webStatus, "ready") == "ready"]
+    | order(coalesce(startYear, year) desc, title asc){
+      _id,
+      title,
+      slug,
+      summary,
+      category,
+      status,
+      years,
+      startYear,
+      endYear,
+      location,
+      client,
+      methods,
+      facts[]{ value, label }
+    }
 }`;
 
 export const teamMembersQuery = groq`*[_type == "teamMember"] | order(order asc) {

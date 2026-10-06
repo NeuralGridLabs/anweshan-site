@@ -4,11 +4,11 @@ import { ArrowRight } from "lucide-react";
 
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
-import ClientMarquee from "@/components/ClientMarquee";
 
 import { servicesQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
+import { hasServiceDetail } from "@/lib/services";
 import type { Services as ServicesData } from "@/lib/types";
 
 /* Service imagery and the alternating light/dark banding are presentation, not
@@ -31,10 +31,6 @@ export default async function ServicesPage() {
 
   return (
     <main className="min-h-screen bg-snow">
-      <div id="clients" className="scroll-mt-20">
-        <ClientMarquee />
-      </div>
-
       <PageHeader
         tone="primary"
         eyebrow="Our services"
@@ -64,10 +60,13 @@ export default async function ServicesPage() {
           const band = BANDS[i % BANDS.length];
           const flipped = i % 2 === 1;
 
-          /* A service links to its detail page only when the editor has both
-             enabled it and given it long-form content. Anything else renders as
-             plain text, so there is no dead or empty link on the page. */
-          const slug = service.hasDetailPage ? service.slug?.current : undefined;
+          /* A service links to its detail page only when the shared gate in
+             lib/services.ts agrees: the flag is on, there is a slug, and there is
+             body content to show. The route applies the same test, so the link and
+             the page can never disagree and produce a 404. */
+          const slug = hasServiceDetail(service)
+            ? service.slug?.current
+            : undefined;
 
           /* The image attached to this service in the Studio. Absent is fine:
              the card simply has no image panel. */

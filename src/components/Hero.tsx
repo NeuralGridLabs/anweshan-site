@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 interface HeroSlide {
   image: string;
   label: string;
+  alt?: string;
 }
 
 interface HeroData {
@@ -15,6 +16,10 @@ interface HeroData {
   heroSubtext?: string;
   primaryCtaLabel?: string;
   secondaryCtaLabel?: string;
+  /* Optional. "#id" scrolls to that id, "/path" or a full URL navigates.
+     Empty falls back to the built-in default for that button. */
+  primaryCtaLink?: string;
+  secondaryCtaLink?: string;
   slides?: HeroSlide[];
 }
 
@@ -87,6 +92,35 @@ export default function Hero({ data }: { data?: HeroData }) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  /* Follows a CMS-authored CTA target, falling back to the built-in default when
+     the field is empty so an untouched document behaves exactly as before.
+
+     "#id" scrolls smoothly, matching the primary button's existing feel. A path
+     or full URL is left to the browser: "#" is deliberately only honoured at the
+     start, so "https://x.com/#y" still navigates rather than trying to find a
+     DOM id. */
+  const followLink = (link: string | undefined, fallback: () => void) => {
+    const value = link?.trim();
+
+    if (!value) {
+      fallback();
+      return;
+    }
+
+    if (value.startsWith("#") && value.length > 1) {
+      scrollTo(value.slice(1));
+      return;
+    }
+
+    window.location.href = value;
+  };
+
+  /* Labels come from the CMS, so surrounding whitespace is trimmed at render
+     rather than trimmed in the data layer. An all-whitespace label falls back to
+     the default. */
+  const primaryLabel = data?.primaryCtaLabel?.trim() || "See our work";
+  const secondaryLabel = data?.secondaryCtaLabel?.trim() || "Our clients";
+
   return (
     <section className="relative overflow-hidden" style={{ backgroundColor: "#EAB308" }}>
 
@@ -122,17 +156,23 @@ export default function Hero({ data }: { data?: HeroData }) {
 
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
-              onClick={() => scrollTo("projects")}
+              onClick={() =>
+                followLink(data?.primaryCtaLink, () => scrollTo("projects"))
+              }
               className="flex items-center gap-2 rounded-full bg-forest text-white text-sm font-semibold px-6 py-3 hover:bg-forest/90 transition-colors"
             >
-              {data?.primaryCtaLabel || "See our work"}
+              {primaryLabel}
               <ArrowRight size={14} />
             </button>
             <button
-              onClick={() => (window.location.href = "/services#clients")}
-              className="flex items-center gap-2 rounded-full border border-forest/30 text-forest text-sm font-semibold px-6 py-3 hover:border-forest hover:bg-forest/10 transition-colors"
+              onClick={() =>
+                followLink(data?.secondaryCtaLink, () => {
+                  window.location.href = "/clients";
+                })
+              }
+              className="flex items-center gap-2 rounded-full border border-forest/30 text-forest text-sm font-semibold px-6 py-3 hover:bg-forest hover:bg-forest/10 transition-colors"
             >
-              {data?.secondaryCtaLabel || "Our clients"}
+              {secondaryLabel}
             </button>
           </div>
         </div>
@@ -144,7 +184,7 @@ export default function Hero({ data }: { data?: HeroData }) {
             <Image
               key={slide.image}
               src={slide.image}
-              alt={slide.label}
+              alt={slide.alt || slide.label}
               fill
               sizes="(max-width: 1400px) 100vw, 1400px"
               className={`object-cover transition-opacity duration-[1500ms] ease-in-out ${

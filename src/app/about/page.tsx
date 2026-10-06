@@ -4,6 +4,9 @@ import { ArrowRight } from "lucide-react";
 
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
+import HowWeWork from "@/components/HowWeWork";
+import Values from "@/components/Values";
+import WhyAnweshan from "@/components/WhyAnweshan";
 
 import { aboutQuery, homeQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
@@ -40,15 +43,61 @@ export default async function AboutPage() {
     ? aboutData.missionPillars
     : fallbackMissionPillars;
 
+  const promises = (aboutData?.promises ?? []).filter(
+    (p) => p?.title?.trim() || p?.text?.trim(),
+  );
+
+  /* Blank entries are dropped so an empty paragraph never renders as a gap. */
+  const storyParagraphs = (aboutData?.storyParagraphs ?? [])
+    .map((p) => p?.trim())
+    .filter((p): p is string => Boolean(p));
+
   return (
     <main className="min-h-screen text-base bg-snow">
       <PageHeader
         tone="ink"
-        title="About Us"
+        title={aboutData?.heading?.trim() || "About Us"}
         lead={aboutData?.body || homeData?.aboutBlurb}
         plain
         stacked
       />
+
+      {/* Story: the narrative band directly under the header. Hidden entirely
+          when no paragraphs are set, so an unconfigured document shows nothing
+          between the header and the vision band. */}
+      {storyParagraphs.length > 0 && (
+        <section className="bg-snow py-20 md:py-32">
+          <div className="max-w-[1400px] mx-auto px-6">
+            {aboutData?.storyEyebrow?.trim() && (
+              <Reveal>
+                <p className="text-forest/70 mb-10 text-sm md:text-xl font-semibold tracking-[0.2em] uppercase">
+                  {aboutData.storyEyebrow.trim()}
+                </p>
+              </Reveal>
+            )}
+
+            {/* First paragraph leads at a larger size on the left; anything
+                after it stacks on the right at the regular reading size. */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
+              <Reveal delay={80}>
+                <p className="text-base-text/80 body-lg">{storyParagraphs[0]}</p>
+              </Reveal>
+
+              {storyParagraphs.length > 1 && (
+                <Reveal delay={160}>
+                  <div className="flex flex-col gap-6">
+                    {storyParagraphs.slice(1).map((paragraph, i) => (
+                      <p key={i} className="text-base-text/70 body">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </Reveal>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Vision */}
       <section className="relative py-24 md:py-36 overflow-hidden">
@@ -129,52 +178,86 @@ export default async function AboutPage() {
       {/* Objectives */}
       <section className="relative bg-ivory text-forest py-20 md:py-32 overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16 md:mb-20">
+<div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12 md:mb-16">
             <div className="md:col-span-8">
-              <p className="text-forest/70 mb-6 text-sm md:text-xl font-semibold tracking-[0.2em] uppercase">
-                Our objective
-              </p>
+              {promises.length > 0 ? (
+                <>
+                  {aboutData?.purposeEyebrow?.trim() && (
+                    <p className="eyebrow font-bold text-primary-dark mb-6 text-base md:text-lg">
+                      {aboutData.purposeEyebrow.trim()}
+                    </p>
+                  )}
 
-              <h2 className="h2-section text-forest">
-                Two commitments that shape every engagement.
-              </h2>
+                  {aboutData?.purpose?.trim() && (
+                    <p className="text-forest body-lg max-w-3xl mb-8">
+                      {aboutData.purpose.trim()}
+                    </p>
+                  )}
+
+                  <h2 className="h2-section text-forest">
+                    {aboutData?.promisesHeading?.trim() ||
+                      "Two commitments that shape every engagement."}
+                  </h2>
+                </>
+              ) : (
+                <>
+                  <p className="eyebrow font-bold text-primary-dark mb-6 text-base md:text-lg">
+                    Our objective
+                  </p>
+
+                  <h2 className="h2-section text-forest">
+                    Two commitments that shape every engagement.
+                  </h2>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Two-column objectives */}
-          <div className="relative grid grid-cols-1 md:grid-cols-2">
-            <span
-              aria-hidden
-              className="hidden md:block absolute inset-y-8 left-1/2 w-px bg-forest/15"
-            />
+          {/* Single-column editorial list.
 
-            {fallbackObjectives.map((item, i) => (
-              <Reveal key={item.id} delay={i * 140}>
-                <div
-                  className={`h-full py-10 md:py-4 ${
-                    i === 0
-                      ? "md:pr-16 border-b border-forest/15 md:border-b-0"
-                      : "md:pl-16"
+              Promises and the fallback objectives share this layout; the two
+              shapes differ, so both are normalised to an optional heading plus a
+              body. One row per item, rules between them, no divider and no
+              alternating indents — the number, title and description therefore
+              start at the same x in every row. */}
+          <ul>
+            {(
+              promises.length > 0
+                ? promises.map((p) => ({ heading: p.title, text: p.text }))
+                : fallbackObjectives.map((o) => ({ heading: undefined, text: o.text }))
+            ).map((item, i, all) => (
+              <Reveal key={item.heading ?? i} delay={i * 90}>
+                <li
+                  className={`grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-3 py-8 md:py-10 border-t border-forest/15 ${
+                    i === all.length - 1 ? "border-b border-forest/15" : ""
                   }`}
                 >
-                  <p className="text-forest/40 text-sm font-semibold tabular-nums mb-8">
-                    {item.id}
+                  <p className="md:col-span-1 lg:col-span-2 eyebrow font-bold text-primary-dark text-base md:text-lg">
+                    {String(i + 1).padStart(2, "0")}
                   </p>
 
-                  <p className="text-2xl md:text-4xl font-bold leading-[1.22] tracking-tight mb-8 first-letter:float-left first-letter:mr-3 first-letter:text-6xl md:first-letter:text-7xl first-letter:leading-[0.85] first-letter:font-bold first-letter:text-forest">
-                    {item.text}
-                  </p>
+                  <div className="md:col-span-5 lg:col-span-5">
+                    <h3 className="text-2xl md:text-3xl font-bold leading-tight text-forest text-balance">
+                      {item.heading || item.text}
+                    </h3>
+                  </div>
 
-                
-                </div>
+                  {item.heading && item.text && (
+                    <div className="md:col-span-6 lg:col-span-5">
+                      <p className="text-forest/80 body-lg max-w-xl">
+                        {item.text}
+                      </p>
+                    </div>
+                  )}
+                </li>
               </Reveal>
             ))}
-          </div>
+          </ul>
 
           <Reveal delay={220}>
             <Link
               href="/publications"
-              className="group inline-flex items-center gap-3 rounded-full bg-gold text-forest text-sm font-semibold px-8 py-4 mt-16 hover:bg-primary transition-colors"
+              className="group inline-flex items-center gap-3 rounded-full bg-gold text-forest text-sm font-semibold px-8 py-4 mt-12 hover:bg-primary transition-colors"
             >
               Our publications
 
@@ -186,6 +269,21 @@ export default async function AboutPage() {
           </Reveal>
         </div>
       </section>
+
+      {/* Each band renders nothing when its CMS fields are empty, so the page
+          falls back to today's four sections with no gaps. Backgrounds run
+          ivory → forest → sage → ivory, none repeating against a neighbour. */}
+      <HowWeWork
+        heading={aboutData?.howWeWorkHeading}
+        steps={aboutData?.howWeWorkSteps}
+      />
+
+      <Values heading={aboutData?.valuesHeading} values={aboutData?.values} />
+
+      <WhyAnweshan
+        heading={aboutData?.whyHeading}
+        items={aboutData?.whyItems}
+      />
     </main>
   );
 }

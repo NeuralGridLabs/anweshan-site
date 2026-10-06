@@ -6,6 +6,7 @@ import { clients } from "./clients";
 import { career } from "./career";
 import { contact } from "./contact";
 import { project } from "./project";
+import { clientHub } from "./clientHub";
 import { teamMember } from "./teamMember";
 import { publication } from "./publication";
 import { galleryEvent } from "./galleryEvent";
@@ -21,6 +22,7 @@ export const schemaTypes = [
   contact,
   // Collections (many documents)
   project,
+  clientHub,
   teamMember,
   publication,
   galleryEvent,

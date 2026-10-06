@@ -1,5 +1,21 @@
 import { defineField, defineType } from "sanity";
 
+import { CATEGORY_OPTIONS } from "../../src/lib/categories";
+import { webStatusField } from "./clientHub";
+
+/* Field-name note, because it is easy to trip over:
+
+   `client` here is a plain string holding the partner's name, and it predates
+   the client hub. It is left exactly as it is. The structured link to a
+   clientHub document is the separate `clientHub` reference below, so no
+   existing project loses its client text and the hub can be linked without
+   renaming anything.
+
+   Likewise these already carry the meaning the site needs, so they are reused
+   rather than duplicated: `years` is the timeline, `client` is the partner,
+   `methods` is the expertise list, `facts` is the stats row, `approach` is
+   "How we worked" and `outcomes` is "What it produced". */
+
 export const project = defineType({
   name: "project",
   title: "Project",
@@ -18,9 +34,62 @@ export const project = defineType({
       options: { source: "title", maxLength: 96 },
       validation: (r) => r.required(),
     }),
+    defineField({
+      name: "clientHub",
+      title: "Client hub",
+      type: "reference",
+      description:
+        "Links this project to a Client hub, which gives both a shared page. Leave empty and the project simply has no client page.",
+      to: [{ type: "clientHub" }],
+    }),
     defineField({ name: "client", title: "Client / Partner", type: "string" }),
     defineField({ name: "year", title: "Year", type: "number" }),
-    defineField({ name: "category", title: "Category / Theme", type: "string" }),
+    defineField({
+      name: "category",
+      title: "Category / Theme",
+      type: "string",
+      description:
+        "Service area this project belongs to. Drives the filter chips on a client's page.",
+      options: { list: CATEGORY_OPTIONS },
+    }),
+    defineField({
+      name: "startYear",
+      title: "Start year",
+      type: "number",
+      description:
+        "Year the assignment began. Used for ordering and for the timeline on a client's page.",
+      validation: (r) =>
+        r.min(1900).max(2100).warning("Enter a four-digit year."),
+    }),
+    defineField({
+      name: "endYear",
+      title: "End year",
+      type: "number",
+      description:
+        "Year the assignment finished. Leave empty when it is still running or the year is the same as the start.",
+      validation: (r) =>
+        r
+          .min(1900)
+          .max(2100)
+          .warning("Enter a four-digit year.")
+          /* Compared against the sibling start year. Sanity has no warning-level
+             custom rule, so this one surfaces as a message on the field; the
+             range checks above stay soft warnings. */
+          .custom((endYear, context) => {
+            const startYear = (context.document as { startYear?: number } | undefined)
+              ?.startYear;
+
+            if (
+              typeof endYear === "number" &&
+              typeof startYear === "number" &&
+              endYear < startYear
+            ) {
+              return "End year is earlier than the start year.";
+            }
+
+            return true;
+          }),
+    }),
     defineField({
       name: "summary",
       title: "Summary",
@@ -90,6 +159,23 @@ export const project = defineType({
         "Link to a live product or platform hosted elsewhere, e.g. a web app. Use this for the Anweshan-operated platforms, which link out instead of to an internal project route.",
     }),
     defineField({ name: "featured", title: "Featured on home", type: "boolean", initialValue: false }),
+    webStatusField(),
   ],
-  preview: { select: { title: "title", subtitle: "client", media: "coverImage" } },
+  preview: {
+    select: {
+      title: "title",
+      hubName: "clientHub->name",
+      webStatus: "webStatus",
+      media: "coverImage",
+    },
+    prepare: ({ title, hubName, webStatus }) => ({
+      title: title || "(untitled project)",
+      /* The hub and the clearance state together, so a row answers "is this
+         visible, and on whose page does it appear?" at a glance. */
+      subtitle:
+        (hubName || "No client hub") +
+        " · " +
+        (webStatus === "needs-clearance" ? "Needs clearance" : "Ready"),
+    }),
+  },
 });

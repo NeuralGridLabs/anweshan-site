@@ -1,7 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+
+/* One logo as the CMS delivers it: an already-resolved CDN or local URL. */
+export type MarqueeLogo = { name: string; src: string };
 
 type Logo = {
   name: string;
@@ -9,7 +13,18 @@ type Logo = {
   short?: string;
 };
 
-const logos: Logo[] = [
+type ClientMarqueeProps = {
+  eyebrow?: string;
+  heading?: string;
+  intro?: string;
+  ctaLabel?: string;
+  ctaLink?: string;
+  logos?: MarqueeLogo[];
+};
+
+/* Fallback only: used when the CMS list is empty, so the strip still renders
+   the logos the site has always shipped with. */
+const FALLBACK_LOGOS: Logo[] = [
   {
     name: "World Health Organization",
     file: "/images/clients/who.png",
@@ -35,7 +50,7 @@ const logos: Logo[] = [
     file: "/images/clients/MoHP.png",
   },
   {
-    name: "GiZ",
+    name: "GIZ",
     file: "/images/clients/GIZ.jpg",
   },
   {
@@ -66,7 +81,7 @@ const logos: Logo[] = [
   {
     name: "Helen Keller International",
     file:
-      "/images/clients/Helen_Keller_International_logo.svg.webp",
+      "/images/clients/Helen_Keller_International_logo.webp",
   },
   {
     name: "DanChurchAid",
@@ -79,6 +94,12 @@ const logos: Logo[] = [
 ];
 
 const SPEED = 0.12;
+
+/* Each mark is a fixed `w-44` (176px) box. A short CMS list is repeated inside
+   every copy until one copy is at least this wide, so the seamless loop never
+   leaves a visible gap at the end of the strip. */
+const MARK_WIDTH = 176;
+const TARGET_COPY_WIDTH = 1600;
 
 function Mark({ logo, priority }: { logo: Logo; priority?: boolean }) {
   return (
@@ -102,7 +123,42 @@ function Mark({ logo, priority }: { logo: Logo; priority?: boolean }) {
   );
 }
 
-export default function ClientMarquee() {
+/* An internal path goes through next/link for a client-side transition;
+   everything else (absolute URLs, bare fragments) uses a plain anchor. */
+function isInternal(href: string) {
+  return href.startsWith("/") && !href.startsWith("//");
+}
+
+export default function ClientMarquee({
+  eyebrow,
+  heading,
+  intro,
+  ctaLabel,
+  ctaLink,
+  logos,
+}: ClientMarqueeProps) {
+  const items: Logo[] =
+    logos && logos.length > 0
+      ? logos.map((logo) => ({ name: logo.name, file: logo.src }))
+      : FALLBACK_LOGOS;
+
+  /* Repeat a short list so one copy fills the strip. With the full 16-logo
+     fallback this is 1, i.e. exactly today's behaviour. */
+  const repeats = Math.max(
+    1,
+    Math.ceil(TARGET_COPY_WIDTH / (MARK_WIDTH * items.length)),
+  );
+
+  const row = Array.from({ length: repeats }, () => items).flat();
+
+  /* The button always points somewhere useful: CMS values win, otherwise it
+     falls back to the clients page so the band is never a dead end. */
+  const ctaHref = ctaLink?.trim() || "/clients";
+  const ctaText = ctaLabel?.trim() || "View clients";
+
+  const ctaClasses =
+    "inline-flex items-center gap-2 rounded-full bg-forest text-white text-sm font-semibold px-6 py-3 hover:bg-forest/90 transition-colors";
+
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const copyRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
@@ -187,21 +243,32 @@ export default function ClientMarquee() {
   };
 
   return (
-    <section className="relative bg-sage pt-16 md:pt-24 overflow-hidden">
+    <section id="clients" className="relative bg-mint pt-16 md:pt-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-10">
         <p className="text-forest/70 text-[14px] font-semibold tracking-[0.18em] uppercase mb-4">
-          Who we work with
+          {eyebrow?.trim() || "Who we work with"}
         </p>
 
         <h2 className="h2-section text-forest max-w-3xl">
-          Anweshan has worked with a wide range of clients.
+          {heading?.trim() || "Anweshan has worked with a wide range of clients."}
         </h2>
 
         <p className="mt-5 text-forest/75 body-lg max-w-2xl">
-          Government bodies, UN agencies, universities, and international
-          organisations across development research, information technology,
-          and communications.
+          {intro?.trim() ||
+            "Government bodies, UN agencies, universities, and international organisations across development research, information technology, and communications."}
         </p>
+
+        <div className="mt-8">
+          {isInternal(ctaHref) ? (
+            <Link href={ctaHref} className={ctaClasses}>
+              {ctaText}
+            </Link>
+          ) : (
+            <a href={ctaHref} className={ctaClasses}>
+              {ctaText}
+            </a>
+          )}
+        </div>
       </div>
 
       <div className="relative bg-white py-12 md:py-14">
@@ -227,7 +294,7 @@ export default function ClientMarquee() {
                 className="flex shrink-0 pr-6"
                 aria-hidden={copy > 0}
               >
-                {logos.map((logo, i) => (
+                {row.map((logo, i) => (
                   <Mark
                     key={`${logo.name}-${i}`}
                     logo={logo}
