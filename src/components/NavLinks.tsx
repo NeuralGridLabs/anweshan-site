@@ -15,6 +15,7 @@ const navLinks: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About us", href: "/about" },
   { label: "Services", href: "/services" },
+  { label: "CRO", href: "/cro" },
   { label: "Projects", href: "/projects" },
   { label: "Publications", href: "/publications" },
   /* Permanent redirect to the Our clients band on the home page. */

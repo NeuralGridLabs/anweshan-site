@@ -73,6 +73,9 @@ export type Home = {
   /* Credibility markers in the strip under the hero. The schema caps this at
      four; an empty array renders no strip at all. */
   proofItems?: string[];
+  servicesEyebrow?: string;
+  servicesHeading?: string;
+  serviceCards?: { title?: string; description?: string; link?: string }[];
   /* Our clients band on the home page, below Publications. Every field falls
      back to the carousel's own copy, so an untouched document renders exactly
      as before. */

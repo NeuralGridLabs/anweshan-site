@@ -80,7 +80,7 @@ export default async function ContactPage() {
         tone="clay"
         eyebrow="Contact us"
         title={contactData?.heading || "Start a conversation about your research question."}
-        lead="Whether you need full CRO support, a Q-squared survey, an evaluation, or communication design, our team in Lalitpur will get back to you."
+        lead="Whether you need CRO services, a Q-squared survey, an evaluation, or communication design, our team in Lalitpur will get back to you."
         image="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Kathmandu valley"
       />
@@ -215,7 +215,7 @@ export default async function ContactPage() {
                   name="subject"
                   className="bg-transparent border-0 border-b border-primary/25 pb-3 text-base-text text-base outline-none focus:border-primary transition-colors"
                 >
-                  <option>Clinical Research Services (CRO)</option>
+                  <option>Clinical research or CRO enquiry</option>
                   <option>Q-Squared Research</option>
                   <option>Research & Policy Dialogue</option>
                   <option>Health & Development Communication</option>
@@ -224,6 +224,12 @@ export default async function ContactPage() {
                   <option>Career</option>
                   <option>Other</option>
                 </select>
+                <a
+                  href="/cro#enquiry"
+                  className="mt-3 w-fit text-sm font-semibold text-forest underline underline-offset-4 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+                >
+                  Discuss a CRO study in Nepal
+                </a>
               </Reveal>
 
               <Reveal
