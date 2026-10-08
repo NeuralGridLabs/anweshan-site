@@ -30,11 +30,11 @@ type PageHeaderProps = {
 };
 
 const tones: Record<Tone, { bg: string; text: string; sub: string; rule: string; eyebrow: string; bar: string }> = {
-  ink:     { bg: "bg-sage",   text: "text-forest",    sub: "text-forest/70", rule: "border-forest/15", eyebrow: "text-forest",         bar: "bg-forest" },
-  teal:    { bg: "bg-cream",  text: "text-forest",    sub: "text-forest/70", rule: "border-forest/15", eyebrow: "text-forest",         bar: "bg-forest" },
-  primary: { bg: "bg-ivory",  text: "text-forest",    sub: "text-forest/70", rule: "border-forest/15", eyebrow: "text-forest",         bar: "bg-forest" },
-  sand:    { bg: "bg-mint",   text: "text-forest",    sub: "text-forest/80", rule: "border-forest/20", eyebrow: "text-forest",      bar: "bg-forest" },
-  clay:    { bg: "bg-neon",   text: "text-forest",    sub: "text-forest/80", rule: "border-forest/20", eyebrow: "text-forest",        bar: "bg-forest" },
+  ink:     { bg: "bg-sage",   text: "text-forest",    sub: "text-forest/85", rule: "border-forest/15", eyebrow: "text-forest",         bar: "bg-forest" },
+  teal:    { bg: "bg-cream",  text: "text-forest",    sub: "text-forest/85", rule: "border-forest/15", eyebrow: "text-forest",         bar: "bg-forest" },
+  primary: { bg: "bg-ivory",  text: "text-forest",    sub: "text-forest/85", rule: "border-forest/15", eyebrow: "text-forest",         bar: "bg-forest" },
+  sand:    { bg: "bg-mint",   text: "text-forest",    sub: "text-forest/85", rule: "border-forest/20", eyebrow: "text-forest",      bar: "bg-forest" },
+  clay:    { bg: "bg-neon",   text: "text-forest",    sub: "text-forest/85", rule: "border-forest/20", eyebrow: "text-forest",        bar: "bg-forest" },
 };
 
 export default function PageHeader({

@@ -2,9 +2,9 @@
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { MapPin, Mail, Phone, Smartphone, Globe } from "lucide-react";
-import { contactQuery, siteSettingsQuery } from "@/lib/queries";
+import { contactQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-import type { Contact as ContactData, SiteSettings } from "@/lib/types";
+import type { Contact as ContactData } from "@/lib/types";
 
 type ContactDetail = {
   icon: typeof MapPin;
@@ -41,14 +41,10 @@ const fallbackDetails: ContactDetail[] = [
 ];
 
 export default async function ContactPage() {
-  const [rawContactData, rawSiteSettings] = await Promise.all([
-    fetchSanity<ContactData>(contactQuery),
-    fetchSanity<SiteSettings>(siteSettingsQuery),
-  ]);
+  const rawContactData = await fetchSanity<ContactData>(contactQuery);
 
   // Sanity can return null, so always fall back to an empty object.
   const contactData = rawContactData || {};
-  const siteSettings = rawSiteSettings || {};
 
   const details: ContactDetail[] = [
     {
@@ -77,8 +73,6 @@ export default async function ContactPage() {
       value: fallbackDetails[4].value,
     },
   ];
-
-  const orgName = siteSettings.orgName || "Anweshan";
 
   return (
     <main className="min-h-screen bg-paper">

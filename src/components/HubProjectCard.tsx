@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 
 import { categoryShort } from "@/lib/categories";
+import { textListOf, textOf, unwrapMutationValue } from "@/lib/sanity-value";
 import type { HubProject } from "@/lib/types";
 
 /* One assignment as a compact card.
@@ -15,13 +16,14 @@ import type { HubProject } from "@/lib/types";
 /* `years` is the pre-existing display string; startYear/endYear are the
    structured years. A project may have either, so both are honoured. */
 export function timelineOf(project: HubProject): string {
-  if (project.years?.trim()) return project.years.trim();
+  const years = textOf(project.years);
+  if (years.trim()) return years.trim();
 
-  const start = project.startYear;
-  const end = project.endYear;
+  const start = unwrapMutationValue(project.startYear);
+  const end = unwrapMutationValue(project.endYear);
 
-  if (!start) return "";
-  if (!end || end === start) return String(start);
+  if (typeof start !== "number") return "";
+  if (typeof end !== "number" || end === start) return String(start);
   return `${start} to ${end}`;
 }
 
@@ -33,27 +35,52 @@ export default function HubProjectCard({
   className?: string;
 }) {
   const timeline = timelineOf(project);
-  const methods = project.methods ?? [];
-  const extraMethods = Math.max(0, methods.length - 3);
-  const firstStat = project.facts?.[0];
-  const ongoing = project.status === "Ongoing";
+  const methods = textListOf(project.methods);
+  const title = textOf(project.title, "Untitled assignment");
+  const summary = textOf(project.summary);
+  const location = textOf(project.location);
+  const status = textOf(project.status);
+  const category = textOf(unwrapMutationValue(project.category));
+
+  const rawFacts = unwrapMutationValue(project.facts);
+  const firstFact = Array.isArray(rawFacts) ? rawFacts[0] : undefined;
+  const firstStatValue = firstFact ? textOf((firstFact as { value?: unknown }).value) : "";
+  const firstStatLabel = firstFact ? textOf((firstFact as { label?: unknown }).label) : "";
+
+  const ongoing = status === "Ongoing";
 
   return (
     <Link
       href={`/projects/${project.slug?.current}`}
-      className={`group flex h-full flex-col rounded-2xl bg-ivory border border-forest/15 p-6 transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/50 focus-visible:ring-offset-2 focus-visible:ring-offset-snow ${className}`}
+      className={`group relative flex h-full flex-col overflow-hidden rounded-2xl bg-ivory border border-forest/15 p-5 transition duration-300 hover:-translate-y-0.5 hover:border-forest/30 hover:shadow-lg hover:shadow-forest/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/50 focus-visible:ring-offset-2 focus-visible:ring-offset-snow ${className}`}
     >
-      <div className="flex items-center justify-between gap-3 mb-4">
-        {project.category ? (
-          <span className="rounded-full bg-gold/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-forest/70">
-            {categoryShort(project.category)}
-          </span>
-        ) : (
-          <span />
-        )}
+      {/* Accent rule that wipes in from the left. Carries the hover signal so
+          the card reads as a link without relying on the arrow alone. */}
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+      />
 
-        {project.status && (
-          <span className="inline-flex items-center gap-2 text-forest/60 text-xs font-medium whitespace-nowrap">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {category && (
+            <span className="rounded-full bg-gold/25 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-forest/90">
+              {categoryShort(category)}
+            </span>
+          )}
+
+          {/* The headline number sits in this top row rather than in a block of
+              its own, which is what keeps the card short. */}
+          {firstStatValue && (
+            <span className="rounded-full bg-forest px-3 py-1 text-xs font-bold text-ivory">
+              {firstStatValue}
+              {firstStatLabel ? ` ${firstStatLabel}` : ""}
+            </span>
+          )}
+        </div>
+
+        {status && (
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-forest/85 text-xs font-medium whitespace-nowrap">
             <span
               aria-hidden
               className={`h-1.5 w-1.5 rounded-full ${
@@ -61,70 +88,63 @@ export default function HubProjectCard({
               }`}
             />
 
-            {project.status}
+            {status}
           </span>
         )}
       </div>
 
-      <h3 className="text-forest h3-card line-clamp-3">{project.title}</h3>
+      <h3 className="text-forest text-lg font-bold leading-snug tracking-tight line-clamp-2 transition-colors duration-300 group-hover:text-forest/80">
+        {title}
+      </h3>
 
-      {project.summary && (
-        <p className="mt-3 text-forest/75 body-sm line-clamp-3">
-          {project.summary}
+      {summary && (
+        <p className="mt-2 text-forest/85 text-sm leading-relaxed line-clamp-2">
+          {summary}
         </p>
       )}
 
-      {(timeline || project.location) && (
-        <div className="mt-5 space-y-2">
+      {/* One meta row: years and place share a line. */}
+      {(timeline || location) && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-forest/85 text-sm">
           {timeline && (
-            <p className="flex items-center gap-2 text-forest/70 body-sm">
+            <span className="inline-flex items-center gap-1.5">
               <Calendar size={14} className="shrink-0" />
               {timeline}
-            </p>
+            </span>
           )}
 
-          {project.location && (
-            <p className="flex items-center gap-2 text-forest/70 body-sm">
+          {location && (
+            <span className="inline-flex min-w-0 items-center gap-1.5">
               <MapPin size={14} className="shrink-0" />
-              <span className="truncate">{project.location}</span>
-            </p>
+              <span className="truncate">{location}</span>
+            </span>
           )}
         </div>
       )}
 
-      {firstStat?.value && (
-        <p className="mt-5 border-l-2 border-gold pl-3 text-forest font-semibold">
-          {firstStat.value}
-          {firstStat.label ? ` ${firstStat.label}` : ""}
-        </p>
-      )}
-
       {methods.length > 0 && (
-        <ul className="mt-5 flex flex-wrap gap-2">
-          {methods.slice(0, 3).map((method) => (
+        <ul className="mt-3 flex flex-nowrap gap-2 overflow-hidden">
+          {methods.slice(0, 2).map((method) => (
             <li
               key={method}
-              className="rounded-full border border-forest/15 px-3 py-1 text-[11px] font-medium text-forest/70"
+              className="min-w-0 truncate rounded-full border border-forest/25 px-3 py-1 text-xs font-medium text-forest/90"
             >
               {method}
             </li>
           ))}
-
-          {extraMethods > 0 && (
-            <li className="rounded-full border border-forest/15 px-3 py-1 text-[11px] font-medium text-forest/70">
-              +{extraMethods}
-            </li>
-          )}
         </ul>
       )}
 
-      <span className="mt-auto pt-6 inline-flex items-center gap-2 text-forest text-sm font-semibold">
+      {/* Footer merged onto the last line: no separate rule or row. */}
+      <span className="mt-auto flex items-center justify-end gap-2 pt-4 text-forest text-sm font-semibold">
         View assignment
 
-        <ArrowRight
-          size={16}
-          className="transition-transform group-hover:translate-x-1"
-        />
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-forest/20 text-forest transition-all duration-300 group-hover:bg-accent group-hover:border-accent">
+          <ArrowRight
+            size={14}
+            className="transition-transform duration-300 group-hover:translate-x-0.5"
+          />
+        </span>
       </span>
     </Link>
   );

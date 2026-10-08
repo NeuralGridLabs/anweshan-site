@@ -149,7 +149,7 @@ export default function Hero({ data }: { data?: HeroData }) {
             {data?.heroHeading || "Research that moves health policy forward"}
           </h1>
 
-          <p className="text-forest/70 text-lg leading-relaxed mb-10">
+          <p className="text-forest/85 text-lg leading-relaxed mb-10">
             {data?.heroSubtext ||
               "Clinical trials, HPV vaccination studies, and nationwide household surveys that shape Nepal's health landscape."}
           </p>

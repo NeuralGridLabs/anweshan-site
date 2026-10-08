@@ -1,4 +1,4 @@
-import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 
 import { CATEGORY_OPTIONS } from "../../src/lib/categories";
 import { webStatusField } from "./clientHub";
@@ -46,11 +46,20 @@ export const project = defineType({
     defineField({ name: "year", title: "Year", type: "number" }),
     defineField({
       name: "category",
-      title: "Category / Theme",
+      title: "Primary service",
       type: "string",
       description:
-        "Service area this project belongs to. Drives the filter chips on a client's page.",
+        "The one service this assignment is primarily about. Drives which service page it leads with, and the filter chips on a client's page.",
       options: { list: CATEGORY_OPTIONS },
+    }),
+    defineField({
+      name: "serviceAreas",
+      title: "All services involved",
+      type: "array",
+      description:
+        "Every service this assignment involved. Drives which service pages list it. Leave empty when it is the same as the primary service.",
+      of: [defineArrayMember({ type: "string" })],
+      options: { list: CATEGORY_OPTIONS, layout: "tags" },
     }),
     defineField({
       name: "startYear",

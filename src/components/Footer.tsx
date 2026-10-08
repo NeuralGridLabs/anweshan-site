@@ -64,12 +64,12 @@ export default function Footer() {
         </div>
 
         {/* Base */}
-        <div className="mt-10 pt-6 border-t border-white/12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/40">
+        <div className="mt-10 pt-6 border-t border-white/12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/60">
           <p>Copyrights &copy; {new Date().getFullYear()} All Rights Reserved by Anweshan Pvt. Ltd.</p>
           <div className="flex items-center gap-4">
             <SocialIcons
               size={13}
-              className="text-white/40 hover:text-mint transition-colors"
+              className="text-white/60 hover:text-mint transition-colors"
             />
           </div>
         </div>

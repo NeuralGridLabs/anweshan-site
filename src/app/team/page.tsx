@@ -130,7 +130,7 @@ export default async function TeamPage() {
 
                   <p
                     className={`text-base md:text-lg leading-relaxed ${
-                      dark ? "text-forest/80" : "text-forest/75"
+                      dark ? "text-forest/85" : "text-forest/85"
                     }`}
                   >
                     {group.blurb}
@@ -138,7 +138,7 @@ export default async function TeamPage() {
                 </div>
 
                 <div className="md:col-span-8 flex md:justify-end md:items-end">
-                  <p className="text-sm font-semibold tabular-nums text-forest/70">
+                  <p className="text-sm font-semibold tabular-nums text-forest/85">
                     {String(group.members.length).padStart(2, "0")}
                   </p>
                 </div>
@@ -182,7 +182,7 @@ export default async function TeamPage() {
                         {person.name}
                       </h2>
                       {person.role && (
-                        <p className={`body-sm mt-1 ${dark ? "text-forest/80" : "text-forest/60"}`}>
+                        <p className={`body-sm mt-1 ${dark ? "text-forest/85" : "text-forest/85"}`}>
                           {person.role}
                         </p>
                       )}

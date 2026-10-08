@@ -22,7 +22,7 @@ export default function Platforms({ platforms }: { platforms: ResolvedProject[] 
 <h2 className="h2-section text-forest mt-4 max-w-[20ch] text-balance">
   Anweshan IT
 </h2>
-          <p className="body-lg text-forest/75 mt-5 max-w-[62ch]">
+          <p className="body-lg text-forest/85 mt-5 max-w-[62ch]">
             Alongside our research practice, our in-house IT team designs, builds
             and runs digital products for health programmes, hospitals and field
             teams across Nepal.
@@ -70,7 +70,7 @@ export default function Platforms({ platforms }: { platforms: ResolvedProject[] 
                       </div>
                     )}
 
-                    <span className="absolute top-4 left-4 bg-white/95 backdrop-blur text-base-text text-[11px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full">
+                    <span className="absolute top-4 left-4 bg-white/95 backdrop-blur text-base-text text-xs font-semibold tracking-wide px-3.5 py-1.5 rounded-full">
                       {platform.category}
                     </span>
                   </div>

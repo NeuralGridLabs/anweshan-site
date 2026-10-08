@@ -110,7 +110,7 @@ export default function Navbar() {
             {mobileLinks.map((link, i) => {
               const isActive =
                 link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-              const slide = (delay: number) =>
+              const slide = () =>
                 `transition-all duration-500 ${
                   open ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"
                 }`;
@@ -118,7 +118,7 @@ export default function Navbar() {
                 <Fragment key={link.href}>
                   <li
                     style={{ transitionDelay: open ? `${120 + i * 45}ms` : "0ms" }}
-                    className={slide(i)}
+                    className={slide()}
                   >
                     <Link
                       href={link.href}
@@ -135,7 +135,7 @@ export default function Navbar() {
                     <li
                       key={child.href}
                       style={{ transitionDelay: open ? `${120 + (i + j + 1) * 45}ms` : "0ms" }}
-                      className={slide(i + j + 1)}
+                      className={slide()}
                     >
                       <Link
                         href={child.href}

@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import { ArrowRight } from "lucide-react";
-import { FaYoutube } from "react-icons/fa";
 import AboutImages from "@/components/AboutImages";
 import { highlightText } from "@/lib/highlight";
 

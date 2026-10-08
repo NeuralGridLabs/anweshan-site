@@ -42,7 +42,7 @@ export default function WhyAnweshan({ heading, items }: WhyAnweshanProps) {
                   <Check size={14} strokeWidth={2.5} className="text-primary" />
                 </span>
 
-                <span className="text-forest/80 body">{mark}</span>
+                <span className="text-forest/85 body">{mark}</span>
               </li>
             </Reveal>
           ))}

@@ -98,7 +98,7 @@ export default function Explore() {
 
                   <span
                     className={`relative col-span-2 md:col-span-1 text-xs font-semibold tabular-nums transition-colors duration-300 ${
-                      isActive ? "text-forest" : "text-forest/45"
+                      isActive ? "text-forest" : "text-forest/85"
                     }`}
                   >
                     {item.id}
@@ -107,15 +107,15 @@ export default function Explore() {
                   <span className="relative col-span-10 md:col-span-4">
                     <span
                       className={`block text-2xl md:text-4xl font-bold tracking-tight transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                        isActive ? "text-forest md:translate-x-2" : "text-forest/80"
+                        isActive ? "text-forest md:translate-x-2" : "text-forest/85"
                       }`}
                     >
                       {item.label}
                     </span>
-                    <span className="block text-forest/55 meta-label mt-2">{item.caption}</span>
+                    <span className="block text-forest/70 meta-label mt-2">{item.caption}</span>
                   </span>
 
-                  <span className="relative hidden md:block md:col-span-4 text-forest/75 body-sm">
+                  <span className="relative hidden md:block md:col-span-4 text-forest/85 body-sm">
                     {item.description}
                   </span>
 

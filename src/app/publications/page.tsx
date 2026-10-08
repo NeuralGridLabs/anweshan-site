@@ -138,7 +138,7 @@ export default async function PublicationsPage() {
                           )}
 
                           {ext && (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 py-1 pl-1.5 pr-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-forest/70">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 py-1 pl-1.5 pr-2.5 text-xs font-bold uppercase tracking-[0.12em] text-forest/90">
                               <Icon
                                 size={13}
                                 strokeWidth={1.75}
@@ -154,7 +154,7 @@ export default async function PublicationsPage() {
                             no cover image: it is the shortest way to say what
                             kind of paper this is. */}
                         {pub.journal && (
-                          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-forest/85">
                             {pub.journal}
                           </p>
                         )}
@@ -186,7 +186,7 @@ export default async function PublicationsPage() {
                         <div className="relative mb-6 h-40">
                           {pub.abstract ? (
                             <>
-                              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-forest/35">
+                              <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.14em] text-forest/70">
                                 Abstract
                               </p>
 
@@ -202,7 +202,7 @@ export default async function PublicationsPage() {
 
                           {pub.authors && (
                             <div className="absolute inset-x-0 bottom-0 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-forest/35">
+                              <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.14em] text-forest/70">
                                 Authors
                               </p>
 

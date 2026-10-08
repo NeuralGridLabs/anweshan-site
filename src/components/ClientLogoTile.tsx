@@ -25,7 +25,9 @@ const STOP_WORDS = new Set([
 ]);
 
 /** Up to three initials from the significant words of a name. */
-function initialsOf(name: string): string {
+function initialsOf(raw: string): string {
+  /* Editors can leave anything in a name field, so never assume a string. */
+  const name = typeof raw === "string" ? raw : "";
   const words = name.split(/\s+/).filter(Boolean);
   const significant = words.filter(
     (word) => !STOP_WORDS.has(word.toLowerCase().replace(/[^a-z]/g, "")),
@@ -52,28 +54,36 @@ export default function ClientLogoTile({
   logo,
   name,
   shortName,
-  className = "h-24 w-full",
+  className = "h-44 w-full",
 }: ClientLogoTileProps) {
   const logoUrl = sanityImageUrl(logo);
+  /* alt must be a string. A hand-edited name field can hold anything, and an
+     object here is enough to take the page down. */
+  const safeName = typeof name === "string" && name.trim() !== "" ? name : "Client";
+  const safeShortName =
+    typeof shortName === "string" && shortName.trim() !== "" ? shortName.trim() : "";
 
   return (
     <div
-      className={`flex items-center justify-center rounded-xl border border-forest/10 ${className}`}
+      className={`flex items-center justify-center overflow-hidden bg-white ${className}`}
     >
       {logoUrl ? (
+        /* Generous but bounded: the mark takes roughly two thirds of the tile,
+           which is what makes it read as full-size rather than as an icon. */
         <Image
           src={logoUrl}
-          alt={name}
-          width={160}
-          height={80}
-          className="max-h-[70%] w-auto max-w-[70%] object-contain p-4"
+          alt={safeName}
+          width={520}
+          height={400}
+          className="max-h-[86%] max-w-[86%] w-auto object-contain p-3"
         />
       ) : (
         /* No logo: a monogram keeps the card looking deliberate rather than
-           broken, which matters most on a client's own page. */
-        <div className="flex h-full w-full items-center justify-center rounded-xl bg-sage">
-          <span className="text-forest text-2xl font-bold tracking-tight">
-            {shortName?.trim() ? shortName.trim().toUpperCase() : initialsOf(name)}
+           broken, which matters most on a client's own page. Sized up to match
+           the presence of a real mark, so the card never looks half-empty. */
+        <div className="flex h-full w-full items-center justify-center bg-sage">
+          <span className="text-forest text-3xl md:text-4xl font-bold tracking-tight">
+            {safeShortName ? safeShortName.toUpperCase() : initialsOf(safeName)}
           </span>
         </div>
       )}

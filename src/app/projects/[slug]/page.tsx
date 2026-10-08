@@ -120,7 +120,9 @@ export default async function ProjectPage({
   return (
     <main className="min-h-screen bg-snow">
       {/* Header */}
-      <section className="relative bg-mint text-forest">
+      <section className="relative bg-forest text-ivory overflow-hidden">
+        {/* Cover image, heavily veiled. It is texture rather than subject, which
+            keeps the title readable and stops a dark photo fighting the type. */}
         {coverUrl && (
           <div className="absolute inset-0">
             <Image
@@ -129,10 +131,10 @@ export default async function ProjectPage({
               fill
               priority
               sizes="100vw"
-              className="object-cover opacity-30"
+              className="object-cover opacity-25"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-primary via-mint/90 to-mint/70" />
+            <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/70" />
           </div>
         )}
 
@@ -151,7 +153,7 @@ export default async function ProjectPage({
                 Projects
               </Link>
 
-              <span aria-hidden className="text-white/40">
+              <span aria-hidden className="text-white/60">
                 /
               </span>
 
@@ -162,7 +164,7 @@ export default async function ProjectPage({
                 Clients
               </Link>
 
-              <span aria-hidden className="text-white/40">
+              <span aria-hidden className="text-white/60">
                 /
               </span>
 
@@ -173,7 +175,7 @@ export default async function ProjectPage({
                 {hub.name}
               </Link>
 
-              <span aria-hidden className="text-white/40">
+              <span aria-hidden className="text-white/60">
                 /
               </span>
 
@@ -197,24 +199,24 @@ export default async function ProjectPage({
             <div className="md:col-span-9">
               {/* The long category label reads better here than the short chip
                   form used on cards. */}
-              <p className="text-forest eyebrow mb-6">
+              <p className="text-accent eyebrow mb-6">
                 {project.category
                   ? categoryLabel(project.category)
                   : project.category}
               </p>
 
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.06] tracking-tight mb-8">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.06] tracking-tight mb-8 text-ivory text-balance">
                 {project.title}
               </h1>
 
-              <p className="text-dark/100 body-lg max-w-2xl">{project.summary}</p>
+              <p className="text-white/85 body-lg max-w-2xl">{project.summary}</p>
 
               {project.externalUrl && (
                 <a
                   href={project.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-8 inline-flex items-center gap-2 rounded-full bg-forest px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-forest"
+                  className="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-forest transition-colors hover:bg-white"
                 >
                   Visit project
                   <ArrowUpRight size={16} strokeWidth={2.5} />
@@ -224,12 +226,15 @@ export default async function ProjectPage({
           </div>
 
           {meta.length > 0 && (
-            <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8 mt-16 pt-10 border-t border-white/15">
+            <dl className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16">
               {meta.map((item) => (
-                <div key={item.label}>
-                  <dt className="text-dark meta-label mb-2">{item.label}</dt>
+                <div
+                  key={item.label}
+                  className="rounded-xl border border-white/15 bg-white/5 p-5"
+                >
+                  <dt className="text-accent meta-label mb-3">{item.label}</dt>
 
-                  <dd className="text-dark text-base font-semibold leading-snug">
+                  <dd className="text-ivory text-base font-semibold leading-snug">
                     {item.value || "—"}
                   </dd>
                 </div>
@@ -239,17 +244,21 @@ export default async function ProjectPage({
         </div>
       </section>
 
-      {/* Key figures */}
+      {/* Key figures. White cards on sage, so the numbers read as data rather than
+          as more body text. */}
       {stats.length > 0 && (
-        <section className="relative bg-sage text-forest py-12 border-y border-forest/15 overflow-hidden">
-          <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:divide-x lg:divide-white/15">
+        <section className="bg-sage py-14 border-b border-forest/15">
+          <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((fact, i) => (
-              <Reveal key={fact.label || i} className="lg:px-8 lg:first:pl-0">
-                <p className="text-3xl text-primary-dark md:text-4xl font-bold tracking-tight tabular-nums">
+              <Reveal
+                key={fact.label || i}
+                className="rounded-2xl bg-white border border-forest/15 p-6 shadow-sm"
+              >
+                <p className="text-3xl text-primary-dark md:text-4xl font-bold tracking-tight tabular-nums leading-none">
                   {fact.value}
                 </p>
 
-                <p className="text-white/55 meta-label mt-2">{fact.label}</p>
+                <p className="text-forest/85 meta-label mt-3">{fact.label}</p>
               </Reveal>
             ))}
           </div>
@@ -282,7 +291,7 @@ export default async function ProjectPage({
                   {methods.map((method) => (
                     <li
                       key={method}
-                      className="rounded-full border border-forest/15 px-4 py-2 text-xs font-medium text-forest/75"
+                      className="rounded-full border border-forest/30 px-4 py-2 text-sm font-medium text-forest/90"
                     >
                       {method}
                     </li>
@@ -361,33 +370,38 @@ export default async function ProjectPage({
             {/* Client card. Only when the project is actually linked to a hub. */}
             {hub && (
               <Reveal delay={90}>
-                <div className="bg-accent rounded-2xl p-8 mb-8">
-                  <p className="text-base-text/95 meta-label mb-5">Client</p>
+                <div className="rounded-2xl bg-ivory border border-forest/15 p-7 mb-6 shadow-sm">
+                  <p className="text-forest/85 meta-label mb-5">Client</p>
 
                   <ClientLogoTile
                     logo={hub.logo}
                     name={hub.name}
                     shortName={hub.shortName}
-                    className="h-20 w-full mb-5"
+                    className="h-24 w-full rounded-xl border border-forest/10 mb-5"
                   />
 
-                  <p className="text-base-text font-semibold leading-snug">
+                  <p className="text-forest font-bold text-lg leading-snug">
                     {hub.name}
                   </p>
 
                   {hub.relationshipType && (
-                    <p className="mt-1 text-base-text/70 body-sm">
+                    <p className="mt-1 text-forest/85 body-sm">
                       {hub.relationshipType}
                     </p>
                   )}
 
                   <Link
                     href={`/clients/${hub.slug?.current}`}
-                    className="mt-5 inline-flex items-center gap-2 text-base-text text-sm font-semibold hover:opacity-80 transition-opacity"
+                    className="group mt-5 inline-flex items-center gap-2 rounded-full bg-forest px-5 py-2.5 text-white text-sm font-semibold transition-colors hover:bg-forest/90"
                   >
                     {hub.projectCount === 1
                       ? "All 1 assignment"
                       : `All ${hub.projectCount ?? 0} assignments`}
+
+                    <ArrowUpRight
+                      size={15}
+                      className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
                   </Link>
                 </div>
               </Reveal>
@@ -395,12 +409,12 @@ export default async function ProjectPage({
 
             {project.category && (
               <Reveal delay={120}>
-                <div className="bg-accent rounded-2xl p-8 mb-8">
-                  <p className="text-base-text/95 meta-label mb-5">
+                <div className="rounded-2xl bg-ivory border border-forest/15 p-7 shadow-sm">
+                  <p className="text-forest/85 meta-label mb-4">
                     Service area
                   </p>
 
-                  <p className="text-base-text/75 body">
+                  <p className="text-forest font-semibold leading-snug">
                     {categoryLabel(project.category)}
                   </p>
                 </div>
@@ -412,7 +426,7 @@ export default async function ProjectPage({
                 and made real CMS content look like placeholder text. */}
             {!hasNarrative && (
               <Reveal delay={180}>
-                <p className="text-base-text/40 text-xs leading-relaxed mt-6">
+                <p className="text-forest/70 text-xs leading-relaxed mt-6">
                   No detailed narrative has been added to this project record
                   yet.
                 </p>

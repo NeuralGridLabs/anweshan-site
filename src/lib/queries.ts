@@ -1,7 +1,27 @@
 import { groq } from "next-sanity";
 
 /* --------------------------------------------------------------------------
-   SINGLETONS (one document each)
+    THE CLEARANCE GATE
+
+    One expression, used by every project and clientHub query in this file. If
+    it is ever changed, it must be changed here and nowhere else.
+
+    A document is publishable when it is explicitly ready. The `coalesce` is what
+    makes the gate safe to apply to a dataset that already has documents: a
+    legacy record with no webStatus at all counts as ready, so introducing this
+    can never hide something that is already live. Only a document explicitly
+    marked "needs-clearance" is withheld.
+
+    Every filter must use this, including the ones nested inside projections
+    (counts, year ranges, category lists, sibling lookups). A count that skipped
+    the gate would advertise assignments a visitor cannot open, and an unguarded
+    reference dereference would link a project to a client that is being held
+    back.
+   ----------------------------------------------------------------------- */
+export const READY = 'coalesce(webStatus, "ready") == "ready"';
+
+/* --------------------------------------------------------------------------
+    SINGLETONS (one document each)
    ----------------------------------------------------------------------- */
 
 export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
@@ -134,7 +154,7 @@ export const contactQuery = groq`*[_type == "contact"][0]{
    COLLECTIONS (many documents each)
    ----------------------------------------------------------------------- */
 
-export const projectsQuery = groq`*[_type == "project" && coalesce(webStatus, "ready") == "ready"] | order(year desc) {
+export const projectsQuery = groq`*[_type == "project" && ${READY}] | order(year desc) {
   _id,
   title,
   slug,
@@ -143,6 +163,7 @@ export const projectsQuery = groq`*[_type == "project" && coalesce(webStatus, "r
   startYear,
   endYear,
   category,
+  serviceAreas,
   summary,
   status,
   years,
@@ -165,14 +186,19 @@ export const projectsQuery = groq`*[_type == "project" && coalesce(webStatus, "r
    Note: GROQ has no comment syntax, so every comment in this file must sit
    OUTSIDE the backticks. One placed inside a query string parses as an error and
    the fetch returns null, which fails silently as "no data". */
+/* The hub dereference below is guarded on the HUB's status as well as the
+   project's. Without that, a publishable project linked to a client that is
+   being held back would still print that client's name and offer a link to a
+   page that 404s. Filtering the reference itself makes the dereference null. */
 export const projectBySlugQuery = groq`*[_type == "project"
   && slug.current == $slug
-  && coalesce(webStatus, "ready") == "ready"][0]{
+  && ${READY}][0]{
   _id,
   title,
   slug,
   client,
   category,
+  serviceAreas,
   summary,
   status,
   years,
@@ -191,7 +217,7 @@ export const projectBySlugQuery = groq`*[_type == "project"
   featured,
   year,
   webStatus,
-  "clientHub": clientHub->{
+  "clientHub": clientHub[${READY}]->{
     _id,
     name,
     slug,
@@ -200,10 +226,10 @@ export const projectBySlugQuery = groq`*[_type == "project"
     relationshipType,
     "projectCount": count(*[_type == "project"
       && references(^._id)
-      && coalesce(webStatus, "ready") == "ready"])
+      && ${READY}])
   },
   "siblings": *[_type == "project"
-    && coalesce(webStatus, "ready") == "ready"
+    && ${READY}
     && references(^.clientHub._ref)
     && !(_id == ^._id)] | order(coalesce(startYear, year) asc){
       _id,
@@ -216,7 +242,7 @@ export const projectBySlugQuery = groq`*[_type == "project"
 
 export const featuredProjectsQuery = groq`*[_type == "project"
   && featured == true
-  && coalesce(webStatus, "ready") == "ready"] | order(year desc) {
+  && ${READY}] | order(year desc) {
   _id,
   title,
   slug,
@@ -225,6 +251,7 @@ export const featuredProjectsQuery = groq`*[_type == "project"
   startYear,
   endYear,
   category,
+  serviceAreas,
   summary,
   status,
   years,
@@ -244,7 +271,7 @@ export const featuredProjectsQuery = groq`*[_type == "project"
 /* --------------------------------------------------------------------------
     CLIENT HUBS AND PROJECTS
 
-    Every query below filters on `coalesce(webStatus, "ready") == "ready"`.
+    Every query below filters on `${READY}`.
     The coalesce is what makes this safe to add to a dataset that already has
     documents: a legacy project with no webStatus at all is treated as ready,
     so nothing disappears on deploy. Only a document explicitly set to
@@ -257,7 +284,7 @@ export const featuredProjectsQuery = groq`*[_type == "project"
 
 /* A hub with nothing to show would render as an empty page, so the final
    filter withholds it entirely rather than linking to a blank page. */
-export const clientHubsQuery = groq`*[_type == "clientHub" && coalesce(webStatus, "ready") == "ready"]{
+export const clientHubsQuery = groq`*[_type == "clientHub" && ${READY}]{
   _id,
   name,
   slug,
@@ -267,25 +294,25 @@ export const clientHubsQuery = groq`*[_type == "clientHub" && coalesce(webStatus
   order,
   "projectCount": count(*[_type == "project"
     && references(^._id)
-    && coalesce(webStatus, "ready") == "ready"]),
+    && ${READY}]),
   "firstYear": math::min(*[_type == "project"
     && references(^._id)
-    && coalesce(webStatus, "ready") == "ready"
+    && ${READY}
     && startYear > 0].startYear),
   "lastYear": math::max(*[_type == "project"
     && references(^._id)
-    && coalesce(webStatus, "ready") == "ready"
+    && ${READY}
     && coalesce(endYear, startYear) > 0]{
       "y": coalesce(endYear, startYear)
     }.y),
   "categories": array::unique(*[_type == "project"
     && references(^._id)
-    && coalesce(webStatus, "ready") == "ready"].category)
+    && ${READY}].category)
 }[projectCount > 0] | order(order asc, name asc)`;
 
 export const clientHubBySlugQuery = groq`*[_type == "clientHub"
   && slug.current == $slug
-  && coalesce(webStatus, "ready") == "ready"][0]{
+  && ${READY}][0]{
   _id,
   name,
   slug,
@@ -297,14 +324,15 @@ export const clientHubBySlugQuery = groq`*[_type == "clientHub"
   website,
   "projects": *[_type == "project"
     && references(^._id)
-    && coalesce(webStatus, "ready") == "ready"]
+    && ${READY}]
     | order(coalesce(startYear, year) desc, title asc){
       _id,
       title,
-      slug,
-      summary,
-      category,
-      status,
+slug,
+  summary,
+  category,
+  serviceAreas,
+  status,
       years,
       startYear,
       endYear,

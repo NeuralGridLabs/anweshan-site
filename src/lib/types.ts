@@ -222,6 +222,10 @@ export type Project = {
   startYear?: number;
   endYear?: number;
   category?: string;
+  /* Every service area this assignment involved. `category` remains the single
+     primary service; this is the full set, and drives which service pages list
+     the project. */
+  serviceAreas?: string[];
   summary?: string;
   status?: string;
   years?: string;
@@ -257,6 +261,8 @@ export type HubProject = {
   slug?: { _type?: "slug"; current?: string };
   summary?: string;
   category?: string;
+  /* Full set of service areas, alongside the single primary `category`. */
+  serviceAreas?: string[];
   status?: string;
   years?: string;
   startYear?: number;

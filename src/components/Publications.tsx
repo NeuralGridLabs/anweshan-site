@@ -39,7 +39,7 @@ className="relative bg-gradient-to-br from-[#FFF7C2] via-[#F9E68C] to-[#E8C65A] 
 
           <Link
             href="/publications"
-            className="group inline-flex items-center gap-2 text-forest/75 hover:text-forest text-sm font-semibold transition-colors"
+            className="group inline-flex items-center gap-2 text-forest/85 hover:text-forest text-sm font-semibold transition-colors"
           >
             View all publications
             <ArrowUpRight
@@ -70,7 +70,7 @@ className="relative bg-gradient-to-br from-[#FFF7C2] via-[#F9E68C] to-[#E8C65A] 
                     and line up on a shared baseline instead. */}
 
                 {(pub.journal || pub.year) && (
-                  <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-forest/55">
+                  <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-forest/85">
                     {pub.journal && <span className="meta-label">{pub.journal}</span>}
 
                     {pub.year && (
@@ -84,7 +84,7 @@ className="relative bg-gradient-to-br from-[#FFF7C2] via-[#F9E68C] to-[#E8C65A] 
                 </h3>
 
                 {pub.abstract && (
-                  <p className="body-sm text-forest/70 line-clamp-3 mt-3">
+                  <p className="body-sm text-forest/85 line-clamp-3 mt-3">
                     {pub.abstract}
                   </p>
                 )}
@@ -96,7 +96,7 @@ className="relative bg-gradient-to-br from-[#FFF7C2] via-[#F9E68C] to-[#E8C65A] 
                         href={actions.viewUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group/link inline-flex items-center gap-2 text-forest font-semibold text-sm hover:text-forest/70 transition-colors"
+                        className="group/link inline-flex items-center gap-2 text-forest font-semibold text-sm text-forest/70 transition-colors"
                       >
                         View publication
                         <ArrowUpRight
@@ -110,7 +110,7 @@ className="relative bg-gradient-to-br from-[#FFF7C2] via-[#F9E68C] to-[#E8C65A] 
                       <a
                         href={actions.fileUrl}
                         download
-                        className="group/dl inline-flex items-center gap-2 text-forest font-semibold text-sm hover:text-forest/70 transition-colors"
+                        className="group/dl inline-flex items-center gap-2 text-forest font-semibold text-sm text-forest/70 transition-colors"
                       >
                         <Download
                           size={15}

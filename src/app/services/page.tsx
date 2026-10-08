@@ -21,8 +21,8 @@ import type { Services as ServicesData } from "@/lib/types";
 /* Alternating band colours, indexed by position so the rhythm holds regardless
    of how many services the CMS has. */
 const BANDS = [
-  { bg: "bg-forest", text: "text-white", label: "text-ivory", chip: "border-white/25 text-white/90", body: "" },
-  { bg: "bg-cream", text: "text-forest", label: "text-forest", chip: "border-forest/25 text-forest/80", body: "text-black" },
+  { bg: "bg-forest", text: "text-white", label: "text-ivory", chip: "border-white/40 text-white", body: "" },
+  { bg: "bg-cream", text: "text-forest", label: "text-forest", chip: "border-forest/40 text-forest/90", body: "text-black" },
 ];
 
 export default async function ServicesPage() {
@@ -46,7 +46,7 @@ export default async function ServicesPage() {
               No services yet
             </p>
 
-            <p className="body-lg text-forest/70">
+            <p className="body-lg text-forest/85">
               Services are added from the CMS. Open{" "}
               <Link href="/admin" className="font-semibold text-forest underline underline-offset-4">
                 /admin
@@ -139,7 +139,7 @@ export default async function ServicesPage() {
                           {service.highlights.map((h) => (
                             <li
                               key={h}
-                              className={`border ${band.chip} text-xs font-medium px-4 py-2 rounded-full`}
+                              className={`border ${band.chip} text-sm font-medium px-4 py-2 rounded-full`}
                             >
                               {h}
                             </li>

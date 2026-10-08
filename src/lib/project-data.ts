@@ -9,6 +9,7 @@
    ----------------------------------------------------------------------- */
 
 import { sanityImageUrl } from "./image";
+import { textListOrUndefined, textOf } from "./sanity-value";
 import type { Project as SanityProject, ProjectFact } from "./types";
 
 export type ResolvedProject = {
@@ -38,25 +39,28 @@ export type ResolvedProject = {
 function fromSanity(project: SanityProject): ResolvedProject {
   const slug = project.slug?.current || project._id;
 
+  /* Every text field goes through textOf. A hand-edited field that holds an
+     object instead of a string would otherwise reach React as a child and take
+     the whole listing down, which is exactly what happened once already. */
   return {
     key: project._id,
     slug,
-    title: project.title,
-    summary: project.summary ?? "",
-    client: project.client ?? "",
-    category: project.category ?? "",
+    title: textOf(project.title, "Untitled project"),
+    summary: textOf(project.summary),
+    client: textOf(project.client),
+    category: textOf(project.category),
     cover: sanityImageUrl(project.coverImage),
-    year: project.year,
-    status: project.status,
-    years: project.years,
-    location: project.location,
-    methods: project.methods,
-    team: project.team,
-    overview: project.overview,
-    approach: project.approach,
-    outcomes: project.outcomes,
+    year: typeof project.year === "number" ? project.year : undefined,
+    status: textOf(project.status) || undefined,
+    years: textOf(project.years) || undefined,
+    location: textOf(project.location) || undefined,
+    methods: textListOrUndefined(project.methods),
+    team: textOf(project.team) || undefined,
+    overview: textListOrUndefined(project.overview),
+    approach: textListOrUndefined(project.approach),
+    outcomes: textListOrUndefined(project.outcomes),
     facts: project.facts,
-    externalUrl: project.externalUrl,
+    externalUrl: typeof project.externalUrl === "string" ? project.externalUrl : undefined,
   };
 }
 

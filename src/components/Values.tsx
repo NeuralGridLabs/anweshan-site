@@ -45,7 +45,7 @@ export default function Values({ heading, values }: ValuesProps) {
                 )}
 
                 {value.text?.trim() && (
-                  <p className="text-forest/70 body-sm">{value.text.trim()}</p>
+                  <p className="text-forest/85 body-sm">{value.text.trim()}</p>
                 )}
               </div>
             </Reveal>

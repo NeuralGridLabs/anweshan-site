@@ -35,7 +35,8 @@ export default function HubProjects({ projects }: Props) {
     const counts = new Map<string, number>();
 
     for (const project of projects) {
-      if (!project.category) continue;
+      /* Only real strings can become a chip label or a React key. */
+      if (typeof project.category !== "string" || project.category === "") continue;
       counts.set(project.category, (counts.get(project.category) ?? 0) + 1);
     }
 
@@ -76,16 +77,16 @@ export default function HubProjects({ projects }: Props) {
     categoryCounts.length >= MIN_CATEGORIES_FOR_FILTER;
 
   const chipClass = (isActive: boolean) =>
-    `rounded-full px-4 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/50 focus-visible:ring-offset-2 ${
+    `rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/50 focus-visible:ring-offset-2 ${
       isActive
         ? "bg-forest text-white"
-        : "border border-forest/15 text-forest/70 hover:border-forest/40"
+        : "border border-forest/30 text-forest/90 hover:border-forest/60"
     }`;
 
   return (
     <div>
       {showFilter && (
-        <div className="flex flex-wrap gap-2 mb-12">
+        <div className="flex flex-wrap gap-2.5 mb-8">
           <button
             type="button"
             onClick={() => setActive(ALL)}
@@ -116,27 +117,27 @@ export default function HubProjects({ projects }: Props) {
           </p>
         </div>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-8">
           {groups.map(([key, group]) => (
             /* Groups with nothing in them never reach here: the filter runs
                before grouping, so an emptied year disappears entirely. */
             <div
               key={key}
-              className="grid grid-cols-1 gap-6 lg:grid-cols-[110px_1fr] lg:gap-8"
+              className="grid grid-cols-1 gap-3 lg:grid-cols-[90px_1fr] lg:gap-6"
             >
               <div>
                 <h3 className="text-3xl font-bold text-primary-dark tabular-nums lg:sticky lg:top-28">
                   {key === "undated" ? "Year not recorded" : key}
                 </h3>
 
-                <p className="mt-1 text-forest/60 meta-label">
+                <p className="mt-1 text-forest/85 text-xs font-semibold uppercase tracking-[0.12em]">
                   {group.length === 1
                     ? "1 assignment"
                     : `${group.length} assignments`}
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {group.map((project, i) => (
                   <Reveal key={project._id} delay={Math.min(i, 5) * 70}>
                     <HubProjectCard project={project} />

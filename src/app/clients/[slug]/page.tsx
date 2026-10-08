@@ -8,6 +8,7 @@ import Reveal from "@/components/Reveal";
 import { clientHubsQuery, clientHubBySlugQuery, clientsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { categoryLabel, categoryShort } from "@/lib/categories";
+import { textOf, unwrapMutationValue } from "@/lib/sanity-value";
 import type { ClientHub, ClientHubDetail, Clients } from "@/lib/types";
 
 /* One client's page: who they are, the numbers, and every cleared assignment
@@ -78,8 +79,13 @@ export async function generateMetadata({
   if (!hub) return {};
 
   return {
-    title: `${hub.name} | Clients`,
-    description: hub.intro?.trim() || fallbackIntro(hub.name, hub.categories ?? []),
+    title: `${textOf(hub.name, "Client")} | Clients`,
+    description:
+      textOf(hub.intro).trim() ||
+      fallbackIntro(
+        textOf(hub.name, "Client"),
+        (hub.categories ?? []).filter((v): v is string => typeof v === "string"),
+      ),
   };
 }
 
@@ -103,38 +109,54 @@ export default async function ClientHubPage({
 
   if (projects.length === 0) notFound();
 
-  const categories = hub.categories ?? [];
+  /* Everything below is read defensively: a hand-edited field can hold an object
+     where a string is expected, and rendering that would 500 the page. */
+  const hubName = textOf(hub.name, "Client");
+  const categories = (hub.categories ?? []).filter(
+    (value): value is string => typeof value === "string" && value !== "",
+  );
 
   const categoryCounts = new Map<string, number>();
   for (const project of projects) {
-    if (!project.category) continue;
-    categoryCounts.set(project.category, (categoryCounts.get(project.category) ?? 0) + 1);
+    const category = textOf(unwrapMutationValue(project.category));
+    if (!category) continue;
+    categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
   }
 
-  const intro =
-    hub.intro?.trim() || fallbackIntro(hub.name, categories);
+  const intro = textOf(hub.intro).trim() || fallbackIntro(hubName, categories);
 
+  const firstYear = unwrapMutationValue(hub.firstYear);
+  const lastYear = unwrapMutationValue(hub.lastYear);
+
+  /* Only tiles with a real value are built. Years and the latest assignment come
+     from fields an editor may never have filled, and a tile showing an em dash
+     reads as broken rather than empty. */
   const stats = [
     { label: "Assignments", value: String(projects.length) },
-    { label: "Years active", value: yearsRange(hub.firstYear, hub.lastYear) },
+    { label: "Years active", value: yearsRange(firstYear, lastYear) },
     { label: "Service areas", value: String(categoryCounts.size) },
-    { label: "Latest assignment", value: hub.lastYear ? String(hub.lastYear) : "—" },
-  ];
+    {
+      label: "Latest assignment",
+      value: typeof lastYear === "number" ? String(lastYear) : "",
+    },
+  ].filter((stat) => stat.value !== "");
 
-  const website = hub.website?.trim() ?? "";
+  const website = textOf(hub.website).trim();
   const showWebsite = website.startsWith("https://");
 
-  const ctaLabel = singleton?.ctaLabel?.trim() ?? "";
-  const ctaLink = singleton?.ctaLink?.trim() ?? "";
+  const relationshipType = textOf(hub.relationshipType);
+
+  const ctaLabel = textOf(singleton?.ctaLabel).trim();
+  const ctaLink = textOf(singleton?.ctaLink).trim();
 
   return (
     <main className="min-h-screen bg-snow">
       {/* Header */}
       <section className="relative bg-ivory text-forest">
-        <div className="max-w-[1400px] mx-auto px-6 pt-14 pb-16 md:pt-20 md:pb-20">
+        <div className="max-w-[1400px] mx-auto px-6 pt-10 pb-12 md:pt-14 md:pb-14">
           <Link
             href="/clients"
-            className="group inline-flex items-center gap-2 text-forest/70 hover:text-forest text-sm font-semibold mb-12 transition-colors"
+            className="group inline-flex items-center gap-2 text-forest/85 hover:text-forest text-sm font-semibold mb-8 transition-colors"
           >
             <ArrowLeft
               size={16}
@@ -149,47 +171,55 @@ export default async function ClientHubPage({
               <Reveal>
                 <ClientLogoTile
                   logo={hub.logo}
-                  name={hub.name}
+                  name={hubName}
                   shortName={hub.shortName}
-                  className="h-28 w-56"
+                  /* Larger to match the card grid, and rounded so the tile does not read as a
+                   raw image box on the ivory band. */
+                className="h-40 w-full max-w-md rounded-2xl border border-forest/10"
                 />
               </Reveal>
 
               <Reveal delay={70}>
-                <h1 className="h1-page mt-8 mb-5">{hub.name}</h1>
+                <h1 className="h1-page mt-8 mb-5">{hubName}</h1>
               </Reveal>
 
-              {hub.relationshipType && (
+              {relationshipType && (
                 <Reveal delay={110}>
-                  <span className="inline-flex rounded-full bg-gold/20 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-forest/70">
-                    {hub.relationshipType}
+                  <span className="inline-flex rounded-full bg-gold/20 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-forest/90">
+                    {relationshipType}
                   </span>
                 </Reveal>
               )}
 
               <Reveal delay={150}>
-                <div className="mt-8 max-w-2xl">
+                <div className="mt-6 max-w-2xl">
                   <p className="text-forest body-lg">{intro}</p>
-                  <p className="text-forest/70 body mt-4">{TIMELINE_NOTE}</p>
+                  <p className="text-forest/85 body mt-4">{TIMELINE_NOTE}</p>
                 </div>
               </Reveal>
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="grid grid-cols-2 gap-4">
-                {stats.map((stat, i) => (
-                  <Reveal key={stat.label} delay={i * 70}>
-                    <div className="rounded-2xl bg-white border border-forest/15 p-5 h-full">
-                      <p className="text-3xl md:text-4xl font-bold text-primary-dark tabular-nums leading-none">
-                        {stat.value}
-                      </p>
+            {stats.length > 0 && (
+              <div className="lg:col-span-5">
+                {/* Two tiles read as a pair; one or three still sit correctly in
+                    a two-column grid, leaving no ragged empty tile. */}
+                <div className="grid grid-cols-2 gap-4">
+                  {stats.map((stat, i) => (
+                    <Reveal key={stat.label} delay={i * 70}>
+                      <div className="rounded-2xl bg-white border border-forest/15 p-5 h-full">
+                        <p className="text-3xl md:text-4xl font-bold text-primary-dark tabular-nums leading-none">
+                          {stat.value}
+                        </p>
 
-                      <p className="mt-3 text-forest/60 meta-label">{stat.label}</p>
-                    </div>
-                  </Reveal>
-                ))}
+                        <p className="mt-3 text-forest/85 meta-label">
+                          {stat.label}
+                        </p>
+                      </div>
+                    </Reveal>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -198,7 +228,7 @@ export default async function ClientHubPage({
       {categoryCounts.size > 0 && (
         <section className="bg-snow py-12">
           <div className="max-w-[1400px] mx-auto px-6">
-            <p className="text-forest/60 meta-label mb-5">Service areas</p>
+            <p className="text-forest/85 meta-label mb-5">Service areas</p>
 
             <ul className="flex flex-wrap gap-2">
               {[...categoryCounts.entries()]
@@ -206,7 +236,7 @@ export default async function ClientHubPage({
                 .map(([value, count]) => (
                   <li
                     key={value}
-                    className="inline-flex items-center gap-2 rounded-full border border-forest/15 px-4 py-2 text-xs font-medium text-forest/75"
+                    className="inline-flex items-center gap-2 rounded-full border border-forest/30 px-4 py-2 text-sm font-medium text-forest/90"
                   >
                     {categoryShort(value)}
 
@@ -240,7 +270,7 @@ export default async function ClientHubPage({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-forest/30 px-6 py-3 text-forest text-sm font-semibold transition-colors hover:bg-forest hover:text-white"
               >
-                Visit {hub.name}
+                Visit {hubName}
                 <ArrowUpRight size={14} />
               </a>
             )}

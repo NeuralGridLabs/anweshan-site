@@ -74,7 +74,7 @@ function EventEntry({ event }: { event: GalleryEvent }) {
             {event.title || date || "Gallery"}
           </h3>
 
-          <p className="flex items-center gap-3 text-forest/50">
+          <p className="flex items-center gap-3 text-forest/85">
             {event.title && date && (
               <span className="eyebrow">{date}</span>
             )}
@@ -108,7 +108,7 @@ function EventEntry({ event }: { event: GalleryEvent }) {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm text-forest/40">
+                      <span className="text-sm text-forest/85">
                         Image unavailable
                       </span>
                     </div>
@@ -127,7 +127,7 @@ function EventEntry({ event }: { event: GalleryEvent }) {
             })}
           </div>
         ) : (
-          <p className="body-sm text-forest/40">
+          <p className="body-sm text-forest/85">
             No photos uploaded for this event.
           </p>
         )}
@@ -169,7 +169,7 @@ export default async function GalleryPage() {
                   No gallery events yet
                 </p>
 
-                <p className="body-lg text-forest/70 max-w-xl mx-auto">
+                <p className="body-lg text-forest/85 max-w-xl mx-auto">
                   Add an event with its photos from the CMS at{" "}
                   <Link
                     href="/admin"
@@ -193,12 +193,12 @@ export default async function GalleryPage() {
                         {section.heading}
                       </h2>
 
-                      <p className="body-lg text-forest/70">
+                      <p className="body-lg text-forest/85">
                         {section.description}
                       </p>
                     </div>
 
-                    <p className="eyebrow shrink-0 text-forest/45 text-base">
+                    <p className="eyebrow shrink-0 text-forest/70 text-base">
                       {section.events.reduce(
                         (n, e) => n + (e.images?.length ?? 0),
                         0
@@ -222,7 +222,7 @@ export default async function GalleryPage() {
                       Not yet categorised
                     </h2>
 
-                    <p className="body-lg text-forest/70">
+                    <p className="body-lg text-forest/85">
                       These events have no Section set, so they are not part of
                       the two sections above. Set Section on each one in the CMS
                       to move it into place.

@@ -253,7 +253,7 @@ export default function ClientMarquee({
           {heading?.trim() || "Anweshan has worked with a wide range of clients."}
         </h2>
 
-        <p className="mt-5 text-forest/75 body-lg max-w-2xl">
+        <p className="mt-5 text-forest/85 body-lg max-w-2xl">
           {intro?.trim() ||
             "Government bodies, UN agencies, universities, and international organisations across development research, information technology, and communications."}
         </p>

@@ -52,6 +52,29 @@ export default async function AboutPage() {
     .map((p) => p?.trim())
     .filter((p): p is string => Boolean(p));
 
+  /* The opening sentence becomes the pull statement. Splitting on the first
+     full stop followed by a space keeps abbreviations such as "e.g." or "Dr."
+     intact, because those are not followed by a space before the next word.
+     When there is no such break the whole paragraph stays in the statement. */
+  const [firstSentence, ...restSentences] = (() => {
+    const opening = storyParagraphs[0] ?? "";
+    const match = opening.match(/^([\s\S]*?\.)(?=\s)/);
+
+    if (!match) return [opening, ""] as const;
+
+    return [
+      match[1],
+      opening.slice(match[1].length).replace(/^\s+/, ""),
+    ] as const;
+  })();
+
+  /* The leftover of paragraph one, then paragraphs two onwards. Rendered as a
+     single list so one or many read the same way. */
+  const storyRest = [
+    ...(restSentences ? [restSentences] : []),
+    ...storyParagraphs.slice(1),
+  ].filter(Boolean);
+
   return (
     <main className="min-h-screen text-base bg-snow">
       <PageHeader
@@ -64,30 +87,49 @@ export default async function AboutPage() {
 
       {/* Story: the narrative band directly under the header. Hidden entirely
           when no paragraphs are set, so an unconfigured document shows nothing
-          between the header and the vision band. */}
+          between the header and the vision band.
+
+          The opening sentence is lifted out of the first paragraph and set
+          large on the left; the remainder of that paragraph and any later ones
+          run as reading text on the right. Same CMS strings, no invented copy,
+          and a single paragraph lays out without an empty column. */}
       {storyParagraphs.length > 0 && (
         <section className="bg-snow py-20 md:py-32">
           <div className="max-w-[1400px] mx-auto px-6">
-            {aboutData?.storyEyebrow?.trim() && (
-              <Reveal>
-                <p className="text-forest/70 mb-10 text-sm md:text-xl font-semibold tracking-[0.2em] uppercase">
-                  {aboutData.storyEyebrow.trim()}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+              {/* 5/12: eyebrow over the pull statement. */}
+              <Reveal className="lg:col-span-5">
+                {aboutData?.storyEyebrow?.trim() && (
+                  <>
+                    <span
+                      aria-hidden
+                      className="block w-12 h-[3px] bg-gold mb-6"
+                    />
+
+                    <p className="text-forest eyebrow mb-8">
+                      {aboutData.storyEyebrow.trim()}
+                    </p>
+                  </>
+                )}
+
+                <p className="text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug text-forest text-balance">
+                  {firstSentence}
                 </p>
               </Reveal>
-            )}
 
-            {/* First paragraph leads at a larger size on the left; anything
-                after it stacks on the right at the regular reading size. */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
-              <Reveal delay={80}>
-                <p className="text-base-text/80 body-lg">{storyParagraphs[0]}</p>
-              </Reveal>
+              {/* 7/12: the rest, as ordinary reading text. */}
+              {storyRest.length > 0 && (
+                <Reveal delay={120} className="lg:col-span-7">
+                  <div className="max-w-[62ch] space-y-6">
+                    <p className="text-lg leading-8 text-forest/90 border-l-2 border-gold pl-6">
+                      {storyRest[0]}
+                    </p>
 
-              {storyParagraphs.length > 1 && (
-                <Reveal delay={160}>
-                  <div className="flex flex-col gap-6">
-                    {storyParagraphs.slice(1).map((paragraph, i) => (
-                      <p key={i} className="text-base-text/70 body">
+                    {storyRest.slice(1).map((paragraph, i) => (
+                      <p
+                        key={i}
+                        className="text-lg leading-8 text-forest/90 border-t border-forest/15 pt-6"
+                      >
                         {paragraph}
                       </p>
                     ))}

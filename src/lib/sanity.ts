@@ -75,19 +75,9 @@ export async function fetchSanity<T>(
   }
 
   try {
-    console.log("[Sanity] Fetching:", query.substring(0, 100));
     // The client's overloads distinguish "no params" from "params", so an empty
     // object is passed in place of undefined to keep the options argument third.
-    const result = await sanityClient.fetch<T>(
-      query,
-      params ?? {},
-      SANITY_FETCH_OPTIONS,
-    );
-    console.log(
-      "[Sanity] Success, got:",
-      Array.isArray(result) ? result.length : "single",
-    );
-    return result;
+    return await sanityClient.fetch<T>(query, params ?? {}, SANITY_FETCH_OPTIONS);
   } catch (error) {
     console.error("[Sanity] Fetch error:", errorMessage(error));
     console.error("[Sanity] Response:", responseBody(error));

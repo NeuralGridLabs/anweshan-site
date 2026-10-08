@@ -75,3 +75,36 @@ export function categoryShort(value?: string | null): string {
   const match = CATEGORIES.find((c) => c.value === value);
   return match?.short ?? match?.label ?? value;
 }
+
+/* --------------------------------------------------------------------------
+    Category value  <->  service page slug
+
+    Six of the seven categories use the same string as their service page slug.
+    Clinical research is the exception: its category value is
+    "clinical-research-cro" while its page slug is "cro".
+
+    These two functions are the only place that knows this, so the importer and
+    any future "browse by service" page cannot disagree about which service a
+    category belongs to. Unknown input returns null rather than a guess.
+   ----------------------------------------------------------------------- */
+
+const SERVICE_SLUG_BY_AREA: Record<string, string> = {
+  "research-evaluation-surveys": "research-evaluation-surveys",
+  "health-systems-policy": "health-systems-policy",
+  "digital-health-data-systems": "digital-health-data-systems",
+  "social-behaviour-change": "social-behaviour-change",
+  "evidence-communication": "evidence-communication",
+  "programme-implementation-support": "programme-implementation-support",
+  "clinical-research-cro": "cro",
+};
+
+/** The category value a service page slug covers, or null if unrecognised. */
+export function serviceAreaForSlug(slug?: string | null): string | null {
+  if (!slug) return null;
+
+  for (const [area, serviceSlug] of Object.entries(SERVICE_SLUG_BY_AREA)) {
+    if (serviceSlug === slug) return area;
+  }
+
+  return null;
+}
