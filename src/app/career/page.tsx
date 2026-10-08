@@ -1,4 +1,5 @@
 import PageHeader from "@/components/PageHeader";
+import Link from "next/link";
 import { Mail, ArrowUpRight, MapPin, Clock } from "lucide-react";
 
 import Reveal from "@/components/Reveal";
@@ -18,69 +19,6 @@ type Vacancy = {
   summary: string;
 };
 
-const fallbackVacancies: Vacancy[] = [
-  {
-    id: "01",
-    title: "Clinical Research Associate",
-    group: "Clinical",
-    type: "Full time",
-    location: "Lalitpur, with field travel",
-    closes: "Rolling",
-    summary:
-      "Support trial delivery across study sites, from participant recruitment and informed consent through to GCP-compliant source data verification.",
-  },
-  {
-    id: "02",
-    title: "Research Officer, Qualitative",
-    group: "Research",
-    type: "Full time",
-    location: "Lalitpur",
-    closes: "Rolling",
-    summary:
-      "Design and run focus group discussions and in-depth interviews, lead coding and thematic analysis, and draft findings chapters.",
-  },
-  {
-    id: "03",
-    title: "Data Manager",
-    group: "Data",
-    type: "Full time",
-    location: "Lalitpur",
-    closes: "Rolling",
-    summary:
-      "Own study databases end to end: schema design, validation rules, quality assurance routines, and analysis-ready extracts.",
-  },
-  {
-    id: "04",
-    title: "Monitoring and Evaluation Officer",
-    group: "Research",
-    type: "Contract",
-    location: "Lalitpur, with provincial travel",
-    closes: "Rolling",
-    summary:
-      "Build indicator frameworks, run routine data quality assessments, and produce evaluation reporting for programme partners.",
-  },
-  {
-    id: "05",
-    title: "Health Communication Designer",
-    group: "Communications",
-    type: "Full time",
-    location: "Lalitpur",
-    closes: "Rolling",
-    summary:
-      "Turn research findings into infographics, factsheets, and motion pieces for government and development partners.",
-  },
-  {
-    id: "06",
-    title: "Field Research Enumerator",
-    group: "Research",
-    type: "Short term",
-    location: "Multiple districts",
-    closes: "Rolling",
-    summary:
-      "Collect household and facility data on assigned surveys, working to sampling protocols under a field supervisor.",
-  },
-];
-
 const checklist = [
   "Your CV and current position",
   "The role and research area you are applying for",
@@ -93,26 +31,24 @@ export default async function CareerPage() {
 
   // Normalise CMS vacancies onto the display shape used by the list below:
   // the schema has no `id`, and stores the blurb as `description`.
-  const vacancies: Vacancy[] = sanityData?.vacancies?.length
-    ? sanityData.vacancies.map((v, i) => ({
+  const vacancies: Vacancy[] = (sanityData?.vacancies ?? []).map((v, i) => ({
         id: String(i + 1).padStart(2, "0"),
         title: v.title,
         summary: v.description ?? "",
         location: v.location ?? "",
         type: v.type ?? "",
         group: v.group ?? "",
-      }))
-    : fallbackVacancies;
+      }));
 
   return (
     <main className="min-h-screen bg-paper">
       <PageHeader
         tone="primary"
         eyebrow="Work with us"
-        title={sanityData?.heading || "Work with a team committed to evidence."}
+        title={sanityData?.heading || "Do work that respects both evidence and the people behind it"}
         lead={
           sanityData?.intro ||
-          "Anweshan is a contemporary issue focused research organization of highly motivated young professionals seeking to contribute to the wellbeing of poor, vulnerable and marginalized people."
+          "Our assignments need people who are methodologically careful, comfortable with collaboration and willing to take responsibility for the less visible parts of delivery. We recruit core staff and maintain a roster of researchers, clinicians, data specialists, field professionals, writers, designers and translators."
         }
         plain
       />
@@ -126,9 +62,11 @@ export default async function CareerPage() {
                 Current openings
               </p>
 
-              <h2 className="h2-section text-base-text">
-                {vacancies.length} roles open across the practice.
-              </h2>
+              {vacancies.length > 0 && (
+                <h2 className="h2-section text-base-text">
+                  {vacancies.length} {vacancies.length === 1 ? "role" : "roles"} currently open.
+                </h2>
+              )}
             </div>
 
             <div className="md:col-span-4 md:col-start-9 flex md:items-end">
@@ -136,8 +74,9 @@ export default async function CareerPage() {
             </div>
           </div>
 
-          <ul className="border-t border-accent-dark/15">
-            {vacancies.map((role, i) => (
+          {vacancies.length > 0 ? (
+            <ul className="border-t border-accent-dark/15">
+              {vacancies.map((role, i) => (
               <Reveal
                 key={role.id || role.title}
                 delay={i * 70}
@@ -194,8 +133,22 @@ export default async function CareerPage() {
                   </a>
                 </li>
               </Reveal>
-            ))}
-          </ul>
+              ))}
+            </ul>
+          ) : (
+            <div className="rounded-2xl border border-accent-dark/15 bg-white/70 p-7 md:p-9">
+              <h3 className="h3-card text-base-text">No current openings</h3>
+              <p className="body text-base-text/75 mt-3 max-w-2xl">
+                We welcome speculative applications and roster enquiries from people whose experience fits our work.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-forest transition-colors hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+              >
+                Make an enquiry <ArrowUpRight size={16} />
+              </Link>
+            </div>
+          )}
 
           
         </div>

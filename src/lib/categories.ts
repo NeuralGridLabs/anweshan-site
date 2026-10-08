@@ -53,7 +53,7 @@ export const CATEGORIES: Category[] = [
   {
     value: "clinical-research-cro",
     label: "Clinical research and CRO services",
-    short: "Clinical research",
+    short: "CRO",
   },
 ];
 

@@ -6,6 +6,7 @@ import SocialIcons from "@/components/SocialIcons";
 const siteLinks = [
   { label: "About us", href: "/about" },
   { label: "Services", href: "/services" },
+  { label: "CRO", href: "/cro" },
   { label: "Projects", href: "/projects" },
   { label: "Clients", href: "/clients" },
   { label: "Team", href: "/team" },
