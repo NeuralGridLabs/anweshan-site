@@ -10,6 +10,7 @@ import { projectBySlugQuery, projectsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
 import { categoryLabel } from "@/lib/categories";
+import { sectorLabel, splitExpertise } from "@/lib/sectors";
 import type { Project, ProjectSibling } from "@/lib/types";
 
 /* A single project.
@@ -113,7 +114,15 @@ export default async function ProjectPage({
   );
 
   const stats = (project.facts ?? []).filter((fact) => fact.value);
-  const methods = project.methods ?? [];
+  /* Plain strings only, and only known sector values: an unrecognised or
+     malformed entry would otherwise render as a link to a filter that matches
+     nothing. */
+  const sectors = (project.sectors ?? []).filter(
+    (value): value is string => typeof value === "string" && sectorLabel(value) !== value,
+  );
+  /* The Expertise block lists methods only; service and sector names are
+     filtered out by splitExpertise because they are already shown above. */
+  const methods = splitExpertise(project.methods).methods;
   const steps = project.approach ?? [];
   const outputs = project.outcomes ?? [];
 
@@ -209,6 +218,28 @@ export default async function ProjectPage({
                 {project.title}
               </h1>
 
+              {/* Every sector, full labels, each linking to that sector's
+                  filtered view on /projects. */}
+              {sectors.length > 0 && (
+                <ul className="mb-8 flex flex-wrap gap-2.5">
+                  {sectors.map((value) => {
+                    const label = sectorLabel(value);
+                    if (!label) return null;
+
+                    return (
+                      <li key={value}>
+                        <Link
+                          href={`/projects?sector=${value}`}
+                          className="inline-flex items-center rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-ivory transition-colors hover:bg-white hover:text-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-forest"
+                        >
+                          {label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
               <p className="text-white/85 body-lg max-w-2xl">{project.summary}</p>
 
               {project.externalUrl && (
@@ -288,7 +319,11 @@ export default async function ProjectPage({
                 </Reveal>
 
                 <ul className="flex flex-wrap gap-2.5">
-                  {methods.map((method) => (
+                  {/* Methods only. The CMS authors one mixed expertise list, so
+                      service and sector names are pulled out here rather than
+                      being repeated under Expertise when they already appear as
+                      the primary service and as the sector chips above. */}
+                  {splitExpertise(project.methods).methods.map((method) => (
                     <li
                       key={method}
                       className="rounded-full border border-forest/30 px-4 py-2 text-sm font-medium text-forest/90"
@@ -417,6 +452,34 @@ export default async function ProjectPage({
                   <p className="text-forest font-semibold leading-snug">
                     {categoryLabel(project.category)}
                   </p>
+                </div>
+              </Reveal>
+            )}
+
+            {project.sectors && project.sectors.length > 0 && (
+              <Reveal delay={140}>
+                {/* Same ivory card as the service area, so the two read as one
+                    sidebar rather than two competing blocks. */}
+                <div className="mb-6 rounded-2xl bg-ivory border border-forest/15 p-7 shadow-sm">
+                  <p className="text-forest/85 meta-label mb-4">Sector</p>
+
+                  <ul className="flex flex-wrap gap-2">
+                    {project.sectors.map((value) => {
+                      const label = sectorLabel(value);
+                      if (!label) return null;
+
+                      return (
+                        <li key={value}>
+                          <Link
+                            href={`/projects?sector=${value}`}
+                            className="inline-flex items-center rounded-full border border-forest/30 px-4 py-2 text-sm font-medium text-forest/90 transition-colors hover:bg-forest hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/50"
+                          >
+                            {label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               </Reveal>
             )}

@@ -21,6 +21,8 @@
  *   node scripts/import-appendix-a.mjs --limit=10
  *   node scripts/import-appendix-a.mjs --status=needs-clearance
  *   node scripts/import-appendix-a.mjs --set-status=ready --only=<slug>
+ *   node scripts/import-appendix-a.mjs --set-sectors          # dry run
+ *   node scripts/import-appendix-a.mjs --set-sectors --apply --confirm-dataset=production
  *   node scripts/import-appendix-a.mjs --apply --confirm-dataset=production
  *
  * Flags:
@@ -35,6 +37,10 @@
  *                                everything when no --only is given
  *   --apply                     actually write (requires the two flags below)
  *   --confirm-dataset=<name>    must equal the dataset being written to
+ *   --set-sectors               separate mode: derive `sectors` on each project
+ *                                from the JSON `expertise` tags that name a
+ *                                sector, and write ONLY where the stored field
+ *                                is empty. Never overwrites a manual choice.
  */
 
 import fs from "node:fs";
@@ -457,11 +463,242 @@ async function runSetStatus() {
 }
 
 /* ---------------------------------------------------------------------- *
+ * 8b. --set-sectors mode
+ * ---------------------------------------------------------------------- */
+
+/* The eight sectors, mirroring src/lib/sectors.ts. Duplicated rather than
+   imported because this file is plain node ESM and cannot import a TypeScript
+   module; the two lists must be kept in step. `label` is what appears in the
+   CMS-authored `expertise` tags, `value` is what gets stored. */
+const SECTORS = [
+  { value: "public-health-health-systems", label: "Public health and health systems" },
+  { value: "migration-mobility", label: "Migration and mobility" },
+  { value: "nutrition-food-systems", label: "Nutrition and food systems" },
+  { value: "water-sanitation-hygiene", label: "Water, sanitation and hygiene" },
+  { value: "governance-social-inclusion", label: "Governance and social inclusion" },
+  { value: "climate-energy-environment", label: "Climate, energy and environment" },
+  { value: "education-skills", label: "Education and skills" },
+  { value: "private-sector-enterprise", label: "Private sector and enterprise" },
+];
+const SECTOR_BY_LABEL = new Map(SECTORS.map((s) => [s.label.toLowerCase(), s.value]));
+
+/* One project whose expertise tags name no sector, but which plainly belongs to
+   one. Stated explicitly rather than special-cased inside the tag loop so it is
+   visible in the dry-run output and can be argued with. */
+const SECTOR_OVERRIDES = {
+  "Nepal Micronutrient Status Survey editing and publication production":
+    ["nutrition-food-systems"],
+};
+
+/** Sectors implied by a JSON project's `expertise` tags. */
+function sectorsForJsonProject(p) {
+  const tags = Array.isArray(p.expertise) ? p.expertise : [];
+  const found = [];
+  for (const tag of tags) {
+    if (typeof tag !== "string") continue;
+    const value = SECTOR_BY_LABEL.get(tag.trim().toLowerCase());
+    /* Exact, case-insensitive equality only. A near-miss would invent a
+       classification the editor never made. */
+    if (value && !found.includes(value)) found.push(value);
+  }
+
+  const override = SECTOR_OVERRIDES[String(p.title || "").trim()];
+  if (override) for (const value of override) if (!found.includes(value)) found.push(value);
+
+  /* Order follows SECTORS so stored arrays read consistently. */
+  return SECTORS.filter((s) => found.includes(s.value)).map((s) => s.value);
+}
+
+/** A plain array of known sector values, or null. Anything else is refused. */
+function validateSectors(value) {
+  if (!Array.isArray(value)) return null;
+  const known = new Set(SECTORS.map((s) => s.value));
+  if (!value.every((v) => typeof v === "string" && known.has(v))) return null;
+  if (value.some((v) => typeof v === "object")) return null;
+  return value;
+}
+
+async function runSetSectors() {
+  hr("--set-sectors MODE (project.sectors only — nothing else is touched)");
+
+  const live = await client.fetch(
+    `*[_type == "project"]{_id, title, "slug": slug.current, sectors, webStatus}`,
+    {},
+    { perspective: "raw" },
+  );
+
+  const bySlug = new Map();
+  const byTitle = new Map();
+  for (const p of live) {
+    if (p.slug) bySlug.set(p.slug, p);
+    byTitle.set(normaliseTitle(p.title), p);
+  }
+
+  log(`projects in Sanity: ${live.length}`);
+  log(`projects in JSON:  ${jsonProjects.length}`);
+  log("");
+
+  const plan = [];
+  const unmatched = [];
+
+  for (const p of jsonProjects) {
+    const wanted = validateSectors(sectorsForJsonProject(p));
+    if (!wanted) continue;
+
+    const target =
+      (p.slug && bySlug.get(p.slug)) || byTitle.get(normaliseTitle(p.title));
+
+    if (!target) {
+      unmatched.push(p);
+      continue;
+    }
+
+    const existing = Array.isArray(target.sectors) ? target.sectors : [];
+    /* Only ever fills an empty field. A value already chosen in the Studio is
+       never overwritten, so this mode can be re-run safely and cannot undo a
+       manual correction. */
+    if (existing.length > 0) continue;
+
+    plan.push({ target, wanted, inferred: Boolean(SECTOR_OVERRIDES[String(p.title || "").trim()]) });
+  }
+
+  const bySector = new Map(SECTORS.map((s) => [s.value, 0]));
+  for (const item of plan) for (const v of item.wanted) bySector.set(v, bySector.get(v) + 1);
+
+  log(`projects to fill:   ${plan.length}`);
+  log(`projects unmatched: ${unmatched.length}`);
+  log("");
+
+  log("projects whose sector is INFERRED (not stated in any expertise tag):");
+  for (const item of plan.filter((i) => i.inferred)) {
+    log(`  ${String(slugOf(item.target)).slice(0, 50).padEnd(52)} -> ${item.wanted.join(", ")}`);
+  }
+  log("");
+
+  log(`slug${" ".repeat(36)}sectors`);
+  for (const item of plan.slice(0, 40)) {
+    log(`  ${String(slugOf(item.target)).slice(0, 48).padEnd(50)}${item.wanted.join(", ")}`);
+  }
+  if (plan.length > 40) log(`  ... and ${plan.length - 40} more`);
+  log("");
+
+  log("projects per sector:");
+  for (const s of SECTORS) log(`  ${s.value.padEnd(30)}${bySector.get(s.value)}`);
+  log("");
+
+  if (unmatched.length > 0) {
+    log("UNMATCHED (no Sanity project by slug or normalised title):");
+    for (const p of unmatched.slice(0, 20)) log(`  ${String(p.slug || p.title).slice(0, 60)}`);
+    if (unmatched.length > 20) log(`  ... and ${unmatched.length - 20} more`);
+    log("");
+  }
+
+  const alreadySet = live.filter((p) => Array.isArray(p.sectors) && p.sectors.length > 0).length;
+  if (alreadySet > 0) {
+    log(`NOTE: ${alreadySet} project(s) already carry sectors. They are left untouched.`);
+    log("");
+  }
+
+  if (!WILL_WRITE) {
+    log("DRY RUN — nothing was written. Re-run with:");
+    log(`  --set-sectors --apply --confirm-dataset=${DATASET}`);
+    return;
+  }
+
+  if (plan.length === 0) {
+    log("Nothing to do.");
+    return;
+  }
+
+  /* Backup BEFORE any write, so a rollback does not depend on this script
+     having run correctly. */
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const backupPath = path.join(os.tmpdir(), `anweshan-sectors-backup-${stamp}.json`);
+  fs.writeFileSync(
+    backupPath,
+    JSON.stringify(
+      {
+        takenAt: new Date().toISOString(),
+        dataset: DATASET,
+        documents: plan.map((i) => ({
+          _id: i.target._id,
+          title: i.target.title,
+          slug: i.target.slug,
+          sectorsBefore: i.target.sectors ?? null,
+          sectorsAfter: i.wanted,
+        })),
+      },
+      null,
+      2,
+    ),
+  );
+  log(`BACKUP written to: ${backupPath}`);
+
+  const writer = client.withConfig({ token: env.SANITY_API_WRITE_TOKEN });
+  const ops = plan.map((i) => ({
+    /* `set` with a plain array of plain strings. Never a wrapper object and
+       never setIfMissing: an operator wrapper stored as a value is exactly the
+       corruption that broke this dataset once already. */
+    patch: { id: i.target._id, set: { sectors: i.wanted } },
+  }));
+
+  let verified = 0;
+  for (let i = 0; i < ops.length; i += 50) {
+    const batchNumber = Math.floor(i / 50) + 1;
+    const batch = ops.slice(i, i + 50);
+    const expectedIds = batch.map((o) => o.patch.id);
+
+    let result;
+    try {
+      result = await writer.mutate(batch, { visibility: "sync" });
+    } catch (err) {
+      console.error(`\nSTOPPED in batch ${batchNumber}. ${verified} already verified.`);
+      console.error(String(err.message || err));
+      process.exit(1);
+    }
+
+    const returnedIds = Array.isArray(result?.documentIds) ? result.documentIds : [];
+    if (returnedIds.length !== expectedIds.length) {
+      console.error(`\nSTOPPED in batch ${batchNumber} — acknowledged ${returnedIds.length} of ${expectedIds.length}.`);
+      process.exit(1);
+    }
+
+    verified += expectedIds.length;
+    log(`  batch ${batchNumber}: ${verified}/${ops.length} written`);
+  }
+
+  /* Re-read and confirm, rather than trusting the acknowledgement. */
+  const after = await client.fetch(
+    `*[_type == "project" && defined(sectors)]{_id, sectors}`,
+    {},
+    { perspective: "raw" },
+  );
+  const perSector = new Map(SECTORS.map((s) => [s.value, 0]));
+  for (const p of after) {
+    if (!Array.isArray(p.sectors)) continue;
+    for (const v of p.sectors) if (perSector.has(v)) perSector.set(v, perSector.get(v) + 1);
+  }
+
+  log("");
+  log(`VERIFIED by re-reading ${after.length} project(s). Projects per sector:`);
+  for (const s of SECTORS) log(`  ${s.value.padEnd(30)}${perSector.get(s.value)}`);
+
+  const nonString = after.filter((p) => Array.isArray(p.sectors) && p.sectors.some((v) => typeof v !== "string"));
+  if (nonString.length > 0) {
+    console.error(`\nFAIL: ${nonString.length} document(s) hold a non-string sector value.`);
+    process.exit(1);
+  }
+  log("");
+  log(`DONE — ${verified} project(s) given sectors, verified.`);
+}
+
+/* ---------------------------------------------------------------------- *
  * 9. Main
  * ---------------------------------------------------------------------- */
 
 async function main() {
   if (SET_STATUS) return runSetStatus();
+  if (flagPresent("set-sectors")) return runSetSectors();
 
   hr("EXISTING STUDIO STATE (read only)");
 
@@ -1235,7 +1472,20 @@ function validateMutations(muts, existingHubIds) {
     }
   };
 
-  const checkSlug = (slug, label, ownerKey) => {
+  /* Sanity stores a slug as { _type: "slug", current: "..." }.
+
+     A bare string is a legitimate source shape and is normalised to that object,
+     so a caller holding `"some-slug"` is understood rather than rejected.
+     Anything else — a number, an array, null — is left as-is so the checks
+     below can report it precisely. This only affects how a value is READ for
+     checking: the builders in buildMutations already emit real slug objects, so
+     normalisation never alters a mutation that is actually sent. */
+  const normaliseSlugForCheck = (raw) =>
+    typeof raw === "string" ? { _type: "slug", current: raw } : raw;
+
+  const checkSlug = (raw, label, ownerKey) => {
+    const slug = normaliseSlugForCheck(raw);
+
     if (!slug || typeof slug !== "object" || Array.isArray(slug)) {
       problems.push(`${ownerKey}: ${label} is not a slug object`);
       return;
@@ -1290,8 +1540,16 @@ function validateMutations(muts, existingHubIds) {
           problems.push(`${k}: sets featured on an existing document, which must never change`);
         }
         /* Plain values only: no operator wrapper is ever sent, so nothing here has to
-           be unwrapped before it can be checked. */
-        checkSlug(m.patch.set.slug, "set.slug", k);
+           be unwrapped before it can be checked.
+
+           A patch sets only the fields that are missing or were corrupted, so
+           MOST patches carry no slug at all. That is correct and must not be
+           reported: an absent key means "this patch does not touch the slug",
+           not "the slug is malformed". Validated only when the key is actually
+           present, so a patch that does set one is still checked in full. */
+        if (Object.prototype.hasOwnProperty.call(m.patch.set, "slug")) {
+          checkSlug(m.patch.set.slug, "set.slug", k);
+        }
         for (const [field, v] of Object.entries(m.patch.set)) {
           if (NEVER_WRITE_ON_EXISTING.has(field)) {
             problems.push(`${k}: set.${field} would overwrite a field that must never change on an existing document`);

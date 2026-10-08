@@ -10,6 +10,7 @@ import { clientHub } from "./clientHub";
 import { teamMember } from "./teamMember";
 import { publication } from "./publication";
 import { galleryEvent } from "./galleryEvent";
+import { sector } from "./sector";
 
 export const schemaTypes = [
   // Singletons (edited in place, one document each)
@@ -26,4 +27,5 @@ export const schemaTypes = [
   teamMember,
   publication,
   galleryEvent,
+  sector,
 ];

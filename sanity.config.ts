@@ -55,6 +55,12 @@ export default defineConfig({
             S.divider(),
             S.documentTypeListItem("project").title("Projects"),
             S.documentTypeListItem("clientHub").title("Client hubs"),
+            /* Visible in the desk so the eight sector documents stay editable.
+               The FRONTEND does not read them - /sectors uses the fixed list in
+               src/lib/sectors.ts - but the documents are real data an editor
+               filled in, so hiding the type made them unreachable and looked
+               like data loss. */
+            S.documentTypeListItem("sector").title("Sectors"),
             S.documentTypeListItem("teamMember").title("Team members"),
             S.documentTypeListItem("publication").title("Publications"),
             S.documentTypeListItem("galleryEvent").title("Gallery events"),

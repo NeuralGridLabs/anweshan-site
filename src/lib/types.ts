@@ -226,6 +226,9 @@ export type Project = {
      primary service; this is the full set, and drives which service pages list
      the project. */
   serviceAreas?: string[];
+  /* Fields of work this assignment belongs to, as values from SECTORS in
+     lib/sectors.ts. Absent or empty means no sector chip is shown. */
+  sectors?: string[];
   summary?: string;
   status?: string;
   years?: string;
@@ -263,6 +266,8 @@ export type HubProject = {
   category?: string;
   /* Full set of service areas, alongside the single primary `category`. */
   serviceAreas?: string[];
+  /* Fields of work, as values from SECTORS in lib/sectors.ts. */
+  sectors?: string[];
   status?: string;
   years?: string;
   startYear?: number;
@@ -286,6 +291,9 @@ export type ClientHub = {
   firstYear?: number;
   lastYear?: number;
   categories?: string[];
+  /* Flat list of sector values across this hub's ready projects, one entry per
+     project that carries it. Ranked in code for the card chips. */
+  sectors?: string[];
 };
 
 /** A hub with its own page: the card fields plus intro, website and projects. */
@@ -294,6 +302,10 @@ export type ClientHubDetail = ClientHub & {
   website?: string;
   projects?: HubProject[];
 };
+
+/* The eight sectors are values, not documents: they live in src/lib/sectors.ts
+   together with their labels and descriptions. Only the per-project values come
+   from Sanity, and those are plain strings. */
 
 /** One of a project's other assignments for the same client. */
 export type ProjectSibling = {

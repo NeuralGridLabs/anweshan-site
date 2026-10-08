@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import Cutouts from "@/components/Cutouts";
 import Reveal from "@/components/Reveal";
 import { categoryShort } from "@/lib/categories";
+import { sectorShort } from "@/lib/sectors";
 import type { ResolvedProject } from "@/lib/project-data";
 
 /* Featured work.
@@ -20,6 +21,12 @@ import type { ResolvedProject } from "@/lib/project-data";
 
    Nothing here is interactive, so this is a server component: no state, no
    drag handlers, no carousel machinery to ship to the browser. */
+
+/* The first sector on a project, or "" when it has none. Shared by the chip so
+   the "first sector" rule is written down once. */
+function firstSector(project: ResolvedProject): string {
+  return (project.sectors ?? []).find((v) => typeof v === "string" && v !== "") ?? "";
+}
 
 export default function Projects({ projects }: { projects: ResolvedProject[] }) {
   if (projects.length === 0) return null;
@@ -75,7 +82,7 @@ export default function Projects({ projects }: { projects: ResolvedProject[] }) 
                   />
 
                   {/* Index numeral */}
-                  <span className="md:col-span-1 text-4xl md:text-5xl font-bold text-accent/30 tabular-nums leading-none select-none transition-colors duration-300 group-hover:text-accent/70">
+                  <span className="md:col-span-1 pl-3 md:pl-4 text-4xl md:text-5xl font-bold text-accent/30 tabular-nums leading-none select-none transition-colors duration-300 group-hover:text-accent/70">
                     {String(index + 1).padStart(2, "0")}
                   </span>
 
@@ -86,6 +93,14 @@ export default function Projects({ projects }: { projects: ResolvedProject[] }) 
 
                   {/* Facts */}
                   <div className="md:col-span-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                    {/* Sector first, then the service chip. The dark band needs
+                        its own chip treatment, so this is not ProjectChips. */}
+                    {firstSector(project) && (
+                      <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-forest">
+                        {sectorShort(firstSector(project) as string)}
+                      </span>
+                    )}
+
                     {project.category && (
                       <span className="rounded-full border border-white/30 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-ivory">
                         {categoryShort(project.category)}

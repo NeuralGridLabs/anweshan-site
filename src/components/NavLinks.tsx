@@ -15,10 +15,20 @@ const navLinks: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About us", href: "/about" },
   { label: "Services", href: "/services" },
-  { label: "Projects", href: "/projects" },
+  {
+    /* "Works" is a presentation label only. It groups the two collections of
+       delivered work under one trigger; the /projects and /clients routes
+       themselves are untouched and remain the real destinations. */
+    label: "Works",
+    children: [
+      { label: "Projects", href: "/projects" },
+      { label: "Clients", href: "/clients" },
+    ],
+  },
+  /* Sectors is its own primary destination, deliberately not a Works child:
+     it describes fields of practice rather than a body of delivered work. */
+  { label: "Sectors", href: "/sectors" },
   { label: "Publications", href: "/publications" },
-  /* Permanent redirect to the Our clients band on the home page. */
-  { label: "Clients", href: "/clients" },
   {
     /* "Team" is a trigger, not a link. Its two destinations live in the panel. */
     label: "Team",
@@ -131,7 +141,7 @@ export default function NavLinks() {
                       <Link
                         key={child.href}
                         href={child.href}
-                        className={`block px-4 py-3 text-sm font-semibold transition-colors ${
+                        className={`block px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:bg-white/15 focus-visible:text-white ${
                           childActive
                             ? "text-gold"
                             : "text-white/75 hover:bg-white/10 hover:text-white"

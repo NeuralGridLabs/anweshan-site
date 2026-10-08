@@ -7,12 +7,25 @@ import { Fragment, useEffect, useState } from "react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import NavLinks from "@/components/NavLinks";
 
-const mobileLinks = [
+/* The drawer mirrors the desktop nav. A group has no `href` of its own: it is
+   a heading whose destinations are the indented links beneath it, so "Works"
+   cannot become a dead tap target that duplicates its own first child. */
+const mobileLinks: {
+  label: string;
+  href?: string;
+  children?: { label: string; href: string }[];
+}[] = [
   { label: "Home", href: "/" },
   { label: "About us", href: "/about" },
   { label: "Services", href: "/services" },
-  { label: "Projects", href: "/projects" },
-  { label: "Clients", href: "/clients" },
+  {
+    label: "Works",
+    children: [
+      { label: "Projects", href: "/projects" },
+      { label: "Clients", href: "/clients" },
+    ],
+  },
+  { label: "Sectors", href: "/sectors" },
   {
     label: "Team",
     href: "/team",
@@ -108,27 +121,50 @@ export default function Navbar() {
 
           <ul className="space-y-1">
             {mobileLinks.map((link, i) => {
-              const isActive =
-                link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+              const isActive = link.href
+                ? link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href)
+                : false;
+              /* A group's children are active when any of them is the current
+                 route, so "Works" reads as the destination you are inside. */
+              const groupActive =
+                !link.href &&
+                (link.children?.some((child) => pathname.startsWith(child.href)) ??
+                  false);
               const slide = () =>
                 `transition-all duration-500 ${
                   open ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"
                 }`;
               return (
-                <Fragment key={link.href}>
+                <Fragment key={link.href ?? link.label}>
                   <li
                     style={{ transitionDelay: open ? `${120 + i * 45}ms` : "0ms" }}
                     className={slide()}
                   >
-                    <Link
-                      href={link.href}
-                      onClick={() => setOpen(false)}
-                      className={`block text-3xl font-bold tracking-tight py-2.5 border-b border-white/12 ${
-                        isActive ? "text-gold" : "text-white/80 hover:text-white"
-                      } transition-colors`}
-                    >
-                      {link.label}
-                    </Link>
+                    {link.href ? (
+                      <Link
+                        href={link.href}
+                        onClick={() => setOpen(false)}
+                        className={`block text-3xl font-bold tracking-tight py-2.5 border-b border-white/12 ${
+                          isActive ? "text-gold" : "text-white/80 hover:text-white"
+                        } transition-colors`}
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      /* Group heading: not interactive, so it is not focusable
+                         and screen readers treat it as the label for the links
+                         that follow. */
+                      <p
+                        aria-hidden
+                        className={`block text-3xl font-bold tracking-tight py-2.5 border-b border-white/12 ${
+                          groupActive ? "text-gold" : "text-white/80"
+                        }`}
+                      >
+                        {link.label}
+                      </p>
+                    )}
                   </li>
                   {/* Nested under its parent, indented, same list pattern. */}
                   {link.children?.map((child, j) => (
