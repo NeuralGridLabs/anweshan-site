@@ -1,42 +1,106 @@
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Projects from "@/components/Projects";
+import Publications from "@/components/Publications";
+import ProofBar from "@/components/ProofBar";
 import Explore from "@/components/Explore";
+import ClientMarquee from "@/components/ClientMarquee";
 
-import { homeQuery } from "@/lib/queries";
+import {
+  homeQuery,
+  featuredProjectsQuery,
+  featuredPublicationsQuery,
+  clientsQuery,
+} from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type HomeData = {
-  heroEyebrow?: string;
-  heroHeading?: string;
-  heroSubtext?: string;
-  primaryCtaLabel?: string;
-  secondaryCtaLabel?: string;
-  slides?: {
-    image: string;
-    label: string;
-  }[];
-};
+import { sanityImageUrl } from "@/lib/image";
+import { resolveFeaturedProjects } from "@/lib/project-data";
+import type {
+  Home as HomeData,
+  Project,
+  Publication,
+  Clients,
+} from "@/lib/types";
 
 export default async function Home() {
-  const rawHomeData = await fetchSanity(homeQuery);
+  const homeData = await fetchSanity<HomeData>(homeQuery);
 
-  const homeData = rawHomeData as HomeData | undefined;
+  /* Featured work is resolved on the server: the read token is not available
+     in the browser, so a client-side fetch cannot reach a private dataset. */
+  const featuredProjects = resolveFeaturedProjects(
+    await fetchSanity<Project[]>(featuredProjectsQuery),
+  );
+
+  /* Publication preview is resolved the same way. The query already limits this
+     to publications an editor has flagged for the homepage; the component
+     renders nothing when the list is empty. */
+  const featuredPublications =
+    (await fetchSanity<Publication[]>(featuredPublicationsQuery)) ?? [];
+
+  /* Client logos are resolved to URLs on the server, the same way hero slides
+     are, so `@sanity/client` stays out of the browser bundle. Entries without a
+     resolvable image are dropped; if that empties the list the carousel falls
+     back to its own bundled logos. */
+  const clientLogos = ((await fetchSanity<Clients>(clientsQuery))?.items ?? [])
+    .map((item) => ({ name: item.name, src: sanityImageUrl(item.logo) ?? "" }))
+    .filter((logo) => logo.src !== "");
+
+  /* Slide images are resolved to CDN URLs here rather than in the client
+     component, so `@sanity/client` stays out of the browser bundle. Slides
+     without a resolvable image are dropped, letting Hero fall back to its
+     bundled defaults. */
+  const slides = (homeData?.slides ?? [])
+    .map((slide) => ({
+      image: sanityImageUrl(slide.image) ?? "",
+      label: slide.label ?? "",
+      alt: slide.alt ?? "",
+    }))
+    .filter((slide) => slide.image !== "");
+
+  const heroData = {
+    heroEyebrow: homeData?.heroEyebrow,
+    heroHeading: homeData?.heroHeading,
+    heroSubtext: homeData?.heroSubtext,
+    primaryCtaLabel: homeData?.primaryCtaLabel,
+    secondaryCtaLabel: homeData?.secondaryCtaLabel,
+    primaryCtaLink: homeData?.primaryCtaLink,
+    secondaryCtaLink: homeData?.secondaryCtaLink,
+    slides: slides.length > 0 ? slides : undefined,
+  };
 
   return (
     <main>
       <section id="home">
-        <Hero data={homeData} />
+        <Hero data={heroData} />
       </section>
+      <ProofBar items={homeData?.proofItems} />
 
       <section id="about">
-        <About />
+        <About
+          data={{
+            aboutBlurb: homeData?.aboutBlurb,
+            aboutEyebrow: homeData?.aboutEyebrow,
+            aboutBadge: homeData?.aboutBadge,
+            aboutHeading: homeData?.aboutHeading,
+            aboutHeadingHighlight: homeData?.aboutHeadingHighlight,
+            aboutCtaLabel: homeData?.aboutCtaLabel,
+          }}
+        />
       </section>
+      <Publications publications={featuredPublications} />
+
+      <ClientMarquee
+        eyebrow={homeData?.clientsEyebrow}
+        heading={homeData?.clientsHeading}
+        intro={homeData?.clientsIntro}
+        ctaLabel={homeData?.clientsCtaLabel}
+        ctaLink={homeData?.clientsCtaLink}
+        logos={clientLogos}
+      />
 
       <section id="projects">
-        <Projects />
+        <Projects projects={featuredProjects} />
       </section>
-
       <section id="explore">
         <Explore />
       </section>

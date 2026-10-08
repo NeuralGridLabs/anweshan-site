@@ -6,109 +6,94 @@ import Cutouts from "@/components/Cutouts";
 
 import { teamMembersQuery, siteSettingsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import { sanityImageUrl } from "@/lib/image";
+import { localPhotoFor, localTeam, teamGroups } from "@/lib/team";
+import type { SiteSettings, TeamMember } from "@/lib/types";
 
-type TeamMember = {
-  _id: string;
+const OTHER_GROUP = "Other";
+
+type ResolvedMember = {
+  key: string;
   name: string;
-  role: string;
-  group: string;
-  bio?: string;
-  photo?: {
-    asset?: {
-      _ref?: string;
-    };
-  };
-  email?: string;
-  order?: number;
+  role?: string;
+  group?: string;
+  photo: string | null;
 };
 
-type SiteSettings = {
-  stats?: {
-    value: string;
-    label: string;
-  }[];
-};
+/**
+ * Sanity is the preferred source, but the dataset may hold no teamMember
+ * records. The local roster from the original site is used in that case so the
+ * page still renders. A Sanity record without an uploaded image falls back to
+ * its matching local photo rather than showing a placeholder.
+ */
+function resolveMembers(members: TeamMember[] | null): ResolvedMember[] {
+  if (members?.length) {
+    return members.map((m) => ({
+      key: m._id,
+      name: m.name,
+      role: m.role,
+      group: m.group,
+      photo: sanityImageUrl(m.photo) ?? localPhotoFor(m.name),
+    }));
+  }
 
-const fallbackGroups = [
-  {
-    name: "Leadership",
-    blurb:
-      "Direction, partnerships, and institutional oversight that steers strategy.",
-  },
-  {
-    name: "Research & Policy",
-    blurb:
-      "Study design, qualitative and quantitative enquiry, evaluation, and policy analysis.",
-  },
-  {
-    name: "Programmes & Operations",
-    blurb:
-      "Programme management, finance, data, and partnerships that keep delivery running.",
-  },
-  {
-    name: "Communications & Technology",
-    blurb:
-      "Design, editorial, and digital development that power our communications.",
-  },
-  {
-    name: "Support Services",
-    blurb:
-      "Office administration and logistics that keep the organisation running smoothly.",
-  },
-];
+  return localTeam.map((m) => ({
+    key: `local:${m.name}`,
+    name: m.name,
+    role: m.role,
+    group: m.group,
+    photo: m.photo,
+  }));
+}
 
 export default async function TeamPage() {
-  const [rawTeamMembers, rawSiteSettings] = await Promise.all([
-    fetchSanity(teamMembersQuery),
-    fetchSanity(siteSettingsQuery),
+  const [members, siteSettings] = await Promise.all([
+    fetchSanity<TeamMember[]>(teamMembersQuery),
+    fetchSanity<SiteSettings>(siteSettingsQuery),
   ]);
+  // `fetchSanity` resolves to null when Sanity is not configured or the query
+  // fails, so the fallback is applied to the awaited value, not to the promise.
+  const teamMembers = resolveMembers(members);
 
-  const teamMembers = (rawTeamMembers as TeamMember[]) || [];
-  const siteSettings = rawSiteSettings as SiteSettings;
-
-  // Group members by group field
-  const groups = fallbackGroups
+  const groups = teamGroups
     .map((g) => ({
       ...g,
-      members: teamMembers.filter((member) => member.group === g.name),
+      members: teamMembers.filter((m) => m.group === g.name),
     }))
     .filter((g) => g.members.length > 0);
 
-  const meta = siteSettings?.stats?.length
-    ? siteSettings.stats
-    : [
-        {
-          label: "Team members",
-          value: teamMembers.length.toString(),
-        },
-        {
-          label: "Practice groups",
-          value: groups.length.toString(),
-        },
-        {
-          label: "Senior advisors",
-          value: teamMembers
-            .filter(
-              (member) =>
-                member.role?.includes("Senior") ||
-                member.role?.includes("Advisor") ||
-                member.role?.includes("Director")
-            )
-            .length.toString(),
-        },
-        {
-          label: "Based in",
-          value: "Lalitpur",
-        },
-      ];
-
-  function getImageUrl(ref?: string) {
-    if (!ref) return "";
-
-    return `https://cdn.sanity.io/images/10g74skr/production/${ref
-      .replace("image-", "")
-      .replace(/-(jpg|jpeg|png|webp|gif)$/, ".$1")}`;
+  // Anything tagged with a group that is not a heading would otherwise be
+  // dropped, so collect it rather than silently hiding the record.
+  const orphans = teamMembers.filter(
+    (m) => m.group && !teamGroups.some((g) => g.name === m.group),
+  );
+  if (orphans.length) {
+    groups.push({
+      name: OTHER_GROUP,
+      blurb: "Team members whose group has not been set to a listed heading.",
+      members: orphans,
+    });
   }
+
+  const sanityStats = (siteSettings?.stats ?? []).filter(
+    (s): s is { value: string; label: string } =>
+      typeof s.value === "string" && typeof s.label === "string",
+  );
+
+  const meta = sanityStats.length
+    ? sanityStats
+    : [
+        { label: "Team members", value: String(teamMembers.length) },
+        { label: "Teams", value: String(groups.length) },
+        {
+          label: "Advisor & specialist",
+          value: String(
+            groups.find((g) => g.name === "Advisor and specialist")?.members
+              .length ?? 0,
+          ),
+        },
+        { label: "Based in", value: "Lalitpur" },
+      ];
 
   return (
     <main className="min-h-screen bg-snow">
@@ -145,7 +130,7 @@ export default async function TeamPage() {
 
                   <p
                     className={`text-base md:text-lg leading-relaxed ${
-                      dark ? "text-forest/80" : "text-forest/75"
+                      dark ? "text-forest/85" : "text-forest/85"
                     }`}
                   >
                     {group.blurb}
@@ -153,11 +138,7 @@ export default async function TeamPage() {
                 </div>
 
                 <div className="md:col-span-8 flex md:justify-end md:items-end">
-                  <p
-                    className={`text-sm font-semibold tabular-nums ${
-                      dark ? "text-forest/70" : "text-forest/70"
-                    }`}
-                  >
+                  <p className="text-sm font-semibold tabular-nums text-forest/85">
                     {String(group.members.length).padStart(2, "0")}
                   </p>
                 </div>
@@ -165,22 +146,12 @@ export default async function TeamPage() {
 
               <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
                 {group.members.map((person, i) => (
-                  <Reveal
-                    as="li"
-                    key={person._id}
-                    delay={(i % 4) * 90}
-                  >
+                  <Reveal as="li" key={person.key} delay={(i % 4) * 90}>
                     <article className="group">
-                      <div
-                        className={`relative aspect-[4/5] rounded-xl overflow-hidden mb-4 ${
-                          dark ? "bg-forest/6" : "bg-mint/50"
-                        }`}
-                      >
-                        {person.photo?.asset?._ref ? (
+                      <div className={`relative aspect-[4/5] rounded-xl overflow-hidden mb-4 ${dark ? "bg-forest/6" : "bg-mint/50"}`}>
+                        {person.photo ? (
                           <Image
-                            src={getImageUrl(
-                              person.photo.asset._ref
-                            )}
+                            src={person.photo}
                             alt={person.name}
                             fill
                             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 22vw"
@@ -207,26 +178,14 @@ export default async function TeamPage() {
                           </div>
                         )}
                       </div>
-
-                      <h2
-                        className={`text-base md:text-lg font-bold leading-tight tracking-tight ${
-                          dark
-                            ? "text-forest"
-                            : "text-forest"
-                        }`}
-                      >
+                      <h2 className="text-base md:text-lg font-bold leading-tight tracking-tight text-forest">
                         {person.name}
                       </h2>
-
-                      <p
-                        className={`body-sm mt-1 ${
-                          dark
-                            ? "text-forest/80"
-                            : "text-forest/60"
-                        }`}
-                      >
-                        {person.role}
-                      </p>
+                      {person.role && (
+                        <p className={`body-sm mt-1 ${dark ? "text-forest/85" : "text-forest/85"}`}>
+                          {person.role}
+                        </p>
+                      )}
                     </article>
                   </Reveal>
                 ))}

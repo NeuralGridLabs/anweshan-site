@@ -2,21 +2,9 @@
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { MapPin, Mail, Phone, Smartphone, Globe } from "lucide-react";
-import { contactQuery, siteSettingsQuery } from "@/lib/queries";
+import { contactQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
-
-type ContactData = {
-  heading?: string;
-  address?: string;
-  email?: string;
-  phone?: string;
-  mapEmbed?: string;
-};
-
-type SiteSettings = {
-  orgName?: string;
-  tagline?: string;
-};
+import type { Contact as ContactData } from "@/lib/types";
 
 type ContactDetail = {
   icon: typeof MapPin;
@@ -53,14 +41,10 @@ const fallbackDetails: ContactDetail[] = [
 ];
 
 export default async function ContactPage() {
-  const [rawContactData, rawSiteSettings] = await Promise.all([
-    fetchSanity(contactQuery),
-    fetchSanity(siteSettingsQuery),
-  ]);
+  const rawContactData = await fetchSanity<ContactData>(contactQuery);
 
   // Sanity can return null, so always fall back to an empty object.
-  const contactData = (rawContactData as ContactData) || {};
-  const siteSettings = (rawSiteSettings as SiteSettings) || {};
+  const contactData = rawContactData || {};
 
   const details: ContactDetail[] = [
     {
@@ -90,14 +74,12 @@ export default async function ContactPage() {
     },
   ];
 
-  const orgName = siteSettings.orgName || "Anweshan";
-
   return (
     <main className="min-h-screen bg-paper">
       <PageHeader
         tone="clay"
         eyebrow="Contact us"
-        title="Start a conversation about your research question."
+        title={contactData?.heading || "Start a conversation about your research question."}
         lead="Whether you need full CRO support, a Q-squared survey, an evaluation, or communication design, our team in Lalitpur will get back to you."
         image="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000"
         imageAlt="Kathmandu valley"

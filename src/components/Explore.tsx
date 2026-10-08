@@ -11,7 +11,7 @@ const items = [
     id: "01",
     label: "Services",
     href: "/services",
-    caption: "Six practices",
+    caption: "Six practices, trusted by partners",
     description:
       "Clinical research, Q-squared surveys, policy dialogue, communication, and information technology.",
     image:
@@ -29,16 +29,6 @@ const items = [
   },
   {
     id: "03",
-    label: "Clients",
-    href: "/clients",
-    caption: "Twenty-three partners",
-    description:
-      "Ministries, UN agencies, universities, and international organisations across Nepal.",
-    image:
-      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=1400",
-  },
-  {
-    id: "04",
     label: "Team",
     href: "/team",
     caption: "Researchers and advisors",
@@ -108,7 +98,7 @@ export default function Explore() {
 
                   <span
                     className={`relative col-span-2 md:col-span-1 text-xs font-semibold tabular-nums transition-colors duration-300 ${
-                      isActive ? "text-forest" : "text-forest/45"
+                      isActive ? "text-forest" : "text-forest/85"
                     }`}
                   >
                     {item.id}
@@ -117,15 +107,15 @@ export default function Explore() {
                   <span className="relative col-span-10 md:col-span-4">
                     <span
                       className={`block text-2xl md:text-4xl font-bold tracking-tight transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                        isActive ? "text-forest md:translate-x-2" : "text-forest/80"
+                        isActive ? "text-forest md:translate-x-2" : "text-forest/85"
                       }`}
                     >
                       {item.label}
                     </span>
-                    <span className="block text-forest/55 meta-label mt-2">{item.caption}</span>
+                    <span className="block text-forest/70 meta-label mt-2">{item.caption}</span>
                   </span>
 
-                  <span className="relative hidden md:block md:col-span-4 text-forest/75 body-sm">
+                  <span className="relative hidden md:block md:col-span-4 text-forest/85 body-sm">
                     {item.description}
                   </span>
 

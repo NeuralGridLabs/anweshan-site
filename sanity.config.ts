@@ -1,3 +1,5 @@
+"use client";
+
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
@@ -52,6 +54,7 @@ export default defineConfig({
               .child(S.document().schemaType("contact").documentId("contact")),
             S.divider(),
             S.documentTypeListItem("project").title("Projects"),
+            S.documentTypeListItem("clientHub").title("Client hubs"),
             S.documentTypeListItem("teamMember").title("Team members"),
             S.documentTypeListItem("publication").title("Publications"),
             S.documentTypeListItem("galleryEvent").title("Gallery events"),

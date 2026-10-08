@@ -11,6 +11,21 @@ export const galleryEvent = defineType({
       type: "string",
       validation: (r) => r.required(),
     }),
+    defineField({
+      name: "category",
+      title: "Section",
+      type: "string",
+      options: {
+        list: [
+          { title: "Events, Training & Workshops", value: "events-training" },
+          { title: "Team Celebrations", value: "celebrations" },
+        ],
+        layout: "radio",
+      },
+      description:
+        "Which section of the Gallery page this event belongs under. Required, because the page groups events by it.",
+      validation: (r) => r.required(),
+    }),
     defineField({ name: "date", title: "Event date", type: "date" }),
     defineField({ name: "description", title: "Description", type: "text" }),
     defineField({

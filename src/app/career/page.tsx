@@ -1,26 +1,21 @@
-﻿import PageHeader from "@/components/PageHeader";
-import Image from "next/image";
+import PageHeader from "@/components/PageHeader";
 import { Mail, ArrowUpRight, MapPin, Clock } from "lucide-react";
 
 import Reveal from "@/components/Reveal";
 
 import { careerQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import type { Career as CareerData } from "@/lib/types";
 
+/** Display shape for the vacancy list. CMS records are mapped onto it. */
 type Vacancy = {
   id?: string;
   title: string;
   group: string;
   type: string;
   location: string;
-  closes: string;
+  closes?: string;
   summary: string;
-};
-
-type CareerData = {
-  heading?: string;
-  intro?: string;
-  vacancies?: Vacancy[];
 };
 
 const fallbackVacancies: Vacancy[] = [
@@ -94,45 +89,32 @@ const checklist = [
 ];
 
 export default async function CareerPage() {
-  const rawSanityData = await fetchSanity(careerQuery);
+  const sanityData = await fetchSanity<CareerData>(careerQuery);
 
-  const sanityData = rawSanityData as CareerData;
-
-  const vacancies =
-    sanityData?.vacancies?.length
-      ? sanityData.vacancies
-      : fallbackVacancies;
+  // Normalise CMS vacancies onto the display shape used by the list below:
+  // the schema has no `id`, and stores the blurb as `description`.
+  const vacancies: Vacancy[] = sanityData?.vacancies?.length
+    ? sanityData.vacancies.map((v, i) => ({
+        id: String(i + 1).padStart(2, "0"),
+        title: v.title,
+        summary: v.description ?? "",
+        location: v.location ?? "",
+        type: v.type ?? "",
+        group: v.group ?? "",
+      }))
+    : fallbackVacancies;
 
   return (
     <main className="min-h-screen bg-paper">
       <PageHeader
         tone="primary"
         eyebrow="Work with us"
-        title="Work with a team committed to evidence."
+        title={sanityData?.heading || "Work with a team committed to evidence."}
         lead={
           sanityData?.intro ||
           "Anweshan is a contemporary issue focused research organization of highly motivated young professionals seeking to contribute to the wellbeing of poor, vulnerable and marginalized people."
         }
-        image="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000"
-        imageAlt="Colleagues working together"
-        meta={[
-          {
-            label: "Open roles",
-            value: vacancies.length.toString(),
-          },
-          {
-            label: "Practice groups",
-            value: new Set(vacancies.map((v) => v.group)).size.toString(),
-          },
-          {
-            label: "Team size",
-            value: "34",
-          },
-          {
-            label: "Based in",
-            value: "Lalitpur",
-          },
-        ]}
+        plain
       />
 
       {/* Vacancies */}
@@ -150,11 +132,7 @@ export default async function CareerPage() {
             </div>
 
             <div className="md:col-span-4 md:col-start-9 flex md:items-end">
-              <p className="text-base-text/55 body-base">
-                Applications are reviewed as they arrive. If nothing here
-                fits, send a speculative application and we will keep it on
-                file.
-              </p>
+            
             </div>
           </div>
 
@@ -180,13 +158,13 @@ export default async function CareerPage() {
                         {role.title}
                       </span>
 
-                      <span className="block text-base-text/75 body-base mt-2 max-w-md">
+                      <span className="block text-base-text/70 body-sm mt-2 max-w-2xl">
                         {role.summary}
                       </span>
                     </span>
 
                     <span className="col-span-12 md:col-span-4 flex flex-wrap items-center gap-x-6 gap-y-2 md:pt-1.5">
-                      <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
+                      <span className="inline-flex items-center gap-2 text-base-text/75 text-base">
                         <MapPin
                           size={13}
                           className="text-accent"
@@ -194,7 +172,7 @@ export default async function CareerPage() {
                         {role.location}
                       </span>
 
-                      <span className="inline-flex items-center gap-2 text-base-text/75 text-sm font-medium">
+                      <span className="inline-flex items-center gap-2 text-base-text/75 text-base">
                         <Clock
                           size={13}
                           className="text-accent"
@@ -219,31 +197,16 @@ export default async function CareerPage() {
             ))}
           </ul>
 
-          <Reveal>
-            <p className="text-base-text/40 text-md mt-8">
-              These listings are placeholders for layout review and are not
-              live vacancies.
-            </p>
-          </Reveal>
+          
         </div>
       </section>
 
       {/* Applying */}
       <section className="bg-mist py-20 md:py-28">
-        <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          <Reveal className="lg:col-span-5">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1400"
-                alt="Research team at work"
-                fill
-                sizes="(max-width: 1024px) 100vw, 42vw"
-                className="object-cover"
-              />
-            </div>
-          </Reveal>
-
-          <div className="lg:col-span-6 lg:col-start-7">
+        <div className="max-w-[1400px] mx-auto px-6">
+          {/* Single column: the image that sat beside this is removed, so the
+              checklist gets the full content width instead of a narrow column. */}
+          <div className="max-w-3xl">
             <Reveal>
               <p className="text-primary-dark eyebrow mb-6 text-base">
                 How to apply
@@ -262,12 +225,12 @@ export default async function CareerPage() {
                   key={item}
                   delay={140 + i * 70}
                 >
-                  <li className="flex gap-5 py-4 border-b border-accent-dark/15">
-                    <span className="text-accent-dark text-xs font-semibold tabular-nums pt-1">
+                  <li className="flex gap-5 py-5 border-b border-accent-dark/15">
+                    <span className="text-accent-dark text-sm font-semibold tabular-nums pt-1">
                       {String(i + 1).padStart(2, "0")}
                     </span>
 
-                    <span className="text-base-text/75 body">
+                    <span className="text-base-text/80 body-lg">
                       {item}
                     </span>
                   </li>
@@ -286,7 +249,7 @@ export default async function CareerPage() {
 
                 <ArrowUpRight
                   size={16}
-                  className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                  className="group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-transform"
                 />
               </a>
             </Reveal>
