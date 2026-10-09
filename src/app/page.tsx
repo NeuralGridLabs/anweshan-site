@@ -5,12 +5,14 @@ import Publications from "@/components/Publications";
 import ProofBar from "@/components/ProofBar";
 import Explore from "@/components/Explore";
 import ClientMarquee from "@/components/ClientMarquee";
+import HomeServiceCards, { type HomeServiceCard } from "@/components/HomeServiceCards";
 
 import {
   homeQuery,
   featuredProjectsQuery,
   featuredPublicationsQuery,
   clientsQuery,
+  servicesQuery,
 } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
@@ -20,10 +22,55 @@ import type {
   Project,
   Publication,
   Clients,
+  Services,
 } from "@/lib/types";
+
+const fallbackServiceCards: (HomeServiceCard & { serviceAliases: string[] })[] = [
+  {
+    title: "Research, evaluation and surveys",
+    description: "Rigorous mixed-method studies, baselines, evaluations, facility assessments and large-scale field research.",
+    link: "/services",
+    serviceAliases: ["research-evaluation-surveys", "research-evaluation-and-surveys"],
+  },
+  {
+    title: "Health systems and policy",
+    description: "Evidence, planning tools, reviews, guidelines and learning products for stronger public systems.",
+    link: "/services",
+    serviceAliases: ["health-systems-policy", "health-systems-and-policy"],
+  },
+  {
+    title: "Digital health and data systems",
+    description: "Workflow analysis, application development, data-quality systems, dashboards and user support.",
+    link: "/services",
+    serviceAliases: ["digital-health-data-systems", "digital-health-and-data-systems"],
+  },
+  {
+    title: "Social and behaviour change",
+    description: "Audience research, strategy, co-creation and communication products rooted in real barriers and motivations.",
+    link: "/services",
+    serviceAliases: ["social-behaviour-change", "social-and-behaviour-change"],
+  },
+  {
+    title: "Evidence communication",
+    description: "Technical reports, policy briefs, training materials, publications, films, animation and digital content.",
+    link: "/services",
+    serviceAliases: ["evidence-communication"],
+  },
+  {
+    title: "Clinical research and CRO services",
+    description: "Country-level support for feasibility, ethics and regulatory coordination, study operations, data, quality and publication in Nepal.",
+    link: "/cro",
+    serviceAliases: [],
+  },
+];
+
+function normalizedServiceName(value: string) {
+  return value.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 export default async function Home() {
   const homeData = await fetchSanity<HomeData>(homeQuery);
+  const serviceItems = (await fetchSanity<Services>(servicesQuery))?.items ?? [];
 
   /* Featured work is resolved on the server: the read token is not available
      in the browser, so a client-side fetch cannot reach a private dataset. */
@@ -68,6 +115,47 @@ export default async function Home() {
     slides: slides.length > 0 ? slides : undefined,
   };
 
+  const editorCards = homeData?.serviceCards?.filter((card) => card.title?.trim());
+  const serviceCards: HomeServiceCard[] = editorCards?.length
+    ? editorCards.map((card) => {
+        const title = card.title!.trim();
+        const isCroCard =
+          card.link?.trim().replace(/\/$/, "") === "/cro" ||
+          new RegExp("clinical research|\\bCRO\\b", "i").test(title);
+        return isCroCard
+          ? {
+              title: fallbackServiceCards[5].title,
+              description: fallbackServiceCards[5].description,
+              link: fallbackServiceCards[5].link,
+            }
+          : {
+              title,
+              description: card.description,
+              link: card.link?.trim() || "/services",
+            };
+      })
+    : fallbackServiceCards.map((card) => {
+        const match = serviceItems.find((service) => {
+          const slug = service.slug?.current;
+          return Boolean(
+            slug &&
+              (card.serviceAliases.includes(slug) ||
+                normalizedServiceName(service.title) === normalizedServiceName(card.title) ||
+                normalizedServiceName(slug) === normalizedServiceName(card.title)),
+          );
+        });
+        const slug = match?.slug?.current;
+        return {
+          title: card.title,
+          description: card.description,
+          link: slug
+            ? match?.hasDetailPage
+              ? `/services/${slug}`
+              : `/services#${slug}`
+            : card.link,
+        };
+      });
+
   return (
     <main>
       <section id="home">
@@ -87,6 +175,11 @@ export default async function Home() {
           }}
         />
       </section>
+      <HomeServiceCards
+        eyebrow={homeData?.servicesEyebrow}
+        heading={homeData?.servicesHeading}
+        cards={serviceCards}
+      />
       <Publications publications={featuredPublications} />
 
       <ClientMarquee

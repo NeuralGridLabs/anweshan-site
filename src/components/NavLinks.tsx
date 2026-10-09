@@ -15,6 +15,7 @@ const navLinks: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About us", href: "/about" },
   { label: "Services", href: "/services" },
+  { label: "CRO", href: "/cro" },
   {
     /* "Works" is a presentation label only. It groups the two collections of
        delivered work under one trigger; the /projects and /clients routes

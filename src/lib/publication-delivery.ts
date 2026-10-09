@@ -52,10 +52,8 @@ export function hasExternalUrl(externalUrl: unknown): boolean {
  * resolved (it comes from the Sanity asset's `url` via the query, so it cannot
  * be derived here).
  *
- * "View online" prefers the editor's external link — a DOI or publisher page is
- * a better reading experience than the raw PDF — and falls back to the file URL
- * so the action still leads somewhere real when no external URL was set. Either
- * way it only ever renders with a URL in hand, never as a dead link.
+ * "View online" prefers the editor's external link and falls back to the file
+ * URL so the action still leads somewhere real when no external URL was set.
  */
 export function publicationActions(input: {
   fileUrl: string | null | undefined;

@@ -10,6 +10,10 @@
    typed at the call site instead of collapsing to `unknown`.
    ----------------------------------------------------------------------- */
 
+import type { AnweshanRole, PublicationType, AccessStatus } from "../../sanity/schemaTypes/publication";
+
+export type { AnweshanRole, PublicationType, AccessStatus };
+
 export type SanityImage = {
   _type?: "image";
   _key?: string;
@@ -73,7 +77,15 @@ export type Home = {
   /* Credibility markers in the strip under the hero. The schema caps this at
      four; an empty array renders no strip at all. */
   proofItems?: string[];
-  /* Our clients band on the home page, below Publications. Every field falls
+  /* Service cards on the home page. */
+    serviceCards?: {
+      title: string;
+      description?: string;
+      link?: string;
+    }[];
+    servicesEyebrow?: string;
+    servicesHeading?: string;
+    /* Our clients band on the home page, below Publications. Every field falls
      back to the carousel's own copy, so an untouched document renders exactly
      as before. */
   clientsEyebrow?: string;
@@ -343,6 +355,24 @@ export type Publication = {
   coverImage?: SanityImage;
   order?: number;
   featuredOnHome?: boolean;
+
+  /* ---- New fields from content master (Part 11) ---- */
+  type?: PublicationType;
+  topic?: string[];
+  geography?: string[];
+  anweshanRole?: AnweshanRole;
+  roleExplanation?: string;
+  client?: string;
+  partner?: string;
+  funder?: string;
+  citation?: string;
+  doi?: string;
+  accessStatus?: AccessStatus;
+  relatedProject?: {
+    _id: string;
+    title: string;
+    slug?: { _type?: "slug"; current?: string };
+  };
 };
 
 export type GalleryEventCategory = "events-training" | "celebrations";

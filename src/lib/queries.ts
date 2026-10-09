@@ -48,6 +48,9 @@ export const homeQuery = groq`*[_type == "home"][0]{
   aboutHeadingHighlight,
   aboutCtaLabel,
   proofItems,
+  servicesEyebrow,
+  servicesHeading,
+  serviceCards[]{ title, description, link },
   clientsEyebrow,
   clientsHeading,
   clientsIntro,
@@ -434,7 +437,23 @@ export const publicationsQuery = groq`*[_type == "publication" && !(_id in path(
   "fileUrl": file.asset->url,
   externalUrl,
   coverImage,
-  order
+  order,
+  type,
+  topic,
+  geography,
+  anweshanRole,
+  roleExplanation,
+  client,
+  partner,
+  funder,
+  citation,
+  doi,
+  accessStatus,
+  "relatedProject": relatedProject->{
+    _id,
+    title,
+    slug
+  }
 }`;
 
 /* Homepage preview.
@@ -472,7 +491,13 @@ export const featuredPublicationsQuery = groq`*[_type == "publication" && !(_id 
   "fileUrl": file.asset->url,
   externalUrl,
   coverImage,
-  featuredOnHome
+  featuredOnHome,
+  type,
+  anweshanRole,
+  roleExplanation,
+  client,
+  doi,
+  accessStatus
 }`;
 
 /**

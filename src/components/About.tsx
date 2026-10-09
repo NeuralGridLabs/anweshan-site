@@ -21,7 +21,7 @@ const DEFAULT_HEADING = "Advancing Nepal's public health. Through evidence.";
 const DEFAULT_HEADING_HIGHLIGHT = "public health.";
 const DEFAULT_CTA_LABEL = "About Us";
 const DEFAULT_BLURB =
-  "Anweshan Pvt. Ltd. is a multidisciplinary Clinical Research Organization and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives.";
+  "Anweshan Pvt. Ltd. is a multidisciplinary CRO and public health think tank based in Lalitpur, Nepal. We bring together researchers, clinicians, and policy experts to generate evidence that shapes health systems and improves lives.";
 const DEFAULT_BLURB_SECOND =
   "From clinical trials to nationwide household surveys, and from HPV vaccination research to community health toolkit deployments, our work spans the full spectrum of health research across Nepal.";
 

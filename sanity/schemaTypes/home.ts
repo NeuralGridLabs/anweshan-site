@@ -130,6 +130,56 @@ export const home = defineType({
         r.max(4).warning("The strip holds up to four items; extra ones are ignored."),
     }),
     defineField({
+      name: "servicesEyebrow",
+      title: "Services section eyebrow",
+      type: "string",
+      description: "Optional. Small uppercase label above the service cards on the home page.",
+    }),
+    defineField({
+      name: "servicesHeading",
+      title: "Services section heading",
+      type: "string",
+      description: "Optional. Heading above the service cards on the home page.",
+    }),
+    defineField({
+      name: "serviceCards",
+      title: "Service cards",
+      type: "array",
+      description: "Optional. Cards shown on the home page after the introductory section.",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({
+              name: "title",
+              title: "Title",
+              type: "string",
+              validation: (r) => [
+                r.required(),
+                r.max(60).warning("Titles over 60 characters may wrap awkwardly on cards."),
+              ],
+            }),
+            defineField({
+              name: "description",
+              title: "Description",
+              type: "text",
+              rows: 3,
+              validation: (r) =>
+                r.max(200).warning("Descriptions over 200 characters may be difficult to scan on cards."),
+            }),
+            defineField({
+              name: "link",
+              title: "Link",
+              type: "string",
+              description: 'internal path such as "/cro" or "/services#slug", or a full https URL',
+            }),
+          ],
+        }),
+      ],
+      validation: (r) =>
+        r.max(6).warning("The home page displays up to six service cards."),
+    }),
+    defineField({
       name: "clientsEyebrow",
       title: "Clients eyebrow",
       type: "string",
