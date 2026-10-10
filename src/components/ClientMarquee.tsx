@@ -245,13 +245,10 @@ export default function ClientMarquee({
   return (
     <section id="clients" className="relative bg-mint pt-16 md:pt-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-10">
-        <p className="text-forest/70 text-[14px] font-semibold tracking-[0.18em] uppercase mb-4">
-          {eyebrow?.trim() || "Who we work with"}
-        </p>
-
         <h2 className="h2-section text-forest max-w-3xl">
-          {heading?.trim() || "Anweshan has worked with a wide range of clients."}
+          {eyebrow?.trim() || "Who we work with"}
         </h2>
+
 
         <p className="mt-5 text-forest/85 body-lg max-w-2xl">
           {intro?.trim() ||

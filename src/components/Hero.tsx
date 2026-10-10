@@ -194,9 +194,7 @@ export default function Hero({ data }: { data?: HeroData }) {
           {/* Centered copy */}
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="inline-flex items-center gap-2 text-[#064e3b] text-sm font-bold mb-6 tracking-wide">
-              <span className="w-8 h-[2px] bg-[#064e3b]/40" />
               {data?.heroEyebrow || "Research • Implementation • Evidence Communication"}
-              <span className="w-8 h-[2px] bg-[#064e3b]/40" />
             </span>
 
             <h1 className="text-4xl md:text-[3.25rem] font-extrabold text-[#064e3b] leading-[1.12] mb-6">
