@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 
-import { categoryShort } from "@/lib/categories";
 import { textListOf, textOf, unwrapMutationValue } from "@/lib/sanity-value";
 import type { HubProject } from "@/lib/types";
+
+import ProjectChips from "@/components/ProjectChips";
 
 /* One assignment as a compact card.
 
@@ -62,21 +63,18 @@ export default function HubProjectCard({
       />
 
       <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          {category && (
-            <span className="rounded-full bg-gold/25 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-forest/90">
-              {categoryShort(category)}
-            </span>
-          )}
-
-          {/* The headline number sits in this top row rather than in a block of
-              its own, which is what keeps the card short. */}
+        {/* Sector first, then the service chip. The stat sits ahead of them so
+            the headline figure is never the thing that gets clipped when a card
+            is too narrow for all three. */}
+        <div className="flex min-w-0 flex-nowrap items-center gap-2 overflow-hidden">
           {firstStatValue && (
-            <span className="rounded-full bg-forest px-3 py-1 text-xs font-bold text-ivory">
+            <span className="shrink-0 rounded-full bg-forest px-3 py-1 text-xs font-bold text-ivory">
               {firstStatValue}
               {firstStatLabel ? ` ${firstStatLabel}` : ""}
             </span>
           )}
+
+          <ProjectChips sectors={project.sectors} category={category} />
         </div>
 
         {status && (

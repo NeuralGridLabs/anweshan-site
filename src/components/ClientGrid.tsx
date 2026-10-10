@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 import ClientLogoTile from "@/components/ClientLogoTile";
 import Reveal from "@/components/Reveal";
-import { categoryShort } from "@/lib/categories";
+import { SECTORS } from "@/lib/sectors";
 import { textOf, unwrapMutationValue } from "@/lib/sanity-value";
 import type { ClientHub } from "@/lib/types";
 
@@ -126,13 +126,26 @@ export default function ClientGrid({ hubs }: { hubs: ClientHub[] }) {
           {visible.map((hub, i) => {
             const count = hub.projectCount ?? 0;
             const range = yearRange(hub);
-            /* CMS content is editable by hand, so a category can arrive as
-               something other than the expected string. Coerce to strings and
-               drop anything unusable rather than handing an object to React,
-               which would take the whole page down. */
-            const categories = (hub.categories ?? []).filter(
-              (value): value is string => typeof value === "string" && value !== "",
-            );
+            /* Top two sectors by how many of this client's ready projects sit in
+               each. The query returns the flat list (one entry per project that
+               carries the value), so the ranking happens here rather than in
+               eight correlated sub-queries per hub.
+
+               Ties break on SECTORS order, so the same client always renders the
+               same pair. A client with no sectors yet gets none, and no empty
+               row is left behind. */
+            const sectorTally = new Map<string, number>();
+            for (const value of hub.sectors ?? []) {
+              if (typeof value !== "string" || value === "") continue;
+              sectorTally.set(value, (sectorTally.get(value) ?? 0) + 1);
+            }
+
+            const topSectors = SECTORS.filter((s) => sectorTally.has(s.value))
+              .sort((a, b) => {
+                const diff = (sectorTally.get(b.value) ?? 0) - (sectorTally.get(a.value) ?? 0);
+                return diff !== 0 ? diff : 0;
+              })
+              .slice(0, 2);
 
             /* Same guard for the hub's own name and relationship type. */
             const name = textOf(hub.name, "Client");
@@ -201,16 +214,17 @@ export default function ClientGrid({ hubs }: { hubs: ClientHub[] }) {
                       </span>
                     </div>
 
-                    {/* At most one chip line, and never a "+N" that would force a
-                        second row. */}
-                    {categories.length > 0 && (
-                      <ul className="mt-4 flex flex-nowrap gap-2 overflow-hidden">
-                        {categories.slice(0, 2).map((value) => (
+                    {/* The client's top two sectors, on one line and never wrapping. A client
+                        with no sectors yet renders nothing here, so there is no
+                        empty gap. */}
+                    {topSectors.length > 0 && (
+                      <ul className="mt-3 flex flex-nowrap gap-2 overflow-hidden">
+                        {topSectors.map((sector) => (
                           <li
-                            key={value}
-                            className="min-w-0 truncate rounded-full bg-sage px-3 py-1 text-xs font-medium text-forest/90"
+                            key={sector.value}
+                            className="min-w-0 truncate rounded-full bg-sage px-3 py-1 text-xs font-semibold text-forest/90"
                           >
-                            {categoryShort(value)}
+                            {sector.short}
                           </li>
                         ))}
                       </ul>

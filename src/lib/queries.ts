@@ -104,31 +104,6 @@ export const servicesQuery = groq`*[_type == "services"][0]{
   }
 }`;
 
-/* One service's own page content.
-
-   Matches on the `hasDetailPage` switch only. It used to require
-   `count(sections) > 0` as well, but `sections` is now a retired field, so that
-   clause would have made every lookup return nothing. $slug is always a GROQ
-   parameter: no caller input is ever concatenated into the query string. */
-export const serviceBySlugQuery = groq`*[_type == "services"][0]{
-  "items": items[slug.current == $slug && hasDetailPage == true]{
-    _key,
-    title,
-    tagline,
-    detailBody,
-    capabilities,
-    ctaLabel,
-    ctaLink,
-    "image": image{
-      ...,
-      alt,
-      "dims": asset->metadata.dimensions
-    },
-    slug,
-    hasDetailPage
-  }
-}`;
-
 export const clientsQuery = groq`*[_type == "clients"][0]{
   eyebrow,
   heading,
@@ -167,6 +142,7 @@ export const projectsQuery = groq`*[_type == "project" && ${READY}] | order(year
   endYear,
   category,
   serviceAreas,
+  sectors,
   summary,
   status,
   years,
@@ -202,6 +178,7 @@ export const projectBySlugQuery = groq`*[_type == "project"
   client,
   category,
   serviceAreas,
+  sectors,
   summary,
   status,
   years,
@@ -255,6 +232,7 @@ export const featuredProjectsQuery = groq`*[_type == "project"
   endYear,
   category,
   serviceAreas,
+  sectors,
   summary,
   status,
   years,
@@ -287,6 +265,12 @@ export const featuredProjectsQuery = groq`*[_type == "project"
 
 /* A hub with nothing to show would render as an empty page, so the final
    filter withholds it entirely rather than linking to a blank page. */
+/* The `sectors` projection below returns a FLAT list across this hub's ready
+   projects, not a count, because the client card needs the hub's TOP sectors
+   ranked by how many assignments sit in each. Ranking that in one GROQ pass
+   would mean eight correlated sub-queries per hub; the list is a handful of
+   short strings and is ranked in ClientGrid instead. Duplicates are expected:
+   one entry per project that carries the value. */
 export const clientHubsQuery = groq`*[_type == "clientHub" && ${READY}]{
   _id,
   name,
@@ -308,9 +292,12 @@ export const clientHubsQuery = groq`*[_type == "clientHub" && ${READY}]{
     && coalesce(endYear, startYear) > 0]{
       "y": coalesce(endYear, startYear)
     }.y),
-  "categories": array::unique(*[_type == "project"
+"categories": array::unique(*[_type == "project"
     && references(^._id)
-    && ${READY}].category)
+    && ${READY}].category),
+  "sectors": *[_type == "project"
+    && references(^._id)
+    && ${READY}].sectors[]
 }[projectCount > 0] | order(order asc, name asc)`;
 
 export const clientHubBySlugQuery = groq`*[_type == "clientHub"
@@ -335,6 +322,7 @@ slug,
   summary,
   category,
   serviceAreas,
+  sectors,
   status,
       years,
       startYear,
@@ -345,6 +333,33 @@ slug,
       facts[]{ value, label }
     }
 }`;
+
+/* --------------------------------------------------------------------------
+    SECTOR COUNTS
+
+    Sectors are not documents. The eight of them are a fixed list in
+    src/lib/sectors.ts — values on `project.sectors`, in the same way
+    `CATEGORIES` is a list of values rather than `service` documents. Nothing
+    here reads or writes a `sector` document.
+
+`${READY}` still governs the result, because a count that ignored it would
+     advertise work a visitor cannot open.
+
+     Every sector value on every ready project, flattened, WITH duplicates: one
+     entry per project that carries it. Counting happens in the page, which is
+     what keeps this to a single round trip.
+
+     The obvious alternative - one `count()` per sector - needs GROQ's `=>`
+     spread operator, which is GroqQL rather than GROQ and fails to parse. With
+     110 projects the returned array is around 140 short strings, so tallying it
+     in JavaScript is both valid and trivial.
+
+     It fails safe: a null result means "unknown", and the page then shows no
+     count at all rather than a confident zero.
+   ----------------------------------------------------------------------- */
+
+export const sectorProjectValuesQuery = groq`*[_type == "project"
+  && ${READY}].sectors[]`;
 
 export const teamMembersQuery = groq`*[_type == "teamMember"] | order(order asc) {
   _id,
