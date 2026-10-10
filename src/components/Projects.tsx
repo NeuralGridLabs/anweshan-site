@@ -32,7 +32,7 @@ export default function Projects({ projects }: { projects: ResolvedProject[] }) 
   if (projects.length === 0) return null;
 
   return (
-    <section className="relative bg-forest text-ivory py-20 md:py-28 overflow-hidden">
+    <section className="relative bg-[#107838] text-ivory py-20 md:py-28 overflow-hidden">
       <Cutouts variant="featured" />
 
       <div className="relative max-w-[1400px] mx-auto px-6">

@@ -104,31 +104,6 @@ export const servicesQuery = groq`*[_type == "services"][0]{
   }
 }`;
 
-/* One service's own page content.
-
-   Matches on the `hasDetailPage` switch only. It used to require
-   `count(sections) > 0` as well, but `sections` is now a retired field, so that
-   clause would have made every lookup return nothing. $slug is always a GROQ
-   parameter: no caller input is ever concatenated into the query string. */
-export const serviceBySlugQuery = groq`*[_type == "services"][0]{
-  "items": items[slug.current == $slug && hasDetailPage == true]{
-    _key,
-    title,
-    tagline,
-    detailBody,
-    capabilities,
-    ctaLabel,
-    ctaLink,
-    "image": image{
-      ...,
-      alt,
-      "dims": asset->metadata.dimensions
-    },
-    slug,
-    hasDetailPage
-  }
-}`;
-
 export const clientsQuery = groq`*[_type == "clients"][0]{
   eyebrow,
   heading,

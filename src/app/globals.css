@@ -190,6 +190,29 @@ html {
   .cutout-a, .cutout-b, .cutout-c { animation: none !important; }
 }
 
+/* ---- Service detail pop-up -----------------------------------------
+   CSS-only entry animation for the native <dialog>. Desktop fades and
+   settles; mobile rises as a full-screen sheet. The global
+   prefers-reduced-motion block above already flattens both to ~0ms, and
+   the `motion-safe:` guard on the component means the animation is never
+   even applied when reduced motion is requested. */
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Crossfade used when Previous/Next swaps the service inside the open pop-up. */
+@keyframes dialog-swap {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dialog-enter { animation: none !important; }
+}
+
 /* Animated underline for links */
 .underline-grow {
   background-image: linear-gradient(currentColor, currentColor);

@@ -58,7 +58,7 @@ export const services = defineType({
               name: "hasDetailPage",
               title: "Has detail page",
               description:
-                "Turn on to give this service its own page at /services/<slug> and a Learn more link on its band. Needs a slug, tagline, detail paragraph and capabilities.",
+                "Turn on to show a Learn more button on this service that opens a pop-up with the tagline, detail paragraph and capabilities.",
               type: "boolean",
               initialValue: false,
             }),
