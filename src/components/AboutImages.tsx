@@ -50,6 +50,10 @@ export default function AboutImages({ slides = SLIDES }: { slides?: AboutSlide[]
   if (count === 0) return null;
 
   return (
+    /* The frame keeps its own 4:3 ratio at every width. Letting it stretch to
+       the height of the text column made it enormous and, with `object-cover`,
+       cropped the photo. Holding the ratio keeps the frame a sane size, and
+       `object-contain` below then shows the whole picture. */
     <div
       className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-sage"
       onMouseEnter={() => setPaused(true)}
@@ -76,7 +80,7 @@ export default function AboutImages({ slides = SLIDES }: { slides?: AboutSlide[]
             {/* The two source photos are near-square (0.99) and 16:9 (1.78),
                 so no single fixed frame can hold both without either cropping
                 one or letterboxing the other. Fitting rather than filling is
-                what guarantees nothing is cut off.
+                what guarantees the whole picture stays visible.
 
                 This blurred, oversized copy sits behind the real image and
                 bleeds into whatever space `object-contain` leaves, so the

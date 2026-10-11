@@ -2,18 +2,29 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Search, X } from "lucide-react";
 
 import Reveal from "@/components/Reveal";
+import ProjectChips from "@/components/ProjectChips";
 import { CATEGORIES, categoryLabel } from "@/lib/categories";
+import { SECTORS } from "@/lib/sectors";
 
-/* The projects index: search, a service filter and a client filter, over the
-   same cards the server used to render.
+/* The projects index: search, a sector filter, a service filter and a client
+   filter, over the same cards the server used to render.
 
    A client component because the filtering is interactive. Everything it needs
-   arrives as plain serialisable data — the image is already a resolved URL, so
-   no Sanity code runs in the browser. */
+   arrives as plain serialisable data - the image is already a resolved URL, so
+   no Sanity code runs in the browser.
+
+   The sector filter lives in the URL as ?sector=<value> so a filtered view can
+   be linked to, which is how /sectors sends people here. It is read on mount
+   and written with history.replaceState rather than useSearchParams: reading it
+   from the client keeps /projects statically generated instead of opting the
+   whole route into dynamic rendering, and replaceState does not re-render, so
+   the filter state stays the single source of truth. The trade-off is that the
+   sector filter applies after hydration, so a shared link briefly shows the
+   unfiltered list. */
 
 export type ProjectCard = {
   key: string;
@@ -26,6 +37,8 @@ export type ProjectCard = {
   cover: string | null;
   /** Primary service value, or "" when the editor has not chosen one. */
   category: string;
+  /** Sector values from SECTORS. Empty when the project has none yet. */
+  sectors: string[];
 };
 
 type SortKey = "service" | "recent" | "az";
@@ -40,6 +53,40 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
    tokens only, and no two adjacent bands share a background. */
 const BAND_BG = ["bg-snow", "bg-sage"];
 
+/* The sector filter lives in the URL as ?sector=<value>, so a filtered view can
+   be linked to — that is how /sectors sends people here.
+
+   It is read through useSyncExternalStore rather than useSearchParams or a
+   setState-in-effect, for two reasons. useSearchParams would opt /projects out
+   of static rendering for one query parameter. A setState inside an effect
+   causes a cascading render, which the lint rule rightly rejects.
+
+   The URL is a genuine external store, so it is treated as one: `popstate`
+   keeps the back button working, and SECTOR_EVENT tells the component when it
+   has changed the URL itself (replaceState fires no event of its own).
+
+   Consequence to be aware of: the server snapshot is "all", so a shared link
+   briefly paints the unfiltered list before the stored value is adopted. */
+const SECTOR_EVENT = "anweshan:sector-change";
+
+function subscribeToSector(onChange: () => void) {
+  window.addEventListener("popstate", onChange);
+  window.addEventListener(SECTOR_EVENT, onChange);
+  return () => {
+    window.removeEventListener("popstate", onChange);
+    window.removeEventListener(SECTOR_EVENT, onChange);
+  };
+}
+
+function readSectorFromUrl() {
+  return new URLSearchParams(window.location.search).get("sector") ?? "all";
+}
+
+/* Server render: always "all". The client snapshot is only read after mount. */
+function serverSector() {
+  return "all";
+}
+
 export default function ProjectExplorer({
   projects,
   emptyHref = "/admin",
@@ -53,6 +100,27 @@ export default function ProjectExplorer({
   const [service, setService] = useState<string>("all");
   const [client, setClient] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("service");
+
+  /* The authoritative sector selection is the URL. An unrecognised value is
+     treated as "all" so a mistyped link shows everything rather than nothing. */
+  const sectorFromUrl = useSyncExternalStore(
+    subscribeToSector,
+    readSectorFromUrl,
+    serverSector,
+  );
+  const sector = SECTORS.some((s) => s.value === sectorFromUrl)
+    ? sectorFromUrl
+    : "all";
+
+  function selectSector(value: string) {
+    const url = new URL(window.location.href);
+    if (value === "all") url.searchParams.delete("sector");
+    else url.searchParams.set("sector", value);
+
+    window.history.replaceState(null, "", url.toString());
+    /* replaceState notifies nobody, so the store is told by hand. */
+    window.dispatchEvent(new Event(SECTOR_EVENT));
+  }
 
   /* Client options come from the data, so a filter can never point at a client
      with no projects. */
@@ -72,12 +140,40 @@ export default function ProjectExplorer({
     return counts;
   }, [projects]);
 
+  /* Facet counts, each computed against every filter EXCEPT its own. That is
+     what makes the numbers move as the other filters change without the active
+     chip's own count jumping under the reader's cursor. */
+  const sectorCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const project of projects) {
+      /* Every filter but the sector one. */
+      if (service !== "all" && project.category !== service) continue;
+      if (client !== "all" && project.client !== client) continue;
+
+      const needle = query.trim().toLowerCase();
+      if (needle) {
+        const hit =
+          project.title.toLowerCase().includes(needle) ||
+          project.summary.toLowerCase().includes(needle) ||
+          project.client.toLowerCase().includes(needle) ||
+          categoryLabel(project.category).toLowerCase().includes(needle);
+        if (!hit) continue;
+      }
+
+      for (const value of project.sectors) {
+        counts.set(value, (counts.get(value) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [projects, query, service, client]);
+
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
 
     const matched = projects.filter((project) => {
       if (service !== "all" && project.category !== service) return false;
       if (client !== "all" && project.client !== client) return false;
+      if (sector !== "all" && !project.sectors.includes(sector)) return false;
 
       if (!needle) return true;
 
@@ -99,7 +195,7 @@ export default function ProjectExplorer({
       return [...matched].sort((a, b) => firstYear(b) - firstYear(a));
     }
     return matched;
-  }, [projects, query, service, client, sort]);
+  }, [projects, query, service, client, sector, sort]);
 
   /* Grouped in the canonical category order, with anything unrecognised last. */
   const groups = useMemo(() => {
@@ -127,12 +223,14 @@ export default function ProjectExplorer({
     return ordered;
   }, [visible]);
 
-  const filtersActive = query.trim() !== "" || service !== "all" || client !== "all";
+  const filtersActive =
+    query.trim() !== "" || service !== "all" || client !== "all" || sector !== "all";
 
   function clearAll() {
     setQuery("");
     setService("all");
     setClient("all");
+    selectSector("all");
   }
 
   return (
@@ -206,6 +304,45 @@ export default function ProjectExplorer({
               </select>
             </div>
           </div>
+
+          {/* Sector chips, above the service row: sector is the coarser question, so it
+             is asked first. Only sectors with at least one matching project get a
+             chip, so the row can never offer a filter that returns nothing. */}
+          {sectorCounts.size > 0 && (
+            <div className="mt-5">
+              <p className="text-forest/70 meta-label mb-3">Sector</p>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => selectSector("all")}
+                  aria-pressed={sector === "all"}
+                  className={chipClass(sector === "all")}
+                >
+                  All sectors
+                  <span className="ml-2 tabular-nums opacity-60">{projects.length}</span>
+                </button>
+
+                {SECTORS.filter((s) => sectorCounts.has(s.value)).map((option) => {
+                  const isActive = sector === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => selectSector(isActive ? "all" : option.value)}
+                      aria-pressed={isActive}
+                      className={chipClass(isActive)}
+                    >
+                      {option.short}
+                      <span className="ml-2 tabular-nums opacity-60">
+                        {sectorCounts.get(option.value)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Service chips */}
           {serviceCounts.size > 0 && (
@@ -390,8 +527,14 @@ function ProjectCard({ project }: { project: ProjectCard }) {
       )}
 
       <div className="mt-auto pt-4 border-t border-forest/15 flex items-center justify-between gap-3">
+        {/* Chips share the existing footer line rather than adding one, so a
+            card is exactly as tall as it was before sectors existed. */}
+        <ProjectChips sectors={project.sectors} category={project.category} />
+
         {project.client ? (
-          <p className="text-primary-dark meta-label truncate">{project.client}</p>
+          <p className="text-primary-dark meta-label truncate min-w-0">
+            {project.client}
+          </p>
         ) : (
           <span />
         )}

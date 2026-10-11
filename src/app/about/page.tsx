@@ -96,7 +96,7 @@ export default async function AboutPage() {
       {storyParagraphs.length > 0 && (
         <section className="bg-snow py-20 md:py-32">
           <div className="max-w-[1400px] mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-20">
               {/* 5/12: eyebrow over the pull statement. */}
               <Reveal className="lg:col-span-5">
                 {aboutData?.storyEyebrow?.trim() && (
@@ -112,30 +112,36 @@ export default async function AboutPage() {
                   </>
                 )}
 
-                <p className="text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug text-forest text-balance">
+                <p className="text-2xl md:text-3xl lg:text-[2.6rem] font-semibold leading-[1.15] tracking-tight text-forest text-balance">
                   {firstSentence}
                 </p>
               </Reveal>
 
               {/* 7/12: the rest, as ordinary reading text. */}
-              {storyRest.length > 0 && (
-                <Reveal delay={120} className="lg:col-span-7">
-                  <div className="max-w-[62ch] space-y-6">
-                    <p className="text-lg leading-8 text-forest/90 border-l-2 border-gold pl-6">
-                      {storyRest[0]}
-                    </p>
+{storyRest.length > 0 && (
+  <Reveal delay={120} className="lg:col-span-7">
+    <div className="max-w-[62ch]">
+      {/* Opening paragraph */}
+      <div className="relative pl-6 border-l-2 border-gold">
+        <p className="text-base md:text-lg leading-8 text-forest/85">
+          {storyRest[0]}
+        </p>
+      </div>
 
-                    {storyRest.slice(1).map((paragraph, i) => (
-                      <p
-                        key={i}
-                        className="text-lg leading-8 text-forest/90 border-t border-forest/15 pt-6"
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </Reveal>
-              )}
+      {/* Supporting paragraphs */}
+      {storyRest.slice(1).map((paragraph, i) => (
+        <div
+          key={i}
+          className="mt-8 pt-8 border-t border-forest/10"
+        >
+          <p className="text-base md:text-lg leading-8 text-forest/75">
+            {paragraph}
+          </p>
+        </div>
+      ))}
+    </div>
+  </Reveal>
+)}
             </div>
           </div>
         </section>

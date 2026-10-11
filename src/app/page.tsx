@@ -2,9 +2,11 @@ import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Projects from "@/components/Projects";
 import Publications from "@/components/Publications";
+import PublicationsPreview, {
+  type PreviewPublication,
+} from "@/components/PublicationsPreview";
 import ProofBar from "@/components/ProofBar";
 import Explore from "@/components/Explore";
-import ClientMarquee from "@/components/ClientMarquee";
 import HomeServiceCards, { type HomeServiceCard } from "@/components/HomeServiceCards";
 
 import {
@@ -84,6 +86,22 @@ export default async function Home() {
   const featuredPublications =
     (await fetchSanity<Publication[]>(featuredPublicationsQuery)) ?? [];
 
+  /* The preview directly beneath About renders the same flagged records. It
+     takes only the fields its cards use, and drops any record missing a title
+     or a year, because both are rendered unconditionally. An empty result hands
+     the component its bundled sample, so the band is never blank. */
+  const previewPublications: PreviewPublication[] = featuredPublications
+    .filter((pub) => pub.title?.trim() && pub.year)
+    .map((pub) => ({
+      _id: pub._id,
+      title: pub.title!,
+      year: pub.year as number,
+      type: pub.type ?? "",
+      journal: pub.journal,
+      authors: pub.authors,
+      accessStatus: pub.accessStatus,
+    }));
+
   /* Client logos are resolved to URLs on the server, the same way hero slides
      are, so `@sanity/client` stays out of the browser bundle. Entries without a
      resolvable image are dropped; if that empties the list the carousel falls
@@ -150,7 +168,7 @@ export default async function Home() {
           description: card.description,
           link: slug
             ? match?.hasDetailPage
-              ? `/services/${slug}`
+              ? `/services?open=${slug}`
               : `/services#${slug}`
             : card.link,
         };
@@ -163,33 +181,34 @@ export default async function Home() {
       </section>
       <ProofBar items={homeData?.proofItems} />
 
-      <section id="about">
-        <About
-          data={{
-            aboutBlurb: homeData?.aboutBlurb,
-            aboutEyebrow: homeData?.aboutEyebrow,
-            aboutBadge: homeData?.aboutBadge,
-            aboutHeading: homeData?.aboutHeading,
-            aboutHeadingHighlight: homeData?.aboutHeadingHighlight,
-            aboutCtaLabel: homeData?.aboutCtaLabel,
-          }}
-        />
-      </section>
+      {/* About and the publications preview share one continuous gold field.
+          The wrapper owns that background so the two read as a single block,
+          split only by the thin rule the preview draws at its top edge. */}
+      <div className="bg-accent">
+        <section id="about">
+          <About
+            data={{
+              aboutBlurb: homeData?.aboutBlurb,
+              aboutEyebrow: homeData?.aboutEyebrow,
+              aboutHeading: homeData?.aboutHeading,
+              aboutHeadingHighlight: homeData?.aboutHeadingHighlight,
+              aboutCtaLabel: homeData?.aboutCtaLabel,
+            }}
+            logos={clientLogos}
+            clientsEyebrow={homeData?.clientsEyebrow}
+            clientsIntro={homeData?.clientsIntro}
+            clientsCtaLabel={homeData?.clientsCtaLabel}
+            clientsCtaLink={homeData?.clientsCtaLink}
+          />
+        </section>
+        <PublicationsPreview recentPublications={previewPublications} />
+      </div>
       <HomeServiceCards
         eyebrow={homeData?.servicesEyebrow}
         heading={homeData?.servicesHeading}
         cards={serviceCards}
       />
       <Publications publications={featuredPublications} />
-
-      <ClientMarquee
-        eyebrow={homeData?.clientsEyebrow}
-        heading={homeData?.clientsHeading}
-        intro={homeData?.clientsIntro}
-        ctaLabel={homeData?.clientsCtaLabel}
-        ctaLink={homeData?.clientsCtaLink}
-        logos={clientLogos}
-      />
 
       <section id="projects">
         <Projects projects={featuredProjects} />

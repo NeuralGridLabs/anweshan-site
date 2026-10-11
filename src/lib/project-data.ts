@@ -9,7 +9,7 @@
    ----------------------------------------------------------------------- */
 
 import { sanityImageUrl } from "./image";
-import { textListOrUndefined, textOf } from "./sanity-value";
+import { textListOf, textListOrUndefined, textOf } from "./sanity-value";
 import type { Project as SanityProject, ProjectFact } from "./types";
 
 export type ResolvedProject = {
@@ -20,6 +20,8 @@ export type ResolvedProject = {
   summary: string;
   client: string;
   category: string;
+  /** Sector values from SECTORS. Filtered to plain strings at this boundary. */
+  sectors?: string[];
   /** Absolute image URL, or null when no image is available. */
   cover: string | null;
   /** Set for products Anweshan operates; those link out instead of to a route. */
@@ -49,6 +51,9 @@ function fromSanity(project: SanityProject): ResolvedProject {
     summary: textOf(project.summary),
     client: textOf(project.client),
     category: textOf(project.category),
+    /* Only plain strings survive. A malformed entry is dropped rather than
+       passed on, because consumers call .includes() and .map() on this. */
+    sectors: textListOf(project.sectors),
     cover: sanityImageUrl(project.coverImage),
     year: typeof project.year === "number" ? project.year : undefined,
     status: textOf(project.status) || undefined,

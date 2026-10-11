@@ -38,6 +38,12 @@ export default async function ProjectsPage() {
     years: project.years ?? "",
     cover: project.cover,
     category: project.category,
+    /* Coerced to a plain string array: the client component does `.includes()`
+       on it, and CMS content is editable by hand. A stray object here would
+       take the whole page down rather than costing one chip. */
+    sectors: (project.sectors ?? []).filter(
+      (value): value is string => typeof value === "string" && value !== "",
+    ),
   }));
 
   return (

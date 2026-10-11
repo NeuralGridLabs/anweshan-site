@@ -1,6 +1,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
 import { CATEGORY_OPTIONS } from "../../src/lib/categories";
+import { SECTOR_OPTIONS } from "../../src/lib/sectors";
 import { webStatusField } from "./clientHub";
 
 /* Field-name note, because it is easy to trip over:
@@ -60,6 +61,15 @@ export const project = defineType({
         "Every service this assignment involved. Drives which service pages list it. Leave empty when it is the same as the primary service.",
       of: [defineArrayMember({ type: "string" })],
       options: { list: CATEGORY_OPTIONS, layout: "tags" },
+    }),
+    defineField({
+      name: "sectors",
+      title: "Sectors",
+      type: "array",
+      description:
+        "The fields of work this assignment belongs to. Shown as tags on project cards and the project page, and used for the sector filter.",
+      of: [defineArrayMember({ type: "string" })],
+      options: { list: SECTOR_OPTIONS, layout: "tags" },
     }),
     defineField({
       name: "startYear",

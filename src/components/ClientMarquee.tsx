@@ -95,24 +95,24 @@ const FALLBACK_LOGOS: Logo[] = [
 
 const SPEED = 0.12;
 
-/* Each mark is a fixed `w-44` (176px) box. A short CMS list is repeated inside
+/* Each mark is a fixed `w-36` (144px) box. A short CMS list is repeated inside
    every copy until one copy is at least this wide, so the seamless loop never
    leaves a visible gap at the end of the strip. */
-const MARK_WIDTH = 176;
+const MARK_WIDTH = 144;
 const TARGET_COPY_WIDTH = 1600;
 
 function Mark({ logo, priority }: { logo: Logo; priority?: boolean }) {
   return (
-    <div className="flex items-center justify-center w-44 h-20 shrink-0 select-none">
+    <div className="flex items-center justify-center w-36 h-16 shrink-0 select-none">
       {logo.file ? (
         <Image
           src={logo.file}
           alt={logo.name}
-          width={160}
-          height={70}
+          width={124}
+          height={56}
           draggable={false}
           priority={priority}
-          className="object-contain max-w-[150px] max-h-[60px]"
+          className="object-contain max-w-[124px] max-h-14"
         />
       ) : (
         <span className="text-sm font-semibold text-forest whitespace-nowrap">
@@ -129,14 +129,19 @@ function isInternal(href: string) {
   return href.startsWith("/") && !href.startsWith("//");
 }
 
-export default function ClientMarquee({
-  eyebrow,
-  heading,
-  intro,
-  ctaLabel,
-  ctaLink,
-  logos,
-}: ClientMarqueeProps) {
+/* --------------------------------------------------------------------------
+    The logo carousel on its own.
+
+    Everything that makes the strip move - the CMS list with its bundled
+    fallback, the repeat maths, the speed, the drag handlers and the fade at
+    each edge - lives here, so the About band can run the same carousel inline
+    without a section of its own.
+
+    `ClientMarquee` below is the full standalone band and composes this same
+    component, which is what keeps the two from drifting apart.
+   ----------------------------------------------------------------------- */
+
+export function ClientLogoStrip({ logos }: { logos?: MarqueeLogo[] }) {
   const items: Logo[] =
     logos && logos.length > 0
       ? logos.map((logo) => ({ name: logo.name, file: logo.src }))
@@ -150,14 +155,6 @@ export default function ClientMarquee({
   );
 
   const row = Array.from({ length: repeats }, () => items).flat();
-
-  /* The button always points somewhere useful: CMS values win, otherwise it
-     falls back to the clients page so the band is never a dead end. */
-  const ctaHref = ctaLink?.trim() || "/clients";
-  const ctaText = ctaLabel?.trim() || "View clients";
-
-  const ctaClasses =
-    "inline-flex items-center gap-2 rounded-full bg-forest text-white text-sm font-semibold px-6 py-3 hover:bg-forest/90 transition-colors";
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const copyRef = useRef<HTMLDivElement | null>(null);
@@ -242,15 +239,70 @@ export default function ClientMarquee({
     }
   };
 
+  /* A white rounded panel rather than a full-bleed band: on the About band's
+     gold ground it gives the logos their own surface to sit on, and the small
+     vertical padding keeps the marks off the panel edges. No horizontal padding
+     - the strip has to run to the panel edge for the loop to read as endless. */
+  return (
+    <div className="relative rounded-2xl bg-white py-5 md:py-6 overflow-hidden">
+      <div className="absolute left-0 inset-y-0 w-16 md:w-24 z-10 bg-gradient-to-r from-white to-transparent pointer-events-none" />
+
+      <div className="absolute right-0 inset-y-0 w-16 md:w-24 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+
+      <div
+        ref={viewportRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        className={`overflow-x-auto no-scrollbar overscroll-x-contain touch-pan-y cursor-grab select-none ${
+          dragging ? "cursor-grabbing" : ""
+        }`}
+      >
+        <div className="flex w-max">
+          {[0, 1, 2].map((copy) => (
+            <div
+              key={copy}
+              ref={copy === 0 ? copyRef : undefined}
+              className="flex shrink-0 pr-4"
+              aria-hidden={copy > 0}
+            >
+              {row.map((logo, i) => (
+                <Mark
+                  key={`${logo.name}-${i}`}
+                  logo={logo}
+                  priority={copy === 0 && i < 4}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ClientMarquee({
+  eyebrow,
+  heading,
+  intro,
+  ctaLabel,
+  ctaLink,
+  logos,
+}: ClientMarqueeProps) {
+  /* The button always points somewhere useful: CMS values win, otherwise it
+     falls back to the clients page so the band is never a dead end. */
+  const ctaHref = ctaLink?.trim() || "/clients";
+  const ctaText = ctaLabel?.trim() || "View clients";
+
+  const ctaClasses =
+    "inline-flex items-center gap-2 rounded-full bg-forest text-white text-sm font-semibold px-6 py-3 hover:bg-forest/90 transition-colors";
+
   return (
     <section id="clients" className="relative bg-mint pt-16 md:pt-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-10">
-        <p className="text-forest/70 text-[14px] font-semibold tracking-[0.18em] uppercase mb-4">
-          {eyebrow?.trim() || "Who we work with"}
-        </p>
-
         <h2 className="h2-section text-forest max-w-3xl">
-          {heading?.trim() || "Anweshan has worked with a wide range of clients."}
+          {eyebrow?.trim() || "Who we work with"}
         </h2>
 
         <p className="mt-5 text-forest/85 body-lg max-w-2xl">
@@ -271,41 +323,7 @@ export default function ClientMarquee({
         </div>
       </div>
 
-      <div className="relative bg-white py-12 md:py-14">
-        <div className="absolute left-0 inset-y-0 w-24 z-10 bg-gradient-to-r from-white to-transparent pointer-events-none" />
-
-        <div className="absolute right-0 inset-y-0 w-24 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-
-        <div
-          ref={viewportRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          className={`overflow-x-auto no-scrollbar overscroll-x-contain touch-pan-y cursor-grab select-none ${
-            dragging ? "cursor-grabbing" : ""
-          }`}
-        >
-          <div className="flex w-max">
-            {[0, 1, 2].map((copy) => (
-              <div
-                key={copy}
-                ref={copy === 0 ? copyRef : undefined}
-                className="flex shrink-0 pr-6"
-                aria-hidden={copy > 0}
-              >
-                {row.map((logo, i) => (
-                  <Mark
-                    key={`${logo.name}-${i}`}
-                    logo={logo}
-                    priority={copy === 0 && i < 4}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <ClientLogoStrip logos={logos} />
     </section>
   );
 }
