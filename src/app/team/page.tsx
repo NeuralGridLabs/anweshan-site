@@ -101,9 +101,23 @@ export default async function TeamPage() {
         tone="ink"
         eyebrow="Our team"
         title="A highly motivated team of young professionals."
-        lead="Researchers, clinicians, communications specialists, and operations staff committed to evidence based analysis of development challenges."
-        image="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=2000"
-        imageAlt="Team collaborating in a meeting"
+        image="/images/team/anweshan-team.jpg"
+        imageAlt="The Anweshan team photographed together outdoors"
+        /* Lighter than the default /85 wash. The heading here is forest on a
+           light ground, so it keeps its contrast with far more of the photo
+           showing through, and the photo still sits under the copy rather
+           than competing with it. */
+        scrim="bg-sage/70"
+        /* The photo has had its sky and hillside cropped off, which leaves a
+           wide 1.9:1 frame of nothing but the group. The header is given a
+           floor close to that shape so the picture can be shown whole: at
+           1400px wide it needs about 735px to reach edge to edge, and a little
+           under that costs only a few pixels of sage at each side. Past roughly
+           1600px the floor stops tracking the width and the photo sits centred
+           with sage either side - shown in full, never cropped. object-contain
+           is what makes that the guarantee at every viewport. */
+        imageClassName="object-contain"
+        minHeight="lg:min-h-[720px]"
         meta={meta}
       />
 

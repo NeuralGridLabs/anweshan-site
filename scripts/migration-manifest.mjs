@@ -105,7 +105,7 @@ export const UNMAPPED = [
     what: "Homepage Explore rail (3 items: Expertise / Projects / Team)",
     where: "src/components/Explore.tsx:9-40",
     text: "Captions and descriptions for the three explore cards, plus their Unsplash backgrounds.",
-    reason: "No schema. `clients` is a client roster, not a nav/feature rail. Excluded as navigation content.",
+    reason: "No schema. `clients` is a client roster, not a nav/feature rail. Excluded as navigation content. This rail was later removed from the home page in favour of the Innovations section; Explore.tsx is still on disk but is no longer imported or rendered anywhere.",
   },
   {
     what: "Per-service bullet lists and card images (6 services)",
@@ -144,9 +144,9 @@ export const UNMAPPED = [
     reason: "No schema field. A founding-year fact with no home for it.",
   },
   {
-    what: "Homepage About carousel images (about-01.jpg, about-02.jpg)",
+    what: "Homepage About carousel images (about-01.jpg, about-team.jpg)",
     where: "src/components/AboutImages.tsx:12-15",
-    text: "/images/about/about-01.jpg , /images/about/about-02.jpg",
+    text: "/images/about/about-team.jpg , /images/about/about-01.jpg",
     reason: "Not migrated. This is a standalone 2-image carousel with its own timing, not the `home.slides` array. `home.slides` is proposed only for the three hero captions, whose images are remote. The two local files are left on disk and unused by the migration rather than being forced into the wrong field.",
   },
   {

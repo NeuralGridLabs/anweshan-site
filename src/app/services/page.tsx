@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
@@ -16,12 +15,12 @@ import { hasServiceDetail } from "@/lib/services";
 import { serviceAreaForSlug } from "@/lib/categories";
 import type { Services as ServicesData } from "@/lib/types";
 
-/* Service imagery and the alternating light/dark banding are presentation, not
-   content, so they stay here. Everything an editor writes — title, description,
-   image, highlights — comes from the CMS. Order and count are CMS-driven too.
-   There is no hardcoded image list any more: each service uses the picture
-   attached to it in the Studio, and a service with none simply renders without
-   an image panel. */
+/* Service banding is presentation, not content, so it stays here. Everything an
+   editor writes — title, description, highlights — comes from the CMS. Order and
+   count are CMS-driven too. Bands are text-only and read left to right down the
+   page; there is no image panel and nothing alternates sides. The one image
+   still resolved below is the pop-up's own header picture, which the CMS
+   `servicesQuery` fetches independently of the band. */
 
 /* Alternating band colours, indexed by position so the rhythm holds regardless
    of how many services the CMS has. */
@@ -93,7 +92,6 @@ export default async function ServicesPage() {
       ) : (
         services.map((service, i) => {
           const band = BANDS[i % BANDS.length];
-          const flipped = i % 2 === 1;
 
           /* The shared gate in lib/services.ts decides whether this service
              gets a pop-up at all: the flag is on, there is a slug, and there is
@@ -102,10 +100,6 @@ export default async function ServicesPage() {
           const slug = hasServiceDetail(service)
             ? service.slug?.current
             : undefined;
-
-          /* The image attached to this service in the Studio. Absent is fine:
-             the card simply has no image panel. */
-          const imageUrl = sanityImageUrl(service.image);
 
           /* The heading is always plain text now that the detail pages are
              gone: nothing sits inside an <h2> but the title. */
@@ -123,72 +117,60 @@ export default async function ServicesPage() {
               className={`${band.bg} ${band.text} scroll-mt-24`}
             >
               <div className="max-w-[1400px] mx-auto px-6 py-20 md:py-28">
-                <div
-                  className={`grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center ${
-                    flipped ? "lg:[direction:rtl]" : ""
-                  }`}
-                >
-                  <Reveal className={`lg:col-span-5 ${flipped ? "lg:[direction:ltr]" : ""}`}>
-                    {imageUrl && (
-                      <div className="relative aspect-[5/4] rounded-2xl overflow-hidden">
-                        <Image
-                          src={imageUrl}
-                          alt={service.image?.alt || service.title}
-                          fill
-                          sizes="(max-width: 1024px) 100vw, 42vw"
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
+                {/* Text only, so there is nothing left to alternate. This used
+                    to be a 12-column grid with the photo in one half and the
+                    copy in the other, reversed with direction:rtl on every
+                    second band — which meant half the bands were read from the
+                    right and the numbering jumped about the page. One
+                    left-aligned column at a single measure replaces it. */}
+                <div className="max-w-4xl">
+                  <Reveal>
+                    <div className="flex items-center gap-4 mb-6">
+                      <span
+                        className={`text-4xl md:text-5xl font-bold leading-none tabular-nums ${band.label}`}
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    </div>
                   </Reveal>
 
-                  <div className={`lg:col-span-6 ${flipped ? "lg:col-start-7 lg:[direction:ltr]" : "lg:col-start-7"}`}>
-                    <Reveal>
-                      <div className="flex items-center gap-4 mb-7">
-                        <span className={`text-sm font-semibold ${band.label}`}>
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-                    </Reveal>
-
-                    <Reveal delay={90}>{title}</Reveal>
+                  <Reveal delay={90}>{title}</Reveal>
 
                     {/* A service with detail opens its pop-up instead of
-                        navigating. Bands without detail are unchanged: they
-                        simply carry no button at all. */}
-                    {slug && (
-                      <Reveal delay={120}>
-                        <ServiceDetailTrigger
-                          slug={slug}
-                          label="Learn more"
-                          className={`group mb-7 inline-flex items-center gap-2 text-sm font-semibold ${band.trigger} transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-current`}
-                        />
-                      </Reveal>
-                    )}
+                    navigating. Bands without detail are unchanged: they
+                    simply carry no button at all. */}
+                  {slug && (
+                    <Reveal delay={120}>
+                      <ServiceDetailTrigger
+                        slug={slug}
+                        label="Learn more"
+                        className={`group mb-7 inline-flex items-center gap-2 text-sm font-semibold ${band.trigger} transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-current`}
+                      />
+                    </Reveal>
+                  )}
 
-                    {service.description && (
-                      <Reveal delay={150}>
-                        <p className={`body-lg mb-9 ${band.body}`}>
-                          {service.description}
-                        </p>
-                      </Reveal>
-                    )}
+                  {service.description && (
+                    <Reveal delay={150}>
+                      <p className={`body-lg mb-9 ${band.body}`}>
+                        {service.description}
+                      </p>
+                    </Reveal>
+                  )}
 
-                    {service.highlights && service.highlights.length > 0 && (
-                      <Reveal delay={210}>
-                        <ul className="flex flex-wrap gap-2.5 text-base">
-                          {service.highlights.map((h) => (
-                            <li
-                              key={h}
-                              className={`border ${band.chip} text-sm font-medium px-4 py-2 rounded-full`}
-                            >
-                              {h}
-                            </li>
-                          ))}
-                        </ul>
-                      </Reveal>
-                    )}
-                  </div>
+                  {service.highlights && service.highlights.length > 0 && (
+                    <Reveal delay={210}>
+                      <ul className="flex flex-wrap gap-2.5 text-base">
+                        {service.highlights.map((h) => (
+                          <li
+                            key={h}
+                            className={`border ${band.chip} text-sm font-medium px-4 py-2 rounded-full`}
+                          >
+                            {h}
+                          </li>
+                        ))}
+                      </ul>
+                    </Reveal>
+                  )}
                 </div>
               </div>
             </section>

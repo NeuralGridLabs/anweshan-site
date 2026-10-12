@@ -6,7 +6,7 @@ import PublicationsPreview, {
   type PreviewPublication,
 } from "@/components/PublicationsPreview";
 import ProofBar from "@/components/ProofBar";
-import Explore from "@/components/Explore";
+import Innovations from "@/components/Innovations";
 import HomeServiceCards, { type HomeServiceCard } from "@/components/HomeServiceCards";
 
 import {
@@ -213,9 +213,7 @@ export default async function Home() {
       <section id="projects">
         <Projects projects={featuredProjects} />
       </section>
-      <section id="explore">
-        <Explore />
-      </section>
+      <Innovations />
     </main>
   );
 }
