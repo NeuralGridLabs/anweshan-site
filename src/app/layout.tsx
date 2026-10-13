@@ -4,6 +4,7 @@ import "./globals.css";
 import TopBar from "@/components/TopBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,6 +28,10 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        {/* Suppressed on /admin by the component itself, which knows the route
+            from usePathname; keeping it here means it is mounted once for the
+            whole site rather than per page. */}
+        <ScrollToTop />
       </body>
     </html>
   );
