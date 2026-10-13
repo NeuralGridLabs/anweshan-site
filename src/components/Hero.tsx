@@ -97,7 +97,6 @@ export default function Hero({ data }: { data?: HeroData }) {
   };
 
   const primaryLabel = data?.primaryCtaLabel?.trim() || "See our work";
-  const secondaryLabel = data?.secondaryCtaLabel?.trim() || "Our clients";
 
   return (
     <section className="relative overflow-hidden" style={{ backgroundColor: "#EAB308" }}>

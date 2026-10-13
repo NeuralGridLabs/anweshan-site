@@ -284,7 +284,6 @@ export function ClientLogoStrip({ logos }: { logos?: MarqueeLogo[] }) {
 
 export default function ClientMarquee({
   eyebrow,
-  heading,
   intro,
   ctaLabel,
   ctaLink,

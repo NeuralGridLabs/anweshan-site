@@ -28,7 +28,7 @@ import PublicationTimeline from "@/components/PublicationTimeline";
 import type { PublicationFilters as PublicationFiltersType } from "@/components/PublicationFilters";
 import { sanityFileUrl } from "@/lib/image";
 import { publicationActions } from "@/lib/publication-delivery";
-import type { Publication, PublicationType, AnweshanRole } from "@/lib/types";
+import type { Publication, PublicationType } from "@/lib/types";
 
 // --- Custom Kanban-Style Badges ---
 
@@ -345,7 +345,7 @@ function PublicationModal({ pub, onClose }: { pub: Publication; onClose: () => v
                   <li className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2 font-bold text-[#064e3b]">
                       <Award size={16} strokeWidth={2.5} />
-                      <span>Anweshan's Role: {pub.anweshanRole.replace('-', ' ')}</span>
+                      <span>Anweshan&apos;s Role: {pub.anweshanRole.replace('-', ' ')}</span>
                     </div>
                     {pub.roleExplanation && (
                       <span className="pl-6 text-stone-500">{pub.roleExplanation}</span>
@@ -473,12 +473,33 @@ const EMPTY_FILTERS: PublicationFiltersType = {
   accessStatus: "all",
 };
 
+/** Publications shown before "show more" is pressed. */
+const PAGE_SIZE = 12;
+
+/** The sort orders the select offers, as a closed set. */
+const SORT_ORDERS = ["newest", "oldest", "title"] as const;
+
+type SortOrder = (typeof SORT_ORDERS)[number];
+
+/**
+ * Narrows the select's string value to a SortOrder.
+ *
+ * The cast that used to stand here was `as any`, which defeats the point of
+ * typing the state at all. The select only ever offers these three options,
+ * so the check is belt-and-braces, but it means an added or renamed option
+ * fails to compile rather than silently putting an unexpected string into
+ * state and only breaking in the comparator further down.
+ */
+function isSortOrder(value: string): value is SortOrder {
+  return (SORT_ORDERS as readonly string[]).includes(value);
+}
+
 export default function PublicationsClient({ publications }: { publications: Publication[] }) {
   const [filters, setFilters] = useState<PublicationFiltersType>(EMPTY_FILTERS);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "title">("newest");
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedPub, setSelectedPub] = useState<Publication | null>(null);
 
   useEffect(() => {
@@ -486,12 +507,27 @@ export default function PublicationsClient({ publications }: { publications: Pub
     return () => clearTimeout(timeout);
   }, [filters.query]);
 
-  useEffect(() => {
-    setVisibleCount(12);
-  }, [filters, debouncedQuery, sortOrder]);
+  /* Reset pagination whenever the result set changes.
+
+     Done during render rather than in an effect on purpose. An effect would
+     render once with the old visibleCount and then again with the reset
+     value - the cascading render react-hooks/set-state-in-effect warns about,
+     and visible for a frame. React explicitly supports adjusting state during
+     render for exactly this "a prop changed, derive from it" case.
+
+     The key is built from the individual filter fields rather than from the
+     filters object, whose identity changes on every edit and would reset the
+     count mid-typing. */
+  const resultKey = `${debouncedQuery}|${sortOrder}|${filters.type}|${filters.year}|${filters.topic}|${filters.client}`;
+  const [lastResultKey, setLastResultKey] = useState(resultKey);
+
+  if (lastResultKey !== resultKey) {
+    setLastResultKey(resultKey);
+    setVisibleCount(PAGE_SIZE);
+  }
 
   const filteredAndSorted = useMemo(() => {
-    let result = publications.filter((pub) => {
+    const result = publications.filter((pub) => {
       if (debouncedQuery) {
         const needle = debouncedQuery.toLowerCase();
         const searchable = [pub.title, pub.authors, pub.journal, pub.abstract, ...(pub.topic || [])]
@@ -546,7 +582,10 @@ export default function PublicationsClient({ publications }: { publications: Pub
               <div className="relative">
                 <select
                   value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value as any)}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    if (isSortOrder(next)) setSortOrder(next);
+                  }}
                   className="appearance-none rounded-lg border-none bg-white py-2.5 pl-4 pr-10 text-sm font-bold text-stone-700 shadow-[0_2px_4px_rgba(0,0,0,0.05)] ring-1 ring-inset ring-stone-200 focus:ring-2 focus:ring-[#064e3b] cursor-pointer"
                 >
                   <option value="newest">Newest First</option>
@@ -586,7 +625,7 @@ export default function PublicationsClient({ publications }: { publications: Pub
               </div>
               <h3 className="mb-2 text-xl font-bold text-stone-800">No matches found</h3>
               <p className="mb-8 text-sm text-stone-500 max-w-md">
-                We couldn't find any publications matching your current filters. Try adjusting your search or clearing the filters to see more results.
+                We couldn&apos;t find any publications matching your current filters. Try adjusting your search or clearing the filters to see more results.
               </p>
               <button
                 onClick={() => setFilters(EMPTY_FILTERS)}
