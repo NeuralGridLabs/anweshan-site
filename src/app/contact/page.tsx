@@ -256,19 +256,37 @@ export default async function ContactPage() {
                 delay={340}
                 className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-5 pt-4"
               >
+                {/* TODO(wire-up): this form has no backend yet - there is no
+                    route handler anywhere in the app. Until one exists the
+                    button is disabled rather than left as a type="submit",
+                    which would GET the enquiry text into the URL and the
+                    browser history on every press. The visible note below and
+                    the mailto link are the working path in the meantime.
+
+                    To wire it up: add a route handler, then flip this back to
+                    type="submit" and let it post. Keeping it type="button"
+                    until then means the control can never leak the message. */}
                 <button
-                  type="submit"
-                  className="rounded-full bg-accent text-dark text-md font-semibold px-9 py-4 hover:bg-primary transition-colors"
+                  type="button"
+                  disabled
+                  aria-describedby="contact-form-note"
+                  className="cursor-not-allowed rounded-full bg-accent text-dark text-md font-semibold px-9 py-4 opacity-50"
                 >
                   Send message
                 </button>
 
-                <p className="text-base-text/45 text-md leading-relaxed">
-                  This form is not yet wired to a backend. Until then, email{" "}
-                  <span className="text-base-text/70 font-medium">
+                <p
+                  id="contact-form-note"
+                  className="text-base-text/45 text-md leading-relaxed"
+                >
+                  Sending is not switched on yet. Until it is, email{" "}
+                  <a
+                    href="mailto:info@anweshan.org"
+                    className="text-base-text/70 font-medium underline underline-offset-4 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+                  >
                     info@anweshan.org
-                  </span>{" "}
-                  directly.
+                  </a>{" "}
+                  directly and we will pick it up.
                 </p>
               </Reveal>
             </form>
