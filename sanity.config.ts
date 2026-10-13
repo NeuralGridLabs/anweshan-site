@@ -8,6 +8,15 @@ import { schemaTypes } from "./sanity/schemaTypes";
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "";
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 
+/* Vision is a GROQ query console with a raw result viewer. Useful while
+   writing a query, and not something to hand a content editor or a visitor on
+   a public route - the Studio is mounted at /admin, so the tool ships in the
+   client bundle that anyone can load.
+
+   NODE_ENV is inlined at build time, so in a production build this resolves to
+   an empty array and the tool is dropped rather than merely hidden. */
+const devOnly = process.env.NODE_ENV === "development";
+
 export default defineConfig({
   name: "default",
   title: "Anweshan CMS",
@@ -66,7 +75,7 @@ export default defineConfig({
             S.documentTypeListItem("galleryEvent").title("Gallery events"),
           ]),
     }),
-    visionTool({ defaultApiVersion: "2024-01-01" }),
+    ...(devOnly ? [visionTool({ defaultApiVersion: "2024-01-01" })] : []),
   ],
   schema: { types: schemaTypes },
 });
