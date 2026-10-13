@@ -480,7 +480,10 @@ export const featuredPublicationsQuery = groq`*[_type == "publication" && !(_id 
  * `_ref`. A bare `asset->{...}` would REPLACE the reference and break every
  * image URL, so intrinsic dimensions are added as a sibling `dims` key instead.
  */
-export const galleryEventsQuery = groq`*[_type == "galleryEvent"] | order(order asc, date desc) {
+/* Not ordered here: the Gallery page sorts newest-first in TypeScript, because
+   events with no date have to sort to the end deterministically and GROQ's
+   handling of a missing sort key is not something to rely on for page order. */
+export const galleryEventsQuery = groq`*[_type == "galleryEvent"] {
   _id,
   title,
   category,
@@ -489,6 +492,7 @@ export const galleryEventsQuery = groq`*[_type == "galleryEvent"] | order(order 
   images[]{
     ...,
     alt,
+    caption,
     asset{ _ref, _type },
     "dims": asset->metadata.dimensions
   },

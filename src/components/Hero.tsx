@@ -97,7 +97,6 @@ export default function Hero({ data }: { data?: HeroData }) {
   };
 
   const primaryLabel = data?.primaryCtaLabel?.trim() || "See our work";
-  const secondaryLabel = data?.secondaryCtaLabel?.trim() || "Our clients";
 
   return (
     <section className="relative overflow-hidden" style={{ backgroundColor: "#EAB308" }}>
@@ -114,15 +113,15 @@ export default function Hero({ data }: { data?: HeroData }) {
         <div className="relative max-w-[1400px] mx-auto px-6 md:px-10 pt-16 pb-20">
           {/* Centered copy */}
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="inline-flex items-center gap-2 text-[#064e3b] text-sm font-bold mb-6 tracking-wide">
+            <span className="inline-flex items-center gap-2 text-[#064e3b] text-xl font-bold mb-6 tracking-wide">
               {data?.heroEyebrow || "Research • Implementation • Evidence Communication"}
             </span>
 
-            <h1 className="text-4xl md:text-[3.25rem] font-extrabold text-[#064e3b] leading-[1.12] mb-6">
+            <h1 className="text-4xl md:text-[3.25rem] font-extrabold text-forest leading-[1.12] mb-6">
               {data?.heroHeading || "Evidence that moves from fieldwork to policy action"}
             </h1>
 
-            <p className="text-[#064e3b]/80 text-lg md:text-xl font-medium leading-relaxed mb-10">
+            <p className="text-forest/80 text-lg md:text-xl font-medium leading-relaxed mb-10">
               {data?.heroSubtext ||
                 "We help governments, development partners, research institutions and responsible businesses understand difficult problems, deliver rigorous work and turn findings into decisions, systems and communication that people can use."}
             </p>

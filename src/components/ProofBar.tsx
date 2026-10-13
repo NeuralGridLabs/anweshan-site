@@ -30,7 +30,7 @@ export default function ProofBar({ items }: ProofBarProps) {
               key={`${mark}-${i}`}
               className="flex items-center justify-center gap-x-8 md:gap-x-0"
             >
-              <span className="meta-label text-ivory text-center">{mark}</span>
+              <span className="meta-label text-ivory text-center text-m md:text-m">{mark}</span>
 
               {/* Gold dot between items on the single desktop row. Hidden on
                   mobile, where the items sit in a 2x2 grid and a trailing dot

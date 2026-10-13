@@ -10,8 +10,8 @@ type AboutSlide = {
 };
 
 const SLIDES: AboutSlide[] = [
-  { src: "/images/about/about-01.jpg" },
-  { src: "/images/about/about-02.jpg" },
+  { src: "/images/about/about-team.jpg", alt: "The Anweshan team" },
+  { src: "/images/about/about-01.jpg", alt: "The Anweshan office" },
 ];
 
 const DURATION = 5200;

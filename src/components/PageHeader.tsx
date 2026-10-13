@@ -15,6 +15,29 @@ type PageHeaderProps = {
   image?: string;
   imageAlt?: string;
   /**
+   * Opt-in scrim for the colour wash laid over the header photo. Omitted, the
+   * wash is the heavy /85 the tone implies, which is right for an arbitrary
+   * stock photo but all but erases a picture that was chosen deliberately.
+   * A page with its own photograph can pass a lighter wash and still get the
+   * photo under the text rather than in place of it.
+   */
+  scrim?: string;
+  /**
+   * Opt-in fit for the photo, overriding the default `object-cover kenburns`.
+   * The default assumes decorative stock that may be cropped and zoomed
+   * freely. A photograph of people is neither: cropping it takes heads, and
+   * the slow zoom takes another bite out of every edge as it plays. A page
+   * with a photo that has to stay legible passes its own fit here.
+   */
+  imageClassName?: string;
+  /**
+   * Opt-in floor for the header's height, as a Tailwind class. A header whose
+   * natural height is far wider than the photo's shape has to crop it to fit,
+   * and a photo of people cannot afford that. Giving the box a floor close to
+   * the photo's own aspect leaves it room to be shown whole.
+   */
+  minHeight?: string;
+  /**
    * Opt-in stacked header: title on its own full-width row with the lead
    * paragraph beneath it at a wide-but-readable measure, instead of the
    * default two-column grid that puts the lead in a narrow side column.
@@ -45,6 +68,9 @@ export default function PageHeader({
   tone = "ink",
   image,
   imageAlt = "",
+  scrim,
+  imageClassName = "object-cover kenburns",
+  minHeight,
   stacked = false,
   plain = false,
 }: PageHeaderProps) {
@@ -55,8 +81,12 @@ export default function PageHeader({
      over one is what turns a solid background muddy — so both go. */
   const headerImage = plain ? undefined : image;
 
+  /* The wash sits between the photo and the copy: the photo stays under it and
+     the heading always wins on contrast. */
+  const scrimClass = scrim ?? (tone === "sand" ? "bg-mint/85" : "bg-sage/85");
+
   return (
-    <header className={`relative ${t.bg} ${t.text} overflow-hidden`}>
+    <header className={`relative ${t.bg} ${t.text} overflow-hidden ${minHeight ?? ""}`}>
       {headerImage && (
         <>
           <div className="absolute inset-0">
@@ -66,14 +96,10 @@ export default function PageHeader({
               fill
               priority
               sizes="100vw"
-              className="object-cover kenburns"
+              className={imageClassName}
             />
           </div>
-          <div
-            className={`absolute inset-0 ${
-              tone === "sand" ? "bg-mint/85" : "bg-sage/85"
-            }`}
-          />
+          <div className={`absolute inset-0 ${scrimClass}`} />
         </>
       )}
 
