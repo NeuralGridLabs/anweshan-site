@@ -7,9 +7,9 @@ const apiVersion =
   process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01";
 
 // A placeholder keeps client construction from throwing when env vars are
-// absent (e.g. during a build before the Studio is connected). Real fetches
-// are gated on `projectId` below, so nothing hits Sanity until a project is
-// actually configured.
+// absent (e.g. during a module graph walk before the Studio is connected).
+// A fetch never gets that far: fetchSanity throws on a missing projectId, so
+// a build without configuration fails instead of quietly producing empty pages.
 const safeProjectId = projectId || "placeholder";
 
 export const sanityClient = createClient({
@@ -42,12 +42,23 @@ function responseBody(error: unknown): unknown {
 }
 
 /**
- * Fetches a GROQ query, returning `null` when Sanity is not configured or the
- * request fails, so callers can render their own empty state.
+ * Fetches a GROQ query, returning `null` when the request fails, so callers
+ * can render their own empty state.
  *
  * `T` is the projected result type — see the interfaces in ./types.ts. Always
  * pass it explicitly: an omitted type argument infers `unknown` and the result
  * loses all shape information.
+ *
+ * MISSING CONFIGURATION THROWS. A missing NEXT_PUBLIC_SANITY_PROJECT_ID is not
+ * a transient failure, it is a broken deployment, and swallowing it is how you
+ * get a green build that ships an empty website: every page would take the
+ * `?? []` path, prerender successfully, and deploy with nothing on it, with
+ * nothing but a line in the build log to say why. Throwing fails the build
+ * where someone is watching.
+ *
+ * A failed REQUEST still returns null. That is a different case: Sanity being
+ * briefly unreachable, or a rate limit, should not take the whole build down.
+ * The pages own their empty states for that.
  *
  * CACHING: the client's default `fetch` is Next's cached fetch, and in a static
  * build that cache is written into `.next`. The symptom it caused was subtle:
@@ -70,8 +81,12 @@ export async function fetchSanity<T>(
 
 ): Promise<T | null> {
   if (!projectId) {
-    console.warn("Sanity projectId not configured, skipping fetch");
-    return null;
+    throw new Error(
+      "[Sanity] NEXT_PUBLIC_SANITY_PROJECT_ID is not set. Copy .env.example " +
+        "to .env.local and fill it in, or set the variable in the deploy " +
+        "environment. Refusing to fetch: without it every page would " +
+        "prerender as its empty state and deploy a silently empty site.",
+    );
   }
 
   try {
