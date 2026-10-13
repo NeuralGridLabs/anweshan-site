@@ -1,10 +1,13 @@
 /* --------------------------------------------------------------------------
-    Digital products built by Anweshan
+    Products and units built by Anweshan
 
-    Three products, each linking to its own live destination, so the section
-    works as a set of exit points rather than a gallery. The Bir Hospital app
-    is an antimicrobial reference guide Anweshan built and hosts; it is not a
-    government product and nothing here should imply it is one.
+    Four entries, each linking to its own live destination, so the section
+    works as a set of exit points rather than a gallery. Three are digital
+    products; GraFX is the parallel unit for visual design and data
+    storytelling, so it is listed here as a unit rather than a product. The
+    Bir Hospital app is an antimicrobial reference guide Anweshan built and
+    hosts; it is not a government product and nothing here should imply it
+    is one.
    ----------------------------------------------------------------------- */
 
 export type Innovation = {
@@ -17,12 +20,28 @@ export type Innovation = {
      that next/image can take directly. */
   image: string;
   alt: string;
-  /* The three sources are not the same shape, so the frame each one fills is
+  /* The sources are not the same shape, so the frame each one fills is
      recorded beside it rather than being inferred in the component. */
   fit: "cover" | "contain";
 };
 
 export const innovations: Innovation[] = [
+  {
+    name: "GraFX",
+    tag: "Parallel unit",
+    description:
+      "Our parallel unit for visual design and data storytelling, turning research findings into visuals that lead to action.",
+    href: "https://grafxint.com/",
+    cta: "Visit website",
+    image: "/images/innovations/grafx.png",
+    alt: "GraFX logo",
+    /* A near-square mark with a fully transparent background and the logo
+       inset roughly 35px from every edge. Contained whole on a white plate:
+       a square mark cropped to the 2:1 frame would lose the left and right
+       of the wordmark, and the transparent margin would otherwise show the
+       card through. */
+    fit: "contain",
+  },
   {
     name: "Hire Enumerator",
     tag: "Web platform",
