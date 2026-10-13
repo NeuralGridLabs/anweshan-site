@@ -8,7 +8,7 @@ export default function TopBar() {
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-1.5">
             <MapPin size={13} className="text-forest/85" />
-            Talchikhel, Lalitpur, Nepal
+            Talchhikhel, Lalitpur, Nepal
           </span>
           <span className="hidden md:flex items-center gap-1.5">
             <Phone size={13} className="text-forest/85" />

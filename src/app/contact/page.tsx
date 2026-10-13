@@ -16,7 +16,7 @@ const fallbackDetails: ContactDetail[] = [
   {
     icon: MapPin,
     label: "Office",
-    value: "Anweshan Pvt. Ltd., Talchikhel, Lalitpur, Nepal",
+    value: "Anweshan Pvt. Ltd., Talchhikhel, Lalitpur, Nepal",
   },
   {
     icon: Phone,

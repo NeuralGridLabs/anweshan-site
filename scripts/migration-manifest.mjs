@@ -459,7 +459,7 @@ export const contactPlan = {
   source: [CONTACT_SOURCE, "src/app/contact/page.tsx:88"],
   doc: {
     heading: "Start a conversation about your research question.",
-    address: "Anweshan Pvt. Ltd., Talchikhel, Lalitpur, Nepal",
+    address: "Anweshan Pvt. Ltd., Talchhikhel, Lalitpur, Nepal",
     phone: "977-01-5526674",
     email: "info@anweshan.org",
     mapEmbed: null,

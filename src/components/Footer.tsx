@@ -50,7 +50,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-md text-white/60">
               <li className="flex items-start gap-2.5">
                 <MapPin size={14} className="mt-0.5 shrink-0 text-mint" />
-                Talchikhel, Lalitpur, Nepal
+                Talchhikhel, Lalitpur, Nepal
               </li>
               <li className="flex items-start gap-2.5">
                 <Phone size={14} className="mt-0.5 shrink-0 text-mint" />
