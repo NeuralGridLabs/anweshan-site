@@ -22,6 +22,10 @@ export type SanityImage = {
      its true aspect ratio (w-full h-auto) with no fixed frame. */
   dims?: { width?: number; height?: number; aspectRatio?: number };
   alt?: string;
+  /* Optional per-photo caption, declared on the galleryEvent image array.
+     Distinct from `alt`: `alt` is the accessibility text, this is the editorial
+     line shown under the photo in the lightbox. */
+  caption?: string;
   crop?: unknown;
   hotspot?: unknown;
 };
@@ -379,7 +383,10 @@ export type GalleryEventCategory = "events-training" | "celebrations";
 
 export type GalleryEvent = {
   _id: string;
-  title: string;
+  /* Optional in practice: the schema marks it required, but existing documents
+     predate that and some carry no title. The page renders the parts that are
+     present rather than assuming either field exists. */
+  title?: string;
   category?: GalleryEventCategory;
   date?: string;
   description?: string;

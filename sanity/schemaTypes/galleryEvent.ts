@@ -32,7 +32,26 @@ export const galleryEvent = defineType({
       name: "images",
       title: "Photos",
       type: "array",
-      of: [{ type: "image", options: { hotspot: true } }],
+      /* `alt` is deliberately NOT declared here: the built-in Sanity image type
+         already provides it, and defining a second field of the same name would
+         collide with it. Only `caption` needs adding. */
+      of: [
+        {
+          type: "image",
+          options: {
+            hotspot: true,
+            fields: [
+              {
+                name: "caption",
+                title: "Caption",
+                type: "string",
+                description:
+                  "Shown under the photo in the lightbox. Optional; a photo with no caption simply shows none.",
+              },
+            ],
+          },
+        },
+      ],
       options: { layout: "grid" },
     }),
     defineField({ name: "coverImage", title: "Cover image (optional)", type: "image", options: { hotspot: true } }),

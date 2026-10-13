@@ -1,8 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
+import GalleryGrid from "@/components/GalleryGrid";
+import type { LightboxPhoto } from "@/components/GalleryLightbox";
 
 import { galleryEventsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
@@ -52,103 +53,113 @@ function formatDate(date?: string) {
 }
 
 /**
- * One event: the photo grid, with the date beneath it.
+ * Newest first.
  *
- * There is deliberately no event title and no event description. A gallery
- * event is only a grouping device for a set of photos plus the date they were
- * taken, so the date is the only metadata shown. The card and grid styling is
- * unchanged from the original page.
+ * Sorting happens here rather than in the GROQ `order()` because events with
+ * no date have to sort to the end deterministically, and GROQ's handling of a
+ * missing sort key is not something to lean on for page order. Dated events
+ * come first, then the explicit `order` field as the tiebreak, then _id so
+ * two events that agree on both never swap places between builds.
  */
-function EventEntry({ event }: { event: GalleryEvent }) {
-  const photos = event.images ?? [];
-  const date = formatDate(event.date);
+function newestFirst(events: GalleryEvent[]): GalleryEvent[] {
+  return [...events].sort((a, b) => {
+    const aTime = a.date ? Date.parse(a.date) : NaN;
+    const bTime = b.date ? Date.parse(b.date) : NaN;
+    const aDated = !Number.isNaN(aTime);
+    const bDated = !Number.isNaN(bTime);
 
-  return (
-    <Reveal>
-      <article className="rounded-3xl border border-forest/10 bg-ivory p-5 shadow-[0_8px_30px_rgba(25,60,45,0.05)] md:p-7">
-        {/* Event header: what this set of photos is, and how many. Titles are
-            used when the CMS has one; the date is the fallback, so a set is
-            never left with nothing to identify it by. */}
-        <header className="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 pb-5 border-b border-forest/10">
-          <h3 className="h3-card text-forest">
-            {event.title || date || "Gallery"}
-          </h3>
+    if (aDated && bDated && aTime !== bTime) return bTime - aTime;
+    if (aDated !== bDated) return aDated ? -1 : 1;
 
-          <p className="flex items-center gap-3 text-forest/85">
-            {event.title && date && (
-              <span className="eyebrow">{date}</span>
-            )}
+    const aOrder = a.order ?? 0;
+    const bOrder = b.order ?? 0;
+    if (aOrder !== bOrder) return aOrder - bOrder;
 
-            <span className="eyebrow">
-              {photos.length} {photos.length === 1 ? "photo" : "photos"}
-            </span>
-          </p>
-        </header>
+    return a._id.localeCompare(b._id);
+  });
+}
 
-        {/* Photos on a uniform 4:3 frame. Mixing the photos' own aspect ratios
-            made the rows ragged, which read as broken rather than editorial;
-            cropping to a common frame keeps the grid aligned. */}
-        {photos.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            {photos.map((img, j) => {
-              const src = sanityImageUrl(img);
+/**
+ * Flattens a section's events into one photo list.
+ *
+ * Events arrive newest first and each event's photos keep their stored order,
+ * so an event's photos stay together in the grid rather than being scattered.
+ * Every photo carries the event's title, formatted date and description
+ * alongside its own alt and caption, which is what lets the flat grid and the
+ * lightbox both name the event without either of them knowing what an event
+ * is.
+ *
+ * `indexInEvent` and `eventPhotoCount` are stamped per event, so the lightbox
+ * can count "2 / 8" against the event rather than against the section.
+ *
+ * Nothing is invented: a field the document does not have stays undefined and
+ * simply does not render. Photos whose asset cannot be resolved are dropped
+ * rather than rendered as a broken tile.
+ */
+function flattenEvents(events: GalleryEvent[]): LightboxPhoto[] {
+  const out: LightboxPhoto[] = [];
 
-              return (
-                <div
-                  key={img._key || j}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-sage"
-                >
-                  {src ? (
-                    <Image
-                      src={src}
-                      alt={img.alt || event.title || "Gallery photo"}
-                      fill
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm text-forest/85">
-                        Image unavailable
-                      </span>
-                    </div>
-                  )}
+  for (const event of events) {
+    const title = event.title?.trim() || undefined;
+    const date = formatDate(event.date) || undefined;
+    const description = event.description?.trim() || undefined;
 
-                  {/* Caption on hover, when the photo carries alt text. */}
-                  {img.alt && (
-                    <div className="pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-forest/80 via-forest/10 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      <p className="body-sm line-clamp-2 text-ivory">
-                        {img.alt}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="body-sm text-forest/85">
-            No photos uploaded for this event.
-          </p>
-        )}
-      </article>
-    </Reveal>
-  );
+    const eventPhotos: LightboxPhoto[] = (event.images ?? []).flatMap(
+      (img, i) => {
+        const src = sanityImageUrl(img);
+        if (!src) return [];
+
+        return [
+          {
+            key: img._key || `${event._id}-${i}`,
+            src,
+            alt: img.alt ?? "",
+            caption: img.caption,
+            eventTitle: title,
+            eventDate: date,
+            eventDescription: description,
+            indexInEvent: 0,
+            eventPhotoCount: 0,
+          },
+        ];
+      }
+    );
+
+    /* Counted after the unusable ones are dropped, so the denominator in the
+       lightbox matches the photos that can actually be seen. */
+    eventPhotos.forEach((photo, i) => {
+      photo.indexInEvent = i;
+      photo.eventPhotoCount = eventPhotos.length;
+    });
+
+    out.push(...eventPhotos);
+  }
+
+  return out;
 }
 
 export default async function GalleryPage() {
   const events =
     (await fetchSanity<GalleryEvent[]>(galleryEventsQuery)) ?? [];
 
-  const sections = GALLERY_SECTIONS.map((section) => ({
-    ...section,
-    events: events.filter((e) => e.category === section.category),
-  })).filter((section) => section.events.length > 0);
+  /* Newest first, once, before the events are split across sections, so every
+     section's flattened photos read newest-event-first too. */
+  const sorted = newestFirst(events);
+
+  /* One flat list per section. An event with no usable photo contributes
+     nothing, so a section can end up empty and is then not rendered. */
+  const sections = GALLERY_SECTIONS.map((section) => {
+    const photos = flattenEvents(
+      sorted.filter((e) => e.category === section.category)
+    );
+
+    return { ...section, photos };
+  }).filter((section) => section.photos.length > 0);
 
   /* Events with no category, or a category the page does not know about, would
      otherwise vanish. They are surfaced separately so nothing is hidden. */
-  const uncategorised = events.filter(
-    (e) => !e.category || !KNOWN_CATEGORIES.has(e.category)
+  const uncategorised = flattenEvents(
+    sorted.filter((e) => !e.category || !KNOWN_CATEGORIES.has(e.category))
   );
 
   return (
@@ -185,8 +196,8 @@ export default async function GalleryPage() {
             <>
               {sections.map((section) => (
                 <section key={section.category}>
-                  {/* Section header on a rule, with the photo count sitting
-                      opposite the title so the page reads at a glance. */}
+                  {/* Section header on a rule, with a plain photo count
+                      opposite the title. */}
                   <div className="mb-10 pb-6 border-b border-forest/15 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                     <div className="max-w-2xl">
                       <h2 className="h2-section text-forest mb-3">
@@ -199,42 +210,47 @@ export default async function GalleryPage() {
                     </div>
 
                     <p className="eyebrow shrink-0 text-forest/70 text-base">
-                      {section.events.reduce(
-                        (n, e) => n + (e.images?.length ?? 0),
-                        0
-                      )}{" "}
-                      photos
+                      {section.photos.length}{" "}
+                      {section.photos.length === 1 ? "photo" : "photos"}
                     </p>
                   </div>
 
-                  <div className="space-y-8 md:space-y-10">
-                    {section.events.map((event) => (
-                      <EventEntry key={event._id} event={event} />
-                    ))}
-                  </div>
+                  <GalleryGrid photos={section.photos} />
                 </section>
               ))}
 
               {uncategorised.length > 0 && (
                 <section>
-                  <div className="mb-12 max-w-3xl">
-                    <h2 className="h2-section text-forest mb-4">
-                      Not yet categorised
-                    </h2>
+                  <div className="mb-10 pb-6 border-b border-forest/15 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                    <div className="max-w-2xl">
+                      <h2 className="h2-section text-forest mb-3">
+                        Not yet categorised
+                      </h2>
 
-                    <p className="body-lg text-forest/85">
-                      These events have no Section set, so they are not part of
-                      the two sections above. Set Section on each one in the CMS
-                      to move it into place.
+                      <p className="body-lg text-forest/85">
+                        These events have no Section set, so they are not part of
+                        the two sections above. Set Section on each one in the CMS
+                        to move it into place.
+                      </p>
+                    </div>
+
+                    <p className="eyebrow shrink-0 text-forest/70 text-base">
+                      {uncategorised.length}{" "}
+                      {uncategorised.length === 1 ? "photo" : "photos"}
                     </p>
                   </div>
 
-                  <div className="space-y-8 md:space-y-10">
-                    {uncategorised.map((event) => (
-                      <EventEntry key={event._id} event={event} />
-                    ))}
-                  </div>
+                  <GalleryGrid photos={uncategorised} />
                 </section>
+              )}
+
+              {sections.length === 0 && uncategorised.length === 0 && (
+                <Reveal>
+                  <p className="body-lg text-forest/85">
+                    Events have been added but none of them have any photos
+                    uploaded yet.
+                  </p>
+                </Reveal>
               )}
             </>
           )}
