@@ -6,12 +6,18 @@ import type { Publication } from "@/lib/types";
 
 type Props = {
   publications: Publication[];
+  /* Resolved on the server and passed down. Reading the clock here instead
+     would mean the server and the browser each compute the year separately,
+     and a page built in December but served in January would hydrate against
+     a different value and have its tree thrown away. */
+  currentYear: number;
   selectedYear: string;
   onSelectYear: (year: string) => void;
 };
 
 export default function PublicationTimeline({
   publications,
+  currentYear,
   selectedYear,
   onSelectYear,
 }: Props) {
@@ -33,7 +39,7 @@ export default function PublicationTimeline({
 
     const years = [...counts.keys()];
     const first = Math.min(...years);
-    const last = Math.max(Math.max(...years), new Date().getFullYear());
+    const last = Math.max(Math.max(...years), currentYear);
 
     const rows: { year: number; count: number }[] = [];
     for (let y = first; y <= last; y++) {
@@ -46,7 +52,7 @@ export default function PublicationTimeline({
       total: rows.reduce((sum, r) => sum + r.count, 0),
       undated: undatedCount,
     };
-  }, [publications]);
+  }, [publications, currentYear]);
 
   if (data.length === 0) return null;
 

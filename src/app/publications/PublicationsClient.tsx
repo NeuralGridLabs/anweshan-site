@@ -494,7 +494,7 @@ function isSortOrder(value: string): value is SortOrder {
   return (SORT_ORDERS as readonly string[]).includes(value);
 }
 
-export default function PublicationsClient({ publications }: { publications: Publication[] }) {
+export default function PublicationsClient({ publications, currentYear }: { publications: Publication[]; currentYear: number }) {
   const [filters, setFilters] = useState<PublicationFiltersType>(EMPTY_FILTERS);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -562,6 +562,7 @@ export default function PublicationsClient({ publications }: { publications: Pub
         <PublicationFilters publications={publications} filters={filters} onFiltersChange={setFilters} />
         <PublicationTimeline
           publications={publications}
+          currentYear={currentYear}
           selectedYear={filters.year}
           onSelectYear={(year) => setFilters({ ...filters, year })}
         />
