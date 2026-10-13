@@ -16,11 +16,19 @@ from the original site (projects, clients, team, services).
 
 ## Getting started
 
-Prerequisites: Node.js 18.18+ (Node 20 recommended) and npm.
+Prerequisites: Node.js 22.12+ and npm. This is enforced by `engines` in
+package.json and by `NODE_VERSION` in netlify.toml, because `sanity@6` requires
+`>=22.12` and `next@16` requires `>=20.9` - a build on an older image fails on
+resolution rather than on anything to do with this site.
 
 ```bash
 # install dependencies
 npm install
+
+# configure the environment
+cp .env.example .env.local
+# then fill in NEXT_PUBLIC_SANITY_PROJECT_ID at minimum - the build throws
+# without it rather than prerendering an empty site
 
 # run the dev server
 npm run dev
@@ -33,8 +41,11 @@ The site runs at http://localhost:3000
 ```bash
 npm run build   # production build
 npm run start   # serve the production build
-npm run lint    # eslint
+npm run lint    # eslint across the repo
 ```
+
+`next lint` was removed in Next 16 and `next build` no longer lints, so
+`npm run lint` is not run for you by anything. Run it yourself before pushing.
 
 ## Project structure
 
