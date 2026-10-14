@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    /* Stray, unrelated Laravel project parked in the repo root (57k files of
+       vendored jQuery/Bootstrap/AdminLTE). Overriding the default ignores
+       above removed eslint-config-next's own exclusions, so without this
+       every one of those files gets parsed as source of THIS app. */
+    "anweshan/**",
   ]),
 ]);
 
