@@ -1,59 +1,50 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-
-import Reveal from "@/components/Reveal";
 
 /* --------------------------------------------------------------------------
    Hero.
 
-   The copy, the CTAs and the amber ground are unchanged. The image band is
-   three of Anweshan's own fieldwork photographs in one aligned row, in place
-   of the stock-photo carousel. The wave pattern that used to sit over the
-   section is gone: it was an artificial texture sitting under the pictures,
-   and the row reads cleaner on solid brand amber without it.
+   The copy, the CTAs, the amber ground and the nav are untouched. Only the
+   image band changed: it is back to a single-image auto-advancing carousel,
+   now carrying three collage photographs of Anweshan fieldwork instead of the
+   stock images it started with.
 
-   THE RATIO IS CHOSEN FROM THE FILES, not picked as a round number. The three
-   photographs are 1112x918 (1.21), 2215x2616 (0.85) and 1122x1402 (0.80), and
-   a square frame is the one that treats all three most evenly - it crops the
-   landscape by 17% of its width and the two portraits by 15% and 20% of their
-   height. A wider frame would have cut half the household photograph's body
-   away; a taller one would have done the same to the community shot's forms.
+   NO CROPPING, AND NO GUESSING AT A RATIO. All three collages are exactly
+   2700x1000, so they share a ratio of 2.7 and the frame is set to that. At a
+   ratio the frame and the photograph agree on, object-contain fills the frame
+   exactly - there is no letterbox to fill and therefore no blurred backdrop
+   copy behind it, which is the whole point of measuring rather than guessing.
+   Anything that would crop the collage to fit is a bug, not a style: these
+   pictures are several scenes wide, and cutting any of them loses a panel.
 
-   WHAT EACH CROP SPARES. Each photograph is cropped, but only in the place
-   where there is nothing worth keeping, and the position is measured against
-   the real file:
+   The frame's height comes from its own aspect ratio rather than a fixed
+   pixel height, so the space is reserved before a byte of image arrives and
+   nothing below it moves on load. The width is capped and centred, so the
+   band sits under the buttons rather than stretching across the hero.
 
-     household  landscape, so it loses width and keeps ALL of its height. The
-                crop falls on the girl's back at one edge and the sari at the
-                other; both faces and the emotion card sit well inside.
-     hpv        her head starts 7.5% down and her card ends at 82%, so 42%
-                puts the window at 6-91%. Her whole head survives with room to
-                spare, along with both hands and the entire card. Only the
-                skirt and the ground below it are given up.
-     community  the topmost face begins 11% down and the pink forms end at
-                93%, and a square window holds 80%. 40% puts it at 8-88%,
-                which clears every head - including the woman at the back
-                right - and keeps the forms being filled in.
+   THE FRAME IS THE ONLY ELEMENT. The caption sits bottom-left and the dots
+   bottom-right, both over a short scrim and on the same baseline, so there
+   is no bar under the picture and no gap below it. Both sit inside the frame,
+   which is rounded, overflow-hidden and relative.
 
-   NOTHING MOVES. No scale and no translate on the card: a zoom inside the
-   frame is a crop, and a moving card stops lining up with its neighbours. The
-   lift on hover is carried by shadow and ring instead, which read as height
-   without moving a pixel of the photograph.
+THE SCRIM IS SHORT AND LIGHT. A collage is several scenes wide, and those
+   scenes are the point. A tall, solid gradient over the lower third made the
+   bottom row look hidden rather than dimmed, so the scrim now only covers the
+   bottom quarter, peaks at 90% rather than 100%, and fades out entirely -
+   all it has to do is give white text something to sit on.
 
-   The title is a short strip across the bottom, not a wash over the whole
-   picture, so a hovered photograph still shows its subject. It is always in
-   the DOM for assistive tech, and always painted on anything without a
-   pointer - tested against hover capability rather than a width, so a touch
-   tablet is not left with a title that can never appear. The cards are not
-   tab stops: they are not controls and do nothing on activation.
+   Autoplay runs every 5s with the same 1500ms opacity fade the previous
+   carousel used. It stops on hover, on focus anywhere inside, while the tab is
+   hidden, and entirely under prefers-reduced-motion. The effect depends on the
+   paused flag rather than only setting it, so pausing really does clear the
+   timer instead of leaving one running behind a stopped counter.
 
-   Every tile is a fixed square reserved before the photograph arrives, so
-   nothing reflows while loading, and the row is capped in width so the band
-   stays in proportion to the heading above it rather than dominating the
-   hero. Every transition is motion-reduce guarded.
+   Only the first slide is priority-loaded. The other two are lazy, so the
+   browser does not fetch two 2700px collages for a visitor who never reaches
+   them.
    ----------------------------------------------------------------------- */
 
 interface HeroData {
@@ -64,38 +55,48 @@ interface HeroData {
   primaryCtaLink?: string;
 }
 
-type HeroImage = {
+type HeroSlide = {
   src: string;
   label: string;
   alt: string;
-  /** Focal point. Measured against the file - see the note above. */
-  position: string;
-  preload?: boolean;
 };
 
-const HERO_IMAGES: HeroImage[] = [
+/** Intrinsic size of all three collages, so the frame can reserve the space. */
+const COLLAGE_W = 2700;
+const COLLAGE_H = 1000;
+
+const SLIDES: HeroSlide[] = [
   {
-    src: "/images/hero/household-survey.jpg",
+    src: "/images/hero/household-collage.jpg",
     label: "Household Survey",
-    alt: "An enumerator in a pink sari records answers on a tablet outside a village house while a child holds up a card of emotion faces",
-    position: "50% 50%",
-    preload: true,
+    alt: "Household survey fieldwork photo collage",
   },
   {
-    src: "/images/hero/hpv-vaccination-research.jpg",
-    label: "HPV Vaccination Research",
-    alt: "A girl stands outside a village house and holds her HPV vaccination card up to the camera",
-    position: "50% 42%",
+    src: "/images/hero/training-collage.jpg",
+    label: "Training",
+    alt: "Training fieldwork photo collage",
   },
   {
-    src: "/images/hero/community-health-survey.jpg",
+    src: "/images/hero/community-collage.jpg",
     label: "Community Health Survey",
-    alt: "Two enumerators fill in questionnaires on pink forms as women seated on woven mats take part in a group discussion",
-    position: "50% 40%",
+    alt: "Community health survey fieldwork photo collage",
   },
 ];
 
+/** Milliseconds each slide is held, matching the old carousel's pace. */
+const HOLD_MS = 5000;
+/** The old carousel's crossfade. */
+const FADE = "duration-[1500ms] ease-in-out";
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export default function Hero({ data }: { data?: HeroData }) {
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = SLIDES.length;
+
   const scrollTo = useCallback((id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -115,6 +116,35 @@ export default function Hero({ data }: { data?: HeroData }) {
     },
     [scrollTo]
   );
+
+  const goTo = useCallback(
+    (index: number) => setCurrent(((index % total) + total) % total),
+    [total]
+  );
+
+  /* Autoplay. Depends on `paused` and on `current`, so the countdown restarts
+     after every advance and stops dead while paused. */
+  useEffect(() => {
+    if (paused || prefersReducedMotion()) return;
+
+    const timer = setTimeout(() => {
+      setCurrent((prev) => (prev + 1) % total);
+    }, HOLD_MS);
+
+    return () => clearTimeout(timer);
+  }, [current, paused, total]);
+
+  /* Returning to a backgrounded tab should not skip the carousel forward by
+     however long it was away, so it is held while the tab is hidden and
+     released on the way back rather than restarted mid-countdown. */
+  useEffect(() => {
+    function onVisibility() {
+      if (!document.hidden) setPaused(false);
+    }
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
 
   const primaryLabel = data?.primaryCtaLabel?.trim() || "See our work";
 
@@ -153,58 +183,101 @@ export default function Hero({ data }: { data?: HeroData }) {
           </div>
         </div>
 
-        {/* Three identical squares, one row from md, capped so the band stays
-            in proportion to the heading rather than filling the whole width. */}
-        <ul
-          className="mx-auto grid max-w-[1080px] grid-cols-1 gap-5 md:grid-cols-3 md:gap-6
-                     [&:has(>li:hover)>li:not(:hover)]:opacity-50
-                     [&:has(>li:hover)>li:not(:hover)]:saturate-50"
+        {/* Carousel. Width capped and centred under the buttons. The frame
+            carries the aspect ratio, so its height is reserved before the
+            photograph loads and nothing below it shifts. */}
+        <div
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
+          className="mx-auto w-full max-w-[1080px]"
         >
-          {HERO_IMAGES.map((image, i) => (
-            <Reveal
-              as="li"
-              key={image.src}
-              delay={i * 120}
-              className="group/tile transition-[opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
-            >
-              <figure
-                className="relative aspect-square overflow-hidden rounded-3xl bg-forest ring-1 ring-black/10
-                           shadow-[0_14px_34px_rgba(25,60,45,0.12)]
-                           transition-[box-shadow,ring-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
-                           group-hover/tile:shadow-[0_26px_60px_rgba(25,60,45,0.26)]
-                           group-hover/tile:ring-2 group-hover/tile:ring-[#064e3b]/40
-                           motion-reduce:transition-none"
+          <div
+            role="group"
+            aria-roledescription="carousel"
+            aria-label="Fieldwork photo collages"
+            /* bg-forest, not the sage it was: the frame is sized from an
+               aspect ratio, so the browser rounds its height down by a
+               fraction of a pixel. The pale sage (#E9F5DB - effectively white)
+               showed through that seam as a thin light line down the edge.
+               A dark ground cannot show a seam. */
+            className="relative aspect-[2.7/1] w-full overflow-hidden rounded-3xl bg-forest ring-1 ring-black/10 shadow-[0_18px_44px_rgba(25,60,45,0.16)]"
+          >
+            {SLIDES.map((slide, index) => (
+              <div
+                key={slide.src}
+                aria-hidden={index !== current}
+                className={`absolute inset-0 transition-opacity ${FADE} motion-reduce:transition-none ${
+                  index === current ? "opacity-100" : "opacity-0"
+                }`}
               >
-                {/* The photograph, filling its square. One image, no backdrop,
-                    no overlay across the frame, no pattern behind it. */}
+                {/* object-cover, and it still loses nothing: the frame is 2.7:1 and the
+                    file is 2700x1000, which is also exactly 2.7:1. Cover only
+                    crops when the frame and the picture disagree, and here
+                    they do not - it is the one case where cover and contain
+                    render identically, except that cover also absorbs the
+                    sub-pixel rounding of the frame's height and so cannot
+                    leave a seam. The previous object-contain fitted to within
+                    a fraction of a pixel and the pale ground behind showed
+                    through it as a hairline.
+
+                    No padding or border on this wrapper, so the picture runs
+                    edge to edge, and intrinsic width and height are given so
+                    the browser can reserve the box before the bytes arrive. */}
                 <Image
-                  src={image.src}
-                  alt={image.alt}
-                  fill
-                  preload={image.preload}
-                  sizes="(min-width: 768px) 30vw, 92vw"
-                  style={{ objectPosition: image.position }}
-                  className="object-cover transition-[filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/tile:brightness-[1.06] motion-reduce:transition-none"
+                  src={slide.src}
+                  alt={index === current ? slide.alt : ""}
+                  width={COLLAGE_W}
+                  height={COLLAGE_H}
+                  priority={index === 0}
+                  sizes="(min-width: 1080px) 1080px, 92vw"
+                  className="h-full w-full object-cover"
                 />
 
-                {/* A short strip across the bottom, not a wash over the whole
-                    picture - the subject stays visible on hover. */}
-                <figcaption
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-20
-                             bg-gradient-to-t from-[#064e3b] via-[#064e3b]/55 to-transparent
-                             opacity-100 transition-opacity duration-500
-                             [@media(hover:hover)]:opacity-0
-                             [@media(hover:hover)]:group-hover/tile:opacity-100
-                             motion-reduce:transition-none"
-                >
-                  <span className="absolute inset-x-0 bottom-0 block px-4 pb-3.5 text-center text-sm font-bold tracking-wide text-white md:text-base">
-                    {image.label}
-                  </span>
-                </figcaption>
-              </figure>
-            </Reveal>
-          ))}
-        </ul>
+                {/* Scrim: a short band across the bottom, solid brand green at
+                    the very bottom and gone a quarter of the way up.
+
+                    It was h-3/5 at full strength, which darkened the entire
+                    lower third of the collage and made the bottom row of
+                    pictures look hidden. Collage panels are the whole point of
+                    these images, so the scrim now only has to do its one job -
+                    give white text something to sit on - and it does that
+                    inside the height the caption actually occupies. It is also
+                    pointer-events-none, so it never swallows a click meant for
+                    the dots beside it. */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-[#064e3b]/90 via-[#064e3b]/35 to-transparent" />
+              </div>
+            ))}
+
+            {/* Caption, bottom-left, and dots, bottom-right: both over the
+                scrim on the same baseline, so the frame is the only element in
+                the band and nothing sits below it. */}
+            <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-4 px-5 pb-4 md:px-6 md:pb-5">
+              <p
+                aria-live="polite"
+                className="pointer-events-none text-sm font-bold tracking-wide text-white md:text-lg"
+              >
+                {SLIDES[current].label}
+              </p>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {SLIDES.map((slide, index) => (
+                  <button
+                    key={slide.src}
+                    type="button"
+                    onClick={() => goTo(index)}
+                    aria-label={`Show slide ${index + 1}: ${slide.label}`}
+                    aria-current={index === current}
+                    className={`h-1.5 rounded-full transition-[width,background-color] duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#064e3b] motion-reduce:transition-none ${
+                      index === current ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/75"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
