@@ -110,18 +110,11 @@ export default async function Home() {
     .map((item) => ({ name: item.name, src: sanityImageUrl(item.logo) ?? "" }))
     .filter((logo) => logo.src !== "");
 
-  /* Slide images are resolved to CDN URLs here rather than in the client
-     component, so `@sanity/client` stays out of the browser bundle. Slides
-     without a resolvable image are dropped, letting Hero fall back to its
-     bundled defaults. */
-  const slides = (homeData?.slides ?? [])
-    .map((slide) => ({
-      image: sanityImageUrl(slide.image) ?? "",
-      label: slide.label ?? "",
-      alt: slide.alt ?? "",
-    }))
-    .filter((slide) => slide.image !== "");
-
+  /* The hero no longer takes its images from the CMS: the three photographs
+     are a fixed, art-directed set in src/components/Hero.tsx, where each one
+     is given a frame matching its own proportions so nothing is cropped. The
+     `slides` field still exists in the home schema and can still be filled in,
+     but it does not drive the hero. The copy below is still editable. */
   const heroData = {
     heroEyebrow: homeData?.heroEyebrow,
     heroHeading: homeData?.heroHeading,
@@ -130,7 +123,6 @@ export default async function Home() {
     secondaryCtaLabel: homeData?.secondaryCtaLabel,
     primaryCtaLink: homeData?.primaryCtaLink,
     secondaryCtaLink: homeData?.secondaryCtaLink,
-    slides: slides.length > 0 ? slides : undefined,
   };
 
   const editorCards = homeData?.serviceCards?.filter((card) => card.title?.trim());

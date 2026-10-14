@@ -49,6 +49,10 @@ export const home = defineType({
     defineField({
       name: "slides",
       title: "Hero image slides",
+      /* Retained so existing data is not destroyed, but hidden: the hero
+         photographs are set in src/components/Hero.tsx and this no longer
+         drives the page. */
+      hidden: true,
       type: "array",
       of: [
         {
