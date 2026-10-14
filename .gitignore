@@ -49,3 +49,7 @@ backup-before-import.*
 dev.log
 build.log
 devrun.log
+
+# stray, unrelated Laravel project parked in the repo root (nothing in this
+# Next.js app references it)
+/anweshan/
