@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 
 import PageHeader from "@/components/PageHeader";
@@ -8,6 +9,7 @@ import { teamMembersQuery, siteSettingsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
 import { localPhotoFor, localTeam, teamGroups } from "@/lib/team";
+import { pageMetadata } from "@/lib/seo";
 import type { SiteSettings, TeamMember } from "@/lib/types";
 
 const OTHER_GROUP = "Other";
@@ -45,6 +47,13 @@ function resolveMembers(members: TeamMember[] | null): ResolvedMember[] {
     photo: m.photo,
   }));
 }
+
+export const metadata: Metadata = pageMetadata({
+  fallbackTitle: "Team | Anweshan",
+  fallbackDescription:
+    "The researchers, field staff and specialists behind Anweshan's work in Nepal, and the teams they work with.",
+  path: "/team",
+});
 
 export default async function TeamPage() {
   const [members, siteSettings] = await Promise.all([
@@ -86,9 +95,9 @@ export default async function TeamPage() {
         { label: "Team members", value: String(teamMembers.length) },
         { label: "Teams", value: String(groups.length) },
         {
-          label: "Advisor & specialist",
+          label: "Adviser & specialist",
           value: String(
-            groups.find((g) => g.name === "Advisor and specialist")?.members
+            groups.find((g) => g.name === "Adviser and specialist")?.members
               .length ?? 0,
           ),
         },

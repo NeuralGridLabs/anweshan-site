@@ -31,7 +31,7 @@ const items = [
     id: "03",
     label: "Team",
     href: "/team",
-    caption: "Researchers and advisors",
+    caption: "Researchers and advisers",
     description:
       "The clinicians, analysts, and field staff who design and deliver the work.",
     image:

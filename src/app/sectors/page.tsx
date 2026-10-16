@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -6,6 +7,7 @@ import Reveal from "@/components/Reveal";
 
 import { sectorProjectValuesQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import { pageMetadata } from "@/lib/seo";
 import { SECTORS } from "@/lib/sectors";
 
 /* --------------------------------------------------------------------------
@@ -33,7 +35,7 @@ import { SECTORS } from "@/lib/sectors";
 const HEADLINE = "Deep work across connected public-interest sectors";
 
 const STANDFIRST =
-  "Our services are transferable, but context is not. Sector pages should show the questions, systems and evidence particular to each field, then link directly to relevant work and publications.";
+  "Our experience spans public health, migration, nutrition, climate change and other development sectors. We combine research expertise with an understanding of local systems to address sector-specific challenges and inform practical decisions.";
 
 /* Indexed by position so the rhythm holds however many sectors the list holds. */
 const BANDS = [
@@ -44,10 +46,14 @@ const BANDS = [
 /** Two digits, so the column stays the same width from 01 to 10. */
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export const metadata = {
-  title: "Sectors",
-  description: STANDFIRST,
-};
+export const metadata: Metadata = pageMetadata({
+  fallbackTitle: "Sectors we work in | Anweshan",
+  /* The standfirst is the page's own opening line and reads well at length,
+     but it runs past 160 characters, so pageMetadata trims it. /sectors has no
+     Sanity document, so there is no CMS value to prefer. */
+  fallbackDescription: STANDFIRST,
+  path: "/sectors",
+});
 
 export default async function SectorsPage() {
   /* One query for all eight counts: every sector value on every ready project,

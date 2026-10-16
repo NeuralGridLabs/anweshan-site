@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { seoGroup } from "./seoGroup";
+
 export const clients = defineType({
   name: "clients",
   title: "Clients",
@@ -63,6 +65,7 @@ export const clients = defineType({
         },
       ],
     }),
+  seoGroup,
   ],
   preview: { prepare: () => ({ title: "Clients" }) },
 });

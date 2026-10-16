@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Projects from "@/components/Projects";
@@ -18,6 +19,7 @@ import {
 } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
+import { pageMetadata } from "@/lib/seo";
 import { resolveFeaturedProjects } from "@/lib/project-data";
 import type {
   Home as HomeData,
@@ -68,6 +70,22 @@ const fallbackServiceCards: (HomeServiceCard & { serviceAliases: string[] })[] =
 
 function normalizedServiceName(value: string) {
   return value.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+const HOME_TITLE = "Anweshan | Research, implementation and evidence communication";
+const HOME_DESCRIPTION =
+  "Research and implementation partner in Nepal: from study design and field delivery to data systems, policy products and evidence communication.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchSanity<HomeData>(homeQuery);
+
+  return pageMetadata({
+    cmsTitle: data?.seoTitle,
+    cmsDescription: data?.seoDescription,
+    fallbackTitle: HOME_TITLE,
+    fallbackDescription: HOME_DESCRIPTION,
+    path: "/",
+  });
 }
 
 export default async function Home() {

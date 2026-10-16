@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { Mail, ArrowUpRight, MapPin, Clock } from "lucide-react";
@@ -6,6 +7,7 @@ import Reveal from "@/components/Reveal";
 
 import { careerQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import { pageMetadata } from "@/lib/seo";
 import type { Career as CareerData } from "@/lib/types";
 
 /** Display shape for the vacancy list. CMS records are mapped onto it. */
@@ -25,6 +27,22 @@ const checklist = [
   "Relevant field, clinical, or analysis experience in Nepal",
   "Earliest availability",
 ];
+
+const CAREER_TITLE = "Careers | Anweshan";
+const CAREER_DESCRIPTION =
+  "Open roles at Anweshan in Nepal, and how to apply. Research, fieldwork, data and evidence communication work.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchSanity<CareerData>(careerQuery);
+
+  return pageMetadata({
+    cmsTitle: data?.seoTitle,
+    cmsDescription: data?.seoDescription,
+    fallbackTitle: CAREER_TITLE,
+    fallbackDescription: CAREER_DESCRIPTION,
+    path: "/career",
+  });
+}
 
 export default async function CareerPage() {
   const sanityData = await fetchSanity<CareerData>(careerQuery);

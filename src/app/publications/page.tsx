@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
 import PublicationsClient from "./PublicationsClient";
 
 import { publicationsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import { pageMetadata } from "@/lib/seo";
 import type { Publication } from "@/lib/types";
+
+export const metadata: Metadata = pageMetadata({
+  fallbackTitle: "Publications and technical reports | Anweshan",
+  fallbackDescription:
+    "Peer-reviewed articles, technical reports and policy products from Anweshan's public health research in Nepal.",
+  path: "/publications",
+});
 
 export default async function PublicationsPage() {
   const publications = (await fetchSanity<Publication[]>(publicationsQuery)) ?? [];

@@ -10,6 +10,7 @@ import { projectBySlugQuery, projectsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
 import { categoryLabel } from "@/lib/categories";
+import { buildTitle, pageMetadata } from "@/lib/seo";
 import { sectorLabel, splitExpertise } from "@/lib/sectors";
 import type { Project, ProjectSibling } from "@/lib/types";
 
@@ -72,12 +73,29 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = await fetchProject(slug);
 
+  /* Unknown or not-cleared project: no metadata at all, matching the 404 the
+     page renders. */
   if (!project) return {};
 
-  return {
-    title: `${project.title} | ${project.clientHub?.name ?? project.client ?? "Projects"}`,
-    description: project.summary,
-  };
+  const client = project.clientHub?.name ?? project.client ?? "Anweshan";
+
+  return pageMetadata({
+    cmsTitle: project.seoTitle,
+    cmsDescription: project.seoDescription,
+    /* buildTitle takes the longest form that still fits 60 characters, so a
+       long project title loses the "| Client" half rather than being cut
+       mid-word. */
+    fallbackTitle: buildTitle([
+      `${project.title} | ${client}`,
+      `${project.title}`,
+      client,
+    ]),
+    /* A project with no summary still needs a description: fall back to the
+       title and client rather than emitting an empty tag. */
+    fallbackDescription: project.summary?.trim() || `${project.title} - Anweshan`,
+    path: `/projects/${slug}`,
+    descriptionMax: 155,
+  });
 }
 
 export default async function ProjectPage({

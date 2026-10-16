@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
@@ -8,7 +9,15 @@ import type { LightboxPhoto } from "@/components/GalleryLightbox";
 import { galleryEventsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
+import { pageMetadata } from "@/lib/seo";
 import type { GalleryEvent, GalleryEventCategory } from "@/lib/types";
+
+export const metadata: Metadata = pageMetadata({
+  fallbackTitle: "Gallery | Anweshan",
+  fallbackDescription:
+    "Photographs from Anweshan fieldwork, workshops and events across Nepal.",
+  path: "/gallery",
+});
 
 /**
  * The Gallery renders as two fixed sections, in this order. A section is only

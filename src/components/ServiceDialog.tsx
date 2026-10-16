@@ -361,7 +361,7 @@ export function ServiceDialogProvider({
             </div>
 
             <div
-              className="min-h-0 flex-1 transition-opacity duration-150 motion-reduce:transition-none"
+              className="grow shrink-0 transition-opacity duration-150 motion-reduce:transition-none"
               style={{ opacity: fading ? 0 : 1 }}
             >
               <p className="meta-label text-forest mb-4">What this includes</p>
@@ -394,7 +394,7 @@ export function ServiceDialogProvider({
 
             {/* Footer: the editor's CTA when there is one, a jump to the work
                 behind this service, plus a quiet close. */}
-            <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-forest/15 pt-6">
+            <div className="mt-10 flex shrink-0 flex-wrap items-center gap-4 border-t border-forest/15 pt-6">
               {active?.projectsHref && (
                 <Link
                   href={active.projectsHref}

@@ -6,14 +6,36 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 
+import { OG_IMAGE, openGraphFor, siteUrl, twitterFor } from "@/lib/seo";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
 
+const DEFAULT_TITLE = "Anweshan | Research, implementation and evidence communication";
+const DEFAULT_DESCRIPTION =
+  "Research and implementation partner in Nepal: from study design and field delivery to data systems, policy products and evidence communication.";
+
+/* metadataBase is what lets every route emit an absolute canonical and an
+   absolute og:image URL. Without it Next resolves relative URLs against
+   localhost, which is the difference between a share card that works and one
+   that renders broken in Slack or WhatsApp. */
 export const metadata: Metadata = {
-  title: "Anweshan - Redefining Research",
-  description: "Clinical research, policy dialogue, and data-driven survey work across Nepal.",
+  metadataBase: siteUrl(),
+  title: {
+    default: DEFAULT_TITLE,
+    /* Every route sets its own absolute title, so the template does not append
+       anything to them. It exists so a route that ever omits a title still
+       gets the site name rather than a bare string. */
+    template: "%s",
+  },
+  description: DEFAULT_DESCRIPTION,
+  openGraph: openGraphFor(DEFAULT_TITLE, DEFAULT_DESCRIPTION, "/"),
+  twitter: twitterFor(DEFAULT_TITLE, DEFAULT_DESCRIPTION),
+  icons: {
+    icon: OG_IMAGE.url,
+  },
 };
 
 export default function RootLayout({

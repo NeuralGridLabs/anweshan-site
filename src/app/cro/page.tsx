@@ -3,17 +3,20 @@ import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { CapabilityPackForm, FeasibilityForm } from "./CroEnquiryForms";
 
-export const metadata: Metadata = {
-  title: "Clinical research and CRO services in Nepal | Anweshan",
-  description:
-    "Country-level clinical and biomedical research support in Nepal, from feasibility and ethics coordination to site operations, data, quality and publication.",
-  openGraph: {
-    title: "Clinical research and CRO services in Nepal | Anweshan",
-    description:
-      "Country-level clinical and biomedical research support in Nepal, from feasibility and ethics coordination to site operations, data, quality and publication.",
-    type: "website",
-  },
-};
+import { pageMetadata } from "@/lib/seo";
+
+/* Rebuilt through pageMetadata so /cro gains the canonical and the twitter card
+   it was the only page missing. The openGraph block it already had is produced
+   by that helper rather than restated here, so the two cannot drift.
+
+   /cro has no Sanity document at all, so there are no CMS overrides to read and
+   these two constants are the only source. */
+export const metadata: Metadata = pageMetadata({
+  fallbackTitle: "Clinical research and CRO services in Nepal | Anweshan",
+  fallbackDescription:
+    "Clinical research and CRO services in Nepal: feasibility, ethics and regulatory coordination, study operations, data, quality and publication support.",
+  path: "/cro",
+});
 
 const partners = [
   "Pharmaceutical and biotechnology companies exploring studies in Nepal",

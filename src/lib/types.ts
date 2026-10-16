@@ -98,7 +98,33 @@ export type Home = {
   /* Both halves of the band's button are needed for it to appear. */
   clientsCtaLabel?: string;
   clientsCtaLink?: string;
+  /* Optional SEO overrides; see SeoOverrides. */
+  seoTitle?: string;
+  seoDescription?: string;
 };
+
+/* -------------------------------------------------------------------------- */
+/* SEO overrides                                                              */
+/* -------------------------------------------------------------------------- */
+
+/* Optional per-document overrides for the title and description a route would
+   otherwise take from its built-in default. Empty means "use the default" -
+   never "render nothing" - so the pages fall back rather than emitting an
+   empty tag. Present on every document that has a page of its own. */
+export type SeoOverrides = {
+  seoTitle?: string;
+  seoDescription?: string;
+};
+
+
+
+
+
+
+
+
+
+
 
 export type MissionPillar = {
   title?: string;
@@ -116,7 +142,7 @@ export type AboutStep = {
   text?: string;
 };
 
-export type About = {
+export type About = SeoOverrides & {
   heading?: string;
   body?: string;
   image?: SanityImage;
@@ -179,7 +205,7 @@ export type ServiceItem = {
   sections?: ServiceSection[];
 };
 
-export type Services = {
+export type Services = SeoOverrides & {
   heading?: string;
   intro?: string;
   items?: ServiceItem[];
@@ -187,7 +213,7 @@ export type Services = {
 
 export type ClientItem = { name: string; logo?: SanityImage };
 
-export type Clients = {
+export type Clients = SeoOverrides & {
   eyebrow?: string;
   heading?: string;
   intro?: string;
@@ -205,13 +231,13 @@ export type Vacancy = {
   description?: string;
 };
 
-export type Career = {
+export type Career = SeoOverrides & {
   heading?: string;
   intro?: string;
   vacancies?: Vacancy[];
 };
 
-export type Contact = {
+export type Contact = SeoOverrides & {
   heading?: string;
   address?: string;
   email?: string;
@@ -221,7 +247,7 @@ export type Contact = {
 
 export type ProjectFact = { label?: string; value?: string };
 
-export type Project = {
+export type Project = SeoOverrides & {
   _id: string;
   title: string;
   slug?: { _type?: "slug"; current?: string };
@@ -295,7 +321,7 @@ export type HubProject = {
 };
 
 /** A hub as it appears in the /clients card grid. */
-export type ClientHub = {
+export type ClientHub = SeoOverrides & {
   _id: string;
   name: string;
   slug?: { _type?: "slug"; current?: string };

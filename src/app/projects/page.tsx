@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
 import Platforms from "@/components/Platforms";
 import ProjectExplorer from "@/components/ProjectExplorer";
@@ -9,7 +10,15 @@ import {
   resolvePlatforms,
   resolveResearchProjects,
 } from "@/lib/project-data";
+import { pageMetadata } from "@/lib/seo";
 import type { Project } from "@/lib/types";
+
+export const metadata: Metadata = pageMetadata({
+  fallbackTitle: "Work and case studies | Anweshan",
+  fallbackDescription:
+    "Selected case studies and the full record of Anweshan assignments in Nepal, by client, year, service and sector.",
+  path: "/projects",
+});
 
 /* Projects, grouped by primary service.
 

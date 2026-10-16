@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+import { seoGroup } from "./seoGroup";
+
 export const home = defineType({
   name: "home",
   title: "Home",
@@ -220,6 +222,7 @@ export const home = defineType({
       description:
         "Shown in the Our clients band on the home page, below Publications.",
     }),
+    seoGroup,
   ],
   preview: { prepare: () => ({ title: "Home" }) },
 });

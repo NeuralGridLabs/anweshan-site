@@ -150,7 +150,7 @@ export const UNMAPPED = [
     reason: "Not migrated. This is a standalone 2-image carousel with its own timing, not the `home.slides` array. `home.slides` is proposed only for the three hero captions, whose images are remote. The two local files are left on disk and unused by the migration rather than being forced into the wrong field.",
   },
   {
-    what: "Header counters (team members / teams / advisors / based in)",
+    what: "Header counters (team members / teams / advisers / based in)",
     where: "src/app/team/page.tsx:83-96",
     text: "Computed counts, e.g. 'Team members' -> 34, 'Based in' -> Lalitpur.",
     reason: "Deliberately NOT migrated. Counters are layout; the `Based in` fact has no field.",
@@ -460,7 +460,7 @@ export const contactPlan = {
   doc: {
     heading: "Start a conversation about your research question.",
     address: "Anweshan Pvt. Ltd., Talchhikhel, Lalitpur, Nepal",
-    phone: "977-01-5526674",
+    phone: "01-5526674",
     email: "info@anweshan.org",
     mapEmbed: null,
   },
@@ -603,7 +603,7 @@ export const PROJECT_PLACEHOLDER_SENTINEL =
 /** Must equal sanity/schemaTypes/teamMember.ts:22-30. */
 export const TEAM_GROUP_ALLOWED = new Set([
   "Leadership",
-  "Advisor and specialist",
+  "Adviser and specialist",
   "Research and Programmes",
   "Data",
   "Operations",

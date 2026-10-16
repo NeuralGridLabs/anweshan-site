@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 import { CATEGORY_OPTIONS } from "../../src/lib/categories";
 import { SECTOR_OPTIONS } from "../../src/lib/sectors";
 import { webStatusField } from "./clientHub";
+import { seoTitleField, seoDescriptionField } from "./seoFields";
 
 /* Field-name note, because it is easy to trip over:
 
@@ -179,6 +180,10 @@ export const project = defineType({
     }),
     defineField({ name: "featured", title: "Featured on home", type: "boolean", initialValue: false }),
     webStatusField(),
+    /* Optional per-project SEO overrides. The page builds a title from the
+       project title and client when these are empty. */
+    seoTitleField,
+    seoDescriptionField,
   ],
   preview: {
     select: {

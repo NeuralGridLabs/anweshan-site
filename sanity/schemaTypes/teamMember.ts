@@ -21,7 +21,7 @@ export const teamMember = defineType({
       options: {
         list: [
           "Leadership",
-          "Advisor and specialist",
+          "Adviser and specialist",
           "Research and Programmes",
           "Data",
           "Operations",

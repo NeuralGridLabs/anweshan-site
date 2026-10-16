@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
@@ -10,6 +11,7 @@ import WhyAnweshan from "@/components/WhyAnweshan";
 
 import { aboutQuery, homeQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import { pageMetadata } from "@/lib/seo";
 import {
   fallbackMission,
   fallbackMissionPillars,
@@ -29,6 +31,25 @@ const fallbackObjectives = [
     note: "Evidence carried into the community through design, media, and dialogue rather than left inside a report.",
   },
 ];
+
+const ABOUT_TITLE = "About Anweshan | Research and implementation partner in Nepal";
+const ABOUT_DESCRIPTION =
+  "Anweshan is a Nepal-based research and implementation partner, established in 2016 to turn complex questions into credible evidence and usable results.";
+
+/* Generated rather than a static `metadata` const because the CMS values are
+   only known at render time. The CMS wins; the constants above are the
+   fallback, so an empty Studio field never blanks the tags. */
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchSanity<About>(aboutQuery);
+
+  return pageMetadata({
+    cmsTitle: data?.seoTitle,
+    cmsDescription: data?.seoDescription,
+    fallbackTitle: ABOUT_TITLE,
+    fallbackDescription: ABOUT_DESCRIPTION,
+    path: "/about",
+  });
+}
 
 export default async function AboutPage() {
   const [aboutData, homeData] = await Promise.all([

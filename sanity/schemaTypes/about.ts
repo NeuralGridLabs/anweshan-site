@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+import { seoGroup } from "./seoGroup";
+
 export const about = defineType({
   name: "about",
   title: "About",
@@ -228,6 +230,7 @@ export const about = defineType({
       validation: (r) =>
         r.max(8).warning("Up to eight items; extra ones are ignored."),
     }),
+    seoGroup,
   ],
   preview: { prepare: () => ({ title: "About" }) },
 });

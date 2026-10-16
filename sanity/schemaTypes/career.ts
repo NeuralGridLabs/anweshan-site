@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { seoGroup } from "./seoGroup";
+
 export const career = defineType({
   name: "career",
   title: "Career",
@@ -29,6 +31,7 @@ export const career = defineType({
         },
       ],
     }),
+    seoGroup,
   ],
   preview: { prepare: () => ({ title: "Career" }) },
 });

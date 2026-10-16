@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
@@ -14,6 +15,7 @@ import { sanityImageUrl } from "@/lib/image";
 import { hasServiceDetail } from "@/lib/services";
 import { serviceAreaForSlug } from "@/lib/categories";
 import type { Services as ServicesData } from "@/lib/types";
+import { pageMetadata } from "@/lib/seo";
 
 /* Service banding is presentation, not content, so it stays here. Everything an
    editor writes — title, description, highlights — comes from the CMS. Order and
@@ -28,6 +30,26 @@ const BANDS = [
   { bg: "bg-forest", text: "text-white", label: "text-ivory", chip: "border-white/40 text-white", body: "", trigger: "text-white" },
   { bg: "bg-cream", text: "text-forest", label: "text-forest", chip: "border-forest/40 text-forest/90", body: "text-black", trigger: "text-forest" },
 ];
+
+const SERVICES_TITLE = "Services | Anweshan";
+/* The page's own intro, used as the meta description when the editor has not
+   written one. Falls back to the CMS intro first so the two never disagree. */
+const SERVICES_DESCRIPTION =
+  "Research design, fieldwork and data collection, monitoring and evaluation, policy and programme support, and evidence communication, delivered by a Nepal-based team.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchSanity<ServicesData>(servicesQuery);
+
+  return pageMetadata({
+    cmsTitle: data?.seoTitle,
+    /* The intro is the editor's own description of the page, so it is the
+       better source when present. pageMetadata truncates it either way. */
+    cmsDescription: data?.seoDescription ?? data?.intro,
+    fallbackTitle: SERVICES_TITLE,
+    fallbackDescription: SERVICES_DESCRIPTION,
+    path: "/services",
+  });
+}
 
 export default async function ServicesPage() {
   const sanityData = await fetchSanity<ServicesData>(servicesQuery);

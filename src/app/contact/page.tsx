@@ -1,9 +1,11 @@
-﻿import Image from "next/image";
+﻿import type { Metadata } from "next";
+import Image from "next/image";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { MapPin, Mail, Phone, Smartphone, Globe } from "lucide-react";
 import { contactQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
+import { pageMetadata } from "@/lib/seo";
 import type { Contact as ContactData } from "@/lib/types";
 
 type ContactDetail = {
@@ -21,7 +23,7 @@ const fallbackDetails: ContactDetail[] = [
   {
     icon: Phone,
     label: "Phone",
-    value: "977-01-5526674",
+    value: "01-5526674",
   },
   {
     icon: Smartphone,
@@ -39,6 +41,22 @@ const fallbackDetails: ContactDetail[] = [
     value: "www.anweshan.org",
   },
 ];
+
+const CONTACT_TITLE = "Contact | Anweshan";
+const CONTACT_DESCRIPTION =
+  "Contact Anweshan in Lalitpur, Nepal about research, evaluation, fieldwork or evidence communication work.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchSanity<ContactData>(contactQuery);
+
+  return pageMetadata({
+    cmsTitle: data?.seoTitle,
+    cmsDescription: data?.seoDescription,
+    fallbackTitle: CONTACT_TITLE,
+    fallbackDescription: CONTACT_DESCRIPTION,
+    path: "/contact",
+  });
+}
 
 export default async function ContactPage() {
   const rawContactData = await fetchSanity<ContactData>(contactQuery);

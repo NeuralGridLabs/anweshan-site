@@ -33,6 +33,8 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
 }`;
 
 export const homeQuery = groq`*[_type == "home"][0]{
+  seoTitle,
+  seoDescription,
   heroEyebrow,
   heroHeading,
   heroSubtext,
@@ -59,6 +61,8 @@ export const homeQuery = groq`*[_type == "home"][0]{
 }`;
 
 export const aboutQuery = groq`*[_type == "about"][0]{
+  seoTitle,
+  seoDescription,
   heading,
   body,
   image,
@@ -80,6 +84,8 @@ export const aboutQuery = groq`*[_type == "about"][0]{
 }`;
 
 export const servicesQuery = groq`*[_type == "services"][0]{
+  seoTitle,
+  seoDescription,
   heading,
   intro,
   items[]{
@@ -105,6 +111,8 @@ export const servicesQuery = groq`*[_type == "services"][0]{
 }`;
 
 export const clientsQuery = groq`*[_type == "clients"][0]{
+  seoTitle,
+  seoDescription,
   eyebrow,
   heading,
   intro,
@@ -115,12 +123,16 @@ export const clientsQuery = groq`*[_type == "clients"][0]{
 }`;
 
 export const careerQuery = groq`*[_type == "career"][0]{
+  seoTitle,
+  seoDescription,
   heading,
   intro,
   vacancies[] { title, group, location, type, description }
 }`;
 
 export const contactQuery = groq`*[_type == "contact"][0]{
+  seoTitle,
+  seoDescription,
   heading,
   address,
   email,
@@ -173,6 +185,8 @@ export const projectBySlugQuery = groq`*[_type == "project"
   && slug.current == $slug
   && ${READY}][0]{
   _id,
+  seoTitle,
+  seoDescription,
   title,
   slug,
   client,
@@ -304,6 +318,8 @@ export const clientHubBySlugQuery = groq`*[_type == "clientHub"
   && slug.current == $slug
   && ${READY}][0]{
   _id,
+  seoTitle,
+  seoDescription,
   name,
   slug,
   logo{ ..., alt },
@@ -498,4 +514,26 @@ export const galleryEventsQuery = groq`*[_type == "galleryEvent"] {
   },
   coverImage,
   order
+}`;
+
+/* --------------------------------------------------------------------------
+    SITEMAP
+   ----------
+    Deliberately minimal projections. The sitemap needs a URL and a timestamp
+    for each ready document and nothing else, and pulling the full project or
+    hub shape here would mean re-reading every body field at build for a file
+    that only ever renders a link.
+
+    Both reuse the shared READY filter, so a document that is not ready cannot
+    reach the sitemap by any path. That is the same expression every other query
+    uses, so "ready" means exactly one thing across the site.
+   ----------------------------------------------------------------------- */
+export const clientHubsSitemapQuery = groq`*[_type == "clientHub" && ${READY}]{
+  "slug": slug.current,
+  _updatedAt
+}`;
+
+export const projectsSitemapQuery = groq`*[_type == "project" && ${READY}]{
+  "slug": slug.current,
+  _updatedAt
 }`;
