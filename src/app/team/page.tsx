@@ -7,12 +7,7 @@ import Cutouts from "@/components/Cutouts";
 import { teamMembersQuery, siteSettingsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
-<<<<<<< Updated upstream
-import { localPhotoFor, localTeam, teamGroups } from "@/lib/team";
-=======
 import { ADVISER_GROUP_KEY, ADVISER_GROUP_LABEL, localPhotoFor, localTeam, normaliseGroup, teamGroups } from "@/lib/team";
-import { pageMetadata } from "@/lib/seo";
->>>>>>> Stashed changes
 import type { SiteSettings, TeamMember } from "@/lib/types";
 
 const OTHER_GROUP = "Other";
@@ -99,18 +94,11 @@ export default async function TeamPage() {
         { label: "Team members", value: String(teamMembers.length) },
         { label: "Teams", value: String(groups.length) },
         {
-<<<<<<< Updated upstream
-          label: "Advisor & specialist",
-          value: String(
-            groups.find((g) => g.name === "Advisor and specialist")?.members
-              .length ?? 0,
-=======
           label: ADVISER_GROUP_LABEL,
           value: String(
             groups.find(
               (g) => normaliseGroup(g.name) === normaliseGroup(ADVISER_GROUP_KEY),
             )?.members.length ?? 0,
->>>>>>> Stashed changes
           ),
         },
         { label: "Based in", value: "Lalitpur" },
