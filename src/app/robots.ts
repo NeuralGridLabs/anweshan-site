@@ -2,16 +2,17 @@ import type { MetadataRoute } from "next";
 
 import { indexingAllowed, siteUrl } from "@/lib/seo";
 
-/* Indexing is opt-in through ALLOW_INDEXING, and defaults to OFF.
+/* Indexing is on by default and blocked only for previews and local copies.
 
-   A "green deploy, empty index" is much easier to recover from than content
-   having been crawled and dropped from an index before the pages are meant to
-   be public. Anything other than the exact string "true" - unset, "false",
-   "1", "TRUE" - disallows everything, so forgetting the variable is safe
-   rather than quietly permissive.
+   A live deploy should be findable without anyone having to remember to flip a
+   flag, so the normal state is allow. It disallows everything only when there
+   is positive evidence this is not the public production origin - a local
+   copy, a Vercel or Netlify preview - which is exactly the set of builds that
+   should never compete with the real site. Set BLOCK_INDEXING=true to take a
+   live deploy out of the index without undeploying it.
 
-   The sitemap URL is emitted in both states on purpose: it is how you check
-   what would be indexed before switching indexing on. */
+   The sitemap URL is emitted in both cases on purpose: in the blocked state it
+   is how you check what would be indexed before letting crawlers in. */
 export default function robots(): MetadataRoute.Robots {
   const origin = siteUrl().origin;
 
