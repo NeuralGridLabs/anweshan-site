@@ -25,7 +25,7 @@ export type LocalTeamMember = {
 
 export const teamGroups: TeamGroup[] = [
   { name: "Leadership", blurb: "Direction, partnerships, and institutional oversight that steers strategy." },
-  { name: "Advisor and specialist", blurb: "Expert advice and specialist guidance across research, communications, and partnerships." },
+  { name: "Adviser and specialist", blurb: "Expert advice and specialist guidance across research, communications, and partnerships." },
   { name: "Research and Programmes", blurb: "Study design, qualitative and quantitative enquiry, evaluation, and programme delivery." },
   { name: "Data", blurb: "Data coordination and support that strengthen evidence-based practice." },
   { name: "Operations", blurb: "Finance, operations, and administrative support that keep delivery running." },
@@ -37,13 +37,13 @@ export const localTeam: LocalTeamMember[] = [
   { name: "Sanju Maharjan", role: "Chairperson & Programme Director", group: "Leadership", photo: "/images/team/sanju-maharjan.jpg" },
   { name: "Manish Gautam", role: "Managing Director", group: "Leadership", photo: "/images/team/manish-gautam.jpg" },
 
-  { name: "Dharma Gautam", role: "Director", group: "Advisor and specialist", photo: "/images/team/dharma-gautam.jpg" },
-  { name: "Dr. Niraj Poudyal", role: "Senior Research Advisor", group: "Advisor and specialist", photo: "/images/team/niraj-poudyal.jpg" },
-  { name: "Dr. Binod Kumar Sah", role: "Senior Research Advisor", group: "Advisor and specialist", photo: "/images/team/binod-kumar-sah.jpg" },
-  { name: "Bhogendra Raj Dotel", role: "Senior Health Systems Adviser", group: "Advisor and specialist", photo: "/images/team/bhogendra-raj-dotel.jpg" },
-  { name: "Kirti Kaushal Joshi", role: "Lead Graphic Communications Advisor", group: "Advisor and specialist", photo: "/images/team/kirti-kaushal-joshi.jpg" },
-  { name: "Shanker Dev Kattel", role: "Health and Wellness Research Specialist", group: "Advisor and specialist", photo: "/images/team/shanker-dev-kattel.jpg" },
-  { name: "Surendra Koirala", role: "Business Development Officer", group: "Advisor and specialist", photo: "/images/team/surendra-koirala.jpg" },
+  { name: "Dharma Gautam", role: "Director", group: "Adviser and specialist", photo: "/images/team/dharma-gautam.jpg" },
+  { name: "Dr. Niraj Poudyal", role: "Senior Research Adviser", group: "Adviser and specialist", photo: "/images/team/niraj-poudyal.jpg" },
+  { name: "Dr. Binod Kumar Sah", role: "Senior Research Adviser", group: "Adviser and specialist", photo: "/images/team/binod-kumar-sah.jpg" },
+  { name: "Bhogendra Raj Dotel", role: "Senior Health Systems Adviser", group: "Adviser and specialist", photo: "/images/team/bhogendra-raj-dotel.jpg" },
+  { name: "Kirti Kaushal Joshi", role: "Lead Graphic Communications Adviser", group: "Adviser and specialist", photo: "/images/team/kirti-kaushal-joshi.jpg" },
+  { name: "Shanker Dev Kattel", role: "Health and Wellness Research Specialist", group: "Adviser and specialist", photo: "/images/team/shanker-dev-kattel.jpg" },
+  { name: "Surendra Koirala", role: "Business Development Officer", group: "Adviser and specialist", photo: "/images/team/surendra-koirala.jpg" },
 
   { name: "Shreya Shrestha", role: "Research Coordinator", group: "Research and Programmes", photo: "/images/team/shreya-shrestha.jpg" },
   { name: "Aayushi Thapa", role: "Sr. Qualitative Research Officer", group: "Research and Programmes", photo: "/images/team/aayushi-thapa.jpg" },

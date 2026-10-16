@@ -379,9 +379,7 @@ export const clientItems = [
   client("client-pfizer", "Pfizer", "public/images/clients/pfizer.png"),
   client("client-usaid", "USAID", "public/images/clients/usaid.png"),
   client("client-mohp", "Ministry of Health and Population", "public/images/clients/MoHP.png"),
-  client("client-giz", "GiZ", "public/images/clients/GIZ.jpg", {
-    __uncertain: "Spelled 'GiZ' in ClientMarquee.tsx:38; GROQ-irrelevant but editorially wrong. Kept verbatim, not corrected.",
-  }),
+  client("client-giz", "GIZ", "public/images/clients/GIZ.jpg"),
   client("client-ivi", "International Vaccine Institute", "public/images/clients/IVI.png"),
   client("client-bbc", "BBC Media Action", "public/images/clients/BBC.jpg"),
   client("client-bournemouth", "Bournemouth University", "public/images/clients/Shield_of_the_University_of_Bournemouth.svg.webp"),
