@@ -8,6 +8,12 @@ import { canonical } from "@/lib/seo";
 /* Sitemap                                                                    */
 /* -------------------------------------------------------------------------- */
 
+/* Every URL below is built with canonical(), never by string concatenation with
+   an origin literal. canonical() resolves through siteUrl(), which is the one
+   place that decides between NEXT_PUBLIC_SITE_URL, the hard-coded production
+   origin and localhost - so the sitemap cannot end up publishing
+   http://localhost:3000 because a dashboard variable was never filled in. */
+
 /* The public pages that exist as a fixed route. /admin is deliberately absent -
    it is a CMS UI and is disallowed in robots.ts - and /gallery is a real
    public page so it belongs here like any other. */

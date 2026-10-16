@@ -15,16 +15,89 @@ import type { Metadata } from "next";
    ----------------------------------------------------------------------- */
 
 /**
- * Absolute origin for canonical URLs, Open Graph image URLs and the sitemap.
+ * The canonical public origin of the live site.
  *
- * Falls back to localhost so a missing variable degrades to a self-referencing
- * canonical rather than a build error - and a localhost canonical is obviously
- * wrong in production, which is the point: it is meant to be noticed, not
- * silently emitted.
+ * Hard-coded as well as configurable, because it is what every absolute URL
+ * degrades to in a production build when NEXT_PUBLIC_SITE_URL is missing. The
+ * variable is the source of truth; this is the seatbelt, so a build that never
+ * received the variable still publishes www.anweshan.org rather than
+ * http://localhost:3000. If the domain ever moves, change it here and in the
+ * hosting dashboard - not in the fourteen routes that build URLs.
+ */
+export const PRODUCTION_SITE_URL = "https://www.anweshan.org";
+
+/** The dev server. Only ever reached from a build with NODE_ENV=development. */
+const LOCAL_SITE_URL = "http://localhost:3000";
+
+/**
+ * Parses a configured origin, tolerating the shapes people actually type.
+ *
+ * "www.anweshan.org", "https://www.anweshan.org" and "https://www.anweshan.org/"
+ * all have to mean the same origin, since a bare host is the easy mistake to
+ * make in a dashboard field. A value that is not a URL at all returns null
+ * rather than throwing, so a typo falls back to a correct origin instead of
+ * failing the build with a message about SEO on a site deploy.
+ */
+function parseOrigin(raw: string): URL | null {
+  const value = raw.trim();
+  if (value === "") return null;
+
+  try {
+    return new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether this build is running as production.
+ *
+ * NODE_ENV, and not a "has this variable" test: a Netlify deploy preview is
+ * NODE_ENV=production too, and treating it as a local copy is what keeps its
+ * URLs from pointing at localhost.
+ */
+function isProductionBuild(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+/**
+ * Absolute origin for canonical URLs, Open Graph image URLs, the sitemap and
+ * robots.txt.
+ *
+ * Resolution order: NEXT_PUBLIC_SITE_URL, then the hard-coded production origin
+ * in a production build, then localhost in development.
+ *
+ * The localhost fallback is scoped to development on purpose. It used to be
+ * unconditional, which meant a production build missing one dashboard variable
+ * published http://localhost:3000 into every canonical, og:url and sitemap
+ * entry - a green build shipping the wrong host to search engines. Production
+ * now falls back to PRODUCTION_SITE_URL, and development keeps localhost so a
+ * local share card and canonical resolve against the server actually running.
  */
 export function siteUrl(): URL {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  return new URL(raw && raw !== "" ? raw : "http://localhost:3000");
+  const configured = parseOrigin(process.env.NEXT_PUBLIC_SITE_URL ?? "");
+  if (configured) return configured;
+
+  return new URL(isProductionBuild() ? PRODUCTION_SITE_URL : LOCAL_SITE_URL);
+}
+
+/**
+ * Whether an origin is a local copy rather than a real host.
+ *
+ * Checked against the RESOLVED origin, not the raw variable, so the fallback
+ * cannot be mistaken for a misconfiguration.
+ */
+function isLoopback(url: URL): boolean {
+  const host = url.hostname.toLowerCase();
+
+  return (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host === "127.0.0.1" ||
+    host === "0.0.0.0" ||
+    host === "::1" ||
+    host === "[::1]"
+  );
 }
 
 export const SITE_NAME = "Anweshan";
@@ -46,15 +119,18 @@ export const OG_IMAGE = {
  *
  * Indexing is ON by default: the live site should be findable without anyone
  * having to remember a flag. It is blocked only when there is positive evidence
- * that this is not the public production origin, so a misconfigured or
- * preview deployment cannot be crawled by accident.
+ * that this is not the public production origin, so a misconfigured or preview
+ * deployment cannot be crawled by accident.
  *
  * Blocked when:
  *   - BLOCK_INDEXING is the exact string "true" - the explicit override, for
  *     taking a live deploy out of the index without undeploying it;
- *   - NEXT_PUBLIC_SITE_URL is missing or points at a local copy. This is the
- *     common case: a developer machine or a preview that has not been given a
- *     real origin;
+ *   - the RESOLVED origin is a local copy. This is the common case: a
+ *     development server. It is checked after siteUrl() has applied the
+ *     production fallback, which is the whole point - a production build with
+ *     no NEXT_PUBLIC_SITE_URL resolves to www.anweshan.org and stays indexable.
+ *     Keying off the raw variable instead, as this used to, meant one missing
+ *     dashboard setting silently de-indexed the live site;
  *   - VERCEL_ENV is set and is not "production" - a Vercel preview build;
  *   - CONTEXT is set and is not "production" - a Netlify branch or deploy
  *     preview context.
@@ -69,13 +145,10 @@ export const OG_IMAGE = {
 export function indexingAllowed(): boolean {
   if (process.env.BLOCK_INDEXING === "true") return false;
 
-  const url = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
-  if (url === "" || url.includes("localhost") || url.includes("127.0.0.1")) {
-    return false;
-  }
-
   /* Set-but-not-production is a preview; unset means this is not that
-     platform at all. */
+     platform at all. Checked before the origin because it is the cheaper and
+     more specific signal: a deploy preview is never indexable even when it
+     happens to be given the production domain. */
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
     return false;
   }
@@ -84,7 +157,10 @@ export function indexingAllowed(): boolean {
     return false;
   }
 
-  return true;
+  /* Only a resolved loopback blocks. In production this is never true, because
+     siteUrl() falls back to PRODUCTION_SITE_URL - which is what makes a missing
+     NEXT_PUBLIC_SITE_URL safe rather than a silent de-index. */
+  return !isLoopback(siteUrl());
 }
 
 /**
@@ -189,6 +265,13 @@ export function twitterFor(
  * Precedence is CMS, then the hard-coded default. Both are trimmed, canonical
  * and og:title/og:description are always emitted, and `noindex` can be forced
  * for routes that must never be indexed.
+ *
+ * `noindex` is also implied by indexingAllowed() being false, so a deploy
+ * preview or a local copy carries robots noindex on every route. A robots.txt
+ * disallow only keeps crawlers out of the fetch - a URL pasted into a chat is
+ * still fetched and still indexable from the referring link - and noindex is
+ * the only instruction that survives that. In production indexingAllowed() is
+ * true, so this changes nothing there.
  */
 export function pageMetadata({
   cmsTitle,
@@ -211,6 +294,7 @@ export function pageMetadata({
 }): Metadata {
   const title = buildTitle([(cmsTitle ?? "").trim(), fallbackTitle], titleMax);
   const description = seoText(cmsDescription, fallbackDescription, descriptionMax);
+  const blocked = noindex || !indexingAllowed();
 
   return {
     title,
@@ -218,6 +302,6 @@ export function pageMetadata({
     alternates: { canonical: canonical(path) },
     openGraph: openGraphFor(title, description, path),
     twitter: twitterFor(title, description),
-    robots: noindex ? { index: false, follow: false } : undefined,
+    robots: blocked ? { index: false, follow: false } : undefined,
   };
 }
