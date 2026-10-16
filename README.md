@@ -36,6 +36,38 @@ npm run dev
 
 The site runs at http://localhost:3000
 
+### Environment variables
+
+`.env.example` is the full list and is committed; `.env.local` is gitignored and
+is what you copy it to. The variable that governs every absolute URL on the site
+is `NEXT_PUBLIC_SITE_URL`, which must be set in the **hosting dashboard** (not
+just in a local `.env`) for the production context:
+
+| Variable | Where | Value in production |
+|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | hosting dashboard | `https://www.anweshan.org` |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | hosting dashboard | your Sanity project ID |
+| `NEXT_PUBLIC_SANITY_DATASET` | hosting dashboard | `production` |
+| `NEXT_PUBLIC_SANITY_API_VERSION` | optional | `2024-01-01` |
+| `SANITY_API_READ_TOKEN` | hosting dashboard, secret | only if the dataset is private |
+| `BLOCK_INDEXING` | optional | leave unset |
+
+`NEXT_PUBLIC_SITE_URL` drives canonical tags, `og:url`, `/sitemap.xml` and the
+`Sitemap:` line in `/robots.txt`. It is `NEXT_PUBLIC_`-prefixed, so it is inlined
+at build time - changing it requires a rebuild, not just a restart.
+
+If it is missing from a production build, nothing fails and the site does not
+publish localhost URLs: `src/lib/seo.ts` falls back to the hard-coded
+`PRODUCTION_SITE_URL` (`https://www.anweshan.org`), which is exported from that
+same file and is the single place to change if the domain ever moves.
+
+Local development needs none of this. With `NODE_ENV=development` the origin
+falls back to `http://localhost:3000` and `robots.txt` disallows everything, so
+a dev server is never crawled. Netlify deploy previews and branch deploys are
+also blocked automatically via `CONTEXT`, and Vercel previews via `VERCEL_ENV`.
+Set `BLOCK_INDEXING=true` to take a live deploy out of the index without
+undeploying it.
+
 ### Other scripts
 
 ```bash

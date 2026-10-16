@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 
-import { OG_IMAGE, openGraphFor, siteUrl, twitterFor } from "@/lib/seo";
+import { OG_IMAGE, indexingAllowed, openGraphFor, siteUrl, twitterFor } from "@/lib/seo";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,7 +20,8 @@ const DEFAULT_DESCRIPTION =
 /* metadataBase is what lets every route emit an absolute canonical and an
    absolute og:image URL. Without it Next resolves relative URLs against
    localhost, which is the difference between a share card that works and one
-   that renders broken in Slack or WhatsApp. */
+   that renders broken in Slack or WhatsApp. siteUrl() supplies the production
+   origin even when NEXT_PUBLIC_SITE_URL was never set. */
 export const metadata: Metadata = {
   metadataBase: siteUrl(),
   title: {
@@ -36,6 +37,10 @@ export const metadata: Metadata = {
   icons: {
     icon: OG_IMAGE.url,
   },
+  /* Stated here as well as in pageMetadata() so a route that never reaches the
+     shared helper still inherits noindex from a preview or local build. The
+     two always agree - they read the same predicate. */
+  robots: indexingAllowed() ? undefined : { index: false, follow: false },
 };
 
 export default function RootLayout({
