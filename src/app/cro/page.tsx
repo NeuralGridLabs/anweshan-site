@@ -79,7 +79,7 @@ export default function CroPage() {
 
       <section className="bg-snow py-20 md:py-28">
         <div className="mx-auto grid max-w-[1400px] gap-8 px-6 md:grid-cols-12 md:gap-12">
-          <Reveal className="md:col-span-5"><p className="eyebrow mb-5 text-forest">Why Nepal and why Anweshan</p><h2 className="h2-section text-balance">Research shaped by local realities.</h2></Reveal>
+          <Reveal className="md:col-span-5"><p className="eyebrow mb-5 text-forest">Why Nepal and why Anweshan</p><h2 className="h2-section text-balance">Research shaped by local realities</h2></Reveal>
           <Reveal delay={100} className="md:col-span-7"><p className="body-lg text-forest/75">Nepal offers diverse study settings, established referral hospitals, experienced clinicians and important unanswered questions across infectious disease, maternal and newborn health, reproductive health, noncommunicable disease, antimicrobial resistance, disability and implementation science. Successful research here depends on more than access to sites. It requires a partner that understands national institutions, ethics and regulatory pathways, hospital workflows, language, field logistics, data conditions and community expectations. Anweshan brings those pieces together through a Nepal-based multidisciplinary team and a growing business-development presence in Basel.</p></Reveal>
         </div>
       </section>
