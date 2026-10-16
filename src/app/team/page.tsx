@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 
 import PageHeader from "@/components/PageHeader";
@@ -7,7 +8,8 @@ import Cutouts from "@/components/Cutouts";
 import { teamMembersQuery, siteSettingsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { sanityImageUrl } from "@/lib/image";
-import { localPhotoFor, localTeam, teamGroups } from "@/lib/team";
+import { ADVISER_GROUP_KEY, ADVISER_GROUP_LABEL, localPhotoFor, localTeam, normaliseGroup, teamGroups } from "@/lib/team";
+import { pageMetadata } from "@/lib/seo";
 import type { SiteSettings, TeamMember } from "@/lib/types";
 
 const OTHER_GROUP = "Other";
@@ -46,6 +48,13 @@ function resolveMembers(members: TeamMember[] | null): ResolvedMember[] {
   }));
 }
 
+export const metadata: Metadata = pageMetadata({
+  fallbackTitle: "Team | Anweshan",
+  fallbackDescription:
+    "The researchers, field staff and specialists behind Anweshan's work in Nepal, and the teams they work with.",
+  path: "/team",
+});
+
 export default async function TeamPage() {
   const [members, siteSettings] = await Promise.all([
     fetchSanity<TeamMember[]>(teamMembersQuery),
@@ -55,17 +64,25 @@ export default async function TeamPage() {
   // fails, so the fallback is applied to the awaited value, not to the promise.
   const teamMembers = resolveMembers(members);
 
+  /* Both sides go through normaliseGroup so a stored value of "Advisor and
+     specialist", "Advisor & specialist" or "ADVISER AND SPECIALIST" lands in the
+     advisers group instead of being compared literally and failing. */
   const groups = teamGroups
     .map((g) => ({
       ...g,
-      members: teamMembers.filter((m) => m.group === g.name),
+      members: teamMembers.filter(
+        (m) => normaliseGroup(m.group) === normaliseGroup(g.name),
+      ),
     }))
     .filter((g) => g.members.length > 0);
 
-  // Anything tagged with a group that is not a heading would otherwise be
-  // dropped, so collect it rather than silently hiding the record.
+  // Anything whose stored value is not a heading variant would otherwise be
+  // dropped, so collect it rather than silently hiding the record. A member with
+  // no group at all counts as unmatched and surfaces here too, which is the
+  // same "better visible than missing" rule.
   const orphans = teamMembers.filter(
-    (m) => m.group && !teamGroups.some((g) => g.name === m.group),
+    (m) =>
+      !teamGroups.some((g) => normaliseGroup(g.name) === normaliseGroup(m.group)),
   );
   if (orphans.length) {
     groups.push({
@@ -86,10 +103,11 @@ export default async function TeamPage() {
         { label: "Team members", value: String(teamMembers.length) },
         { label: "Teams", value: String(groups.length) },
         {
-          label: "Advisor & specialist",
+label: ADVISER_GROUP_LABEL,
           value: String(
-            groups.find((g) => g.name === "Advisor and specialist")?.members
-              .length ?? 0,
+            groups.find(
+              (g) => normaliseGroup(g.name) === normaliseGroup(ADVISER_GROUP_KEY),
+            )?.members.length ?? 0,
           ),
         },
         { label: "Based in", value: "Lalitpur" },
@@ -139,7 +157,7 @@ export default async function TeamPage() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
                 <div className="md:col-span-4">
                   <p className="text-2xl md:text-3xl font-bold mb-4 text-forest">
-                    {group.name}
+                    {group.label ?? group.name}
                   </p>
 
                   <p

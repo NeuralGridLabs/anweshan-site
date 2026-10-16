@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { seoGroup } from "./seoGroup";
+
 export const contact = defineType({
   name: "contact",
   title: "Contact",
@@ -10,6 +12,7 @@ export const contact = defineType({
     defineField({ name: "email", title: "Email", type: "string" }),
     defineField({ name: "phone", title: "Phone", type: "string" }),
     defineField({ name: "mapEmbed", title: "Map embed URL", type: "url" }),
+    seoGroup,
   ],
   preview: { prepare: () => ({ title: "Contact" }) },
 });

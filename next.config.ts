@@ -1,11 +1,21 @@
 import type { NextConfig } from "next";
 
+import { OLD_REDIRECTS } from "./src/lib/old-redirects";
+
 const nextConfig: NextConfig = {
   turbopack: { root: import.meta.dirname },
-  /* The per-service detail pages are now a pop-up on /services. Old links,
-     bookmarks and search results keep working: they land on the same page with
-     the pop-up already open. Permanent, because the URL will never come back -
-     ?open= is the destination from here on, not a temporary bridge. */
+  /* Two sources of redirects, in this order.
+
+     First the live /services/:slug -> /services?open=:slug rule. The per-service
+     detail pages are now a pop-up on /services, so old links and search results
+     land on the same page with the pop-up already open. Permanent, because the
+     URL will never come back - ?open= is the destination from here on, not a
+     temporary bridge. It cannot collide with anything in OLD_REDIRECTS: those
+     sources are /service (singular), /news, /blogs and a handful of flat pages.
+
+     Then the dead anweshan.org paths, which now 404. OLD_REDIRECTS carries its
+     own match order internally and must be spread last, because it ends in a
+     /news/:slug catch-all. */
   async redirects() {
     return [
       {
@@ -13,6 +23,7 @@ const nextConfig: NextConfig = {
         destination: "/services?open=:slug",
         permanent: true,
       },
+      ...OLD_REDIRECTS,
     ];
   },
   /* Baseline security headers. Deliberately not a Content-Security-Policy:

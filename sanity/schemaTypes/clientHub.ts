@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { seoTitleField, seoDescriptionField } from "./seoFields";
+
 /* --------------------------------------------------------------------------
     Client hub
 
@@ -114,6 +116,10 @@ export const clientHub = defineType({
         "Lower numbers come first on /clients. Leave empty to sort alphabetically.",
     }),
     webStatusField(),
+    /* Optional per-hub SEO overrides. The page builds a title from the hub
+       name when these are empty, so leaving both blank is the normal case. */
+    seoTitleField,
+    seoDescriptionField,
   ],
   preview: {
     select: {

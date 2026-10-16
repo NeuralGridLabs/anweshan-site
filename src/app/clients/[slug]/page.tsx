@@ -8,6 +8,7 @@ import Reveal from "@/components/Reveal";
 import { clientHubsQuery, clientHubBySlugQuery, clientsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import { categoryLabel, categoryShort } from "@/lib/categories";
+import { buildTitle, pageMetadata } from "@/lib/seo";
 import { textOf, unwrapMutationValue } from "@/lib/sanity-value";
 import type { ClientHub, ClientHubDetail, Clients } from "@/lib/types";
 
@@ -76,17 +77,31 @@ export async function generateMetadata({
   const { slug } = await params;
   const hub = await fetchHub(slug);
 
+  /* Unknown or not-cleared hub: no metadata at all. The page itself 404s, and
+     a title for a page that does not exist is worse than none. */
   if (!hub) return {};
 
-  return {
-    title: `${textOf(hub.name, "Client")} | Clients`,
-    description:
+  const name = textOf(hub.name, "Client");
+
+  return pageMetadata({
+    cmsTitle: hub.seoTitle,
+    /* 155 rather than 160: a description is the first thing lost when a snippet
+       has to fit beside a site name. */
+    cmsDescription: hub.seoDescription,
+    fallbackTitle: buildTitle([
+      `${name} and Anweshan | Completed work by year`,
+      `${name} and Anweshan | Work by year`,
+      `${name} | Anweshan`,
+    ]),
+    fallbackDescription:
       textOf(hub.intro).trim() ||
       fallbackIntro(
-        textOf(hub.name, "Client"),
+        name,
         (hub.categories ?? []).filter((v): v is string => typeof v === "string"),
       ),
-  };
+    path: `/clients/${slug}`,
+    descriptionMax: 155,
+  });
 }
 
 export default async function ClientHubPage({

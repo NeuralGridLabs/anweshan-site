@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+import { seoGroup } from "./seoGroup";
+
 export const services = defineType({
   name: "services",
   title: "Services",
@@ -183,6 +185,7 @@ export const services = defineType({
         },
       ],
     }),
+  seoGroup,
   ],
   preview: { prepare: () => ({ title: "Services" }) },
 });

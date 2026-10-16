@@ -1,11 +1,12 @@
-﻿import Link from "next/link";
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-
 import PageHeader from "@/components/PageHeader";
 import ClientGrid from "@/components/ClientGrid";
 import { clientHubsQuery, clientsQuery } from "@/lib/queries";
 import { fetchSanity } from "@/lib/sanity";
 import type { ClientHub, Clients } from "@/lib/types";
+import { pageMetadata } from "@/lib/seo";
 
 /* The client index. Cards come from clientHub documents rather than the clients
    singleton: the singleton still drives the home page logo carousel, while hubs
@@ -16,6 +17,22 @@ const PILL =
 
 function isInternal(href: string) {
   return href.startsWith("/") && !href.startsWith("//");
+}
+
+const CLIENTS_TITLE = "Clients and collaborations | Anweshan";
+const CLIENTS_DESCRIPTION =
+  "Clients and collaborations behind Anweshan's research, evaluation and implementation work in Nepal, with completed work by year.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchSanity<Clients>(clientsQuery);
+
+  return pageMetadata({
+    cmsTitle: data?.seoTitle,
+    cmsDescription: data?.seoDescription,
+    fallbackTitle: CLIENTS_TITLE,
+    fallbackDescription: CLIENTS_DESCRIPTION,
+    path: "/clients",
+  });
 }
 
 export default async function ClientsPage() {

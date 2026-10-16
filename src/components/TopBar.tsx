@@ -12,7 +12,7 @@ export default function TopBar() {
           </span>
           <span className="hidden md:flex items-center gap-1.5">
             <Phone size={13} className="text-forest/85" />
-            977-01-5526674
+            01-5526674
           </span>
           <span className="hidden lg:flex items-center gap-1.5">
             <Mail size={13} className="text-forest/85" />
