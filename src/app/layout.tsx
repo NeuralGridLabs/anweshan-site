@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 
-import { OG_IMAGE, indexingAllowed, openGraphFor, siteUrl, twitterFor } from "@/lib/seo";
+import { indexingAllowed, openGraphFor, siteUrl, twitterFor } from "@/lib/seo";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,9 +34,6 @@ export const metadata: Metadata = {
   description: DEFAULT_DESCRIPTION,
   openGraph: openGraphFor(DEFAULT_TITLE, DEFAULT_DESCRIPTION, "/"),
   twitter: twitterFor(DEFAULT_TITLE, DEFAULT_DESCRIPTION),
-  icons: {
-    icon: OG_IMAGE.url,
-  },
   /* Stated here as well as in pageMetadata() so a route that never reaches the
      shared helper still inherits noindex from a preview or local build. The
      two always agree - they read the same predicate. */
