@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Projects from "@/components/Projects";
-import Publications from "@/components/Publications";
 import PublicationsPreview, {
   type PreviewPublication,
 } from "@/components/PublicationsPreview";
@@ -218,7 +217,6 @@ export default async function Home() {
         heading={homeData?.servicesHeading}
         cards={serviceCards}
       />
-      <Publications publications={featuredPublications} />
 
       <section id="projects">
         <Projects projects={featuredProjects} />
