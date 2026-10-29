@@ -1,4 +1,4 @@
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, Flame } from "lucide-react";
 
 /* --------------------------------------------------------------------------
     Homepage publications preview
@@ -85,6 +85,41 @@ function PreviewTypeBadge({ type }: { type: string }) {
   );
 }
 
+function PublicationTicker({ publications }: { publications: PreviewPublication[] }) {
+  return (
+    <div className="mb-8 overflow-hidden rounded-full border border-white/20 bg-white/10">
+      <div className="flex items-stretch">
+        <div className="relative z-10 flex shrink-0 items-center gap-2 bg-gold px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-wider text-forest sm:px-5 sm:text-xs">
+          <Flame size={15} strokeWidth={2.5} aria-hidden />
+          Hot off the Press
+        </div>
+        <div className="ticker flex flex-1 items-center overflow-hidden">
+          <div className="ticker-track flex w-max items-center">
+            {[0, 1].map((copy) => (
+              <div
+                key={copy}
+                className="flex shrink-0 items-center"
+                aria-hidden={copy === 1}
+              >
+                {publications.map((pub) => (
+                  <span
+                    key={`${copy}-${pub._id}`}
+                    className="flex shrink-0 items-center gap-2 px-5 text-xs font-semibold text-white/90 sm:text-sm"
+                  >
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden />
+                    {pub.title}
+                    {pub.year && <span className="text-white/60">({pub.year})</span>}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PreviewCoverGraphic() {
   return (
     <svg
@@ -118,7 +153,7 @@ export default function PublicationsPreview({
       <div className="max-w-[1400px] mx-auto px-6">
         <div>
           {/* Header Row */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div className="max-w-2xl">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
                 Research that can be read, cited and used
@@ -136,6 +171,9 @@ export default function PublicationsPreview({
             </a>
           </div>
 
+          {/* Live ticker, styled after the scrolling news bars. */}
+          <PublicationTicker publications={previewPubs} />
+
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {previewPubs.map((pub, index) => {
@@ -149,7 +187,7 @@ export default function PublicationsPreview({
               return (
                 <a
                   key={pub._id}
-                  href={`/publications`}
+                  href={`/publications?open=${encodeURIComponent(pub._id)}`}
                   className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/40"
                 >
                   <div className={`relative h-[120px] w-full overflow-hidden bg-gradient-to-br ${bgGradient}`}>

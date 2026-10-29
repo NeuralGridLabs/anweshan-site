@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   X,
   ExternalLink,
@@ -556,6 +556,41 @@ export default function PublicationsClient({ publications, currentYear }: { publ
   const visiblePublications = filteredAndSorted.slice(0, visibleCount);
   const hasMore = visibleCount < filteredAndSorted.length;
 
+  /* Deep links. A publication detail lives in the modal, so the URL carries
+     ?open=<id> while it is open. Opening writes it with replaceState (no
+     history entry, no scroll jump) and closing removes it again, which lets
+     the homepage "Read" links land on the exact article rather than the top
+     of the library. */
+  const openPublication = useCallback((pub: Publication) => {
+    setSelectedPub(pub);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("open", pub._id);
+    window.history.replaceState(null, "", url.toString());
+  }, []);
+
+  const closePublication = useCallback(() => {
+    setSelectedPub(null);
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("open");
+    window.history.replaceState(null, "", url.toString());
+  }, []);
+
+  /* Read ?open once on mount. Deferred by a tick, like ServiceDialog, so the
+     open happens after the page is in the browser rather than during the
+     server render, where window does not exist. An unknown id opens nothing. */
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("open");
+    if (!id) return;
+
+    const match = publications.find((pub) => pub._id === id);
+    if (!match) return;
+
+    const timer = setTimeout(() => openPublication(match), 0);
+    return () => clearTimeout(timer);
+  }, [publications, openPublication]);
+
   return (
     <>
       <div className="bg-white border-b border-stone-200 shadow-sm relative z-10">
@@ -640,7 +675,7 @@ export default function PublicationsClient({ publications, currentYear }: { publ
               <div className={`grid gap-6 md:gap-8 ${viewMode === "grid" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1 mx-auto max-w-4xl"}`}>
                 {visiblePublications.map((pub, i) => (
                   <Reveal key={pub._id} delay={viewMode === "grid" ? (i % 12) * 50 : 0} className="h-full">
-                    <PublicationCard pub={pub} index={i} viewMode={viewMode} onClick={setSelectedPub} />
+                    <PublicationCard pub={pub} index={i} viewMode={viewMode} onClick={openPublication} />
                   </Reveal>
                 ))}
               </div>
@@ -661,7 +696,7 @@ export default function PublicationsClient({ publications, currentYear }: { publ
       </section>
 
       {selectedPub && (
-        <PublicationModal pub={selectedPub} onClose={() => setSelectedPub(null)} />
+        <PublicationModal pub={selectedPub} onClose={closePublication} />
       )}
     </>
   );
