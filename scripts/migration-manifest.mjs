@@ -458,7 +458,7 @@ export const contactPlan = {
   doc: {
     heading: "Start a conversation about your research question.",
     address: "Anweshan Pvt. Ltd., Talchhikhel, Lalitpur, Nepal",
-    phone: "01-5526674",
+    phone: "01-5426674",
     email: "info@anweshan.org",
     mapEmbed: null,
   },
