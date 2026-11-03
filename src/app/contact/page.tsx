@@ -23,7 +23,7 @@ const fallbackDetails: ContactDetail[] = [
   {
     icon: Phone,
     label: "Phone",
-    value: "01-5526674",
+    value: "01-5426674",
   },
   {
     icon: Smartphone,
